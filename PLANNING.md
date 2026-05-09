@@ -18,7 +18,7 @@ The audience is dealership operators, automotive tech executives, and industry o
                                  ▼
 ┌─────────────┐    HTTP    ┌─────────────┐    SQL    ┌──────────────┐
 │  Frontend   │ ─────────► │   Backend   │ ────────► │  PostgreSQL  │
-│  Next.js 14 │            │   FastAPI   │           │  (SQLAlchemy │
+│  Next.js 16 │            │   FastAPI   │           │  (SQLAlchemy │
 │  (App Rtr)  │ ◄───────── │   + APSch.  │ ◄──────── │   + Alembic) │
 └─────────────┘   JSON     └─────┬───────┘   rows    └──────────────┘
                                  │ generate
@@ -31,7 +31,7 @@ The audience is dealership operators, automotive tech executives, and industry o
 
 ### Components
 
-- **Frontend** (`frontend/`): Next.js 14 with App Router, Tailwind CSS, shadcn/ui. Two route groups: `(public)` for the DeLorean blog (homepage, post pages, about) and `dashboard/` for the admin UI (overview, queue, scheduled, published, settings). NextAuth handles credential-based login for the admin only.
+- **Frontend** (`frontend/`): Next.js 16 (App Router) + React 19 + Tailwind CSS v4 + shadcn/ui. Source layout is `src/app/`. Two route groups: `(public)` for the DeLorean blog (homepage, post pages, about) and `dashboard/` for the admin UI (overview, queue, scheduled, published, settings). NextAuth handles credential-based login for the admin only.
 - **Backend** (`backend/`): Python + FastAPI. Routers: `posts.py`, `pipeline.py`, `settings.py`, plus auth endpoints. Services: `news_fetcher.py` (Perplexity), `blog_writer.py` (Claude), `publisher.py` (status routing). `scheduler.py` runs APScheduler in-process for the bi-weekly cron.
 - **Database**: PostgreSQL. Schema managed by SQLAlchemy models + Alembic migrations.
 - **External services**:
@@ -45,21 +45,24 @@ The audience is dealership operators, automotive tech executives, and industry o
 ```
 /
 ├── frontend/                  # Next.js app
-│   ├── app/
-│   │   ├── (public)/                  # Public blog — DeLorean
-│   │   │   ├── page.tsx               # Homepage / post list
-│   │   │   ├── blog/[slug]/page.tsx   # Individual post page
-│   │   │   └── about/page.tsx         # About DeLorean
-│   │   ├── (auth)/login/
-│   │   ├── dashboard/
-│   │   │   ├── page.tsx               # Overview / stats
-│   │   │   ├── queue/                 # Review queue
-│   │   │   ├── scheduled/             # Scheduled posts
-│   │   │   ├── published/             # Published posts
-│   │   │   └── settings/              # System settings
-│   │   └── layout.tsx
-│   ├── components/
-│   └── lib/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── (public)/                  # Public blog — DeLorean
+│   │   │   │   ├── page.tsx               # Homepage / post list
+│   │   │   │   ├── blog/[slug]/page.tsx   # Individual post page
+│   │   │   │   └── about/page.tsx         # About DeLorean
+│   │   │   ├── (auth)/login/
+│   │   │   ├── dashboard/
+│   │   │   │   ├── page.tsx               # Overview / stats
+│   │   │   │   ├── queue/                 # Review queue
+│   │   │   │   ├── scheduled/             # Scheduled posts
+│   │   │   │   ├── published/             # Published posts
+│   │   │   │   └── settings/              # System settings
+│   │   │   ├── globals.css                # Tailwind v4 + design tokens via @theme
+│   │   │   └── layout.tsx
+│   │   ├── components/
+│   │   └── lib/
+│   └── components.json                    # shadcn/ui config
 │
 ├── backend/                   # FastAPI app
 │   ├── main.py
@@ -77,7 +80,7 @@ The audience is dealership operators, automotive tech executives, and industry o
 
 ## Stack decisions
 
-- **Next.js 14 (App Router)**: Server components fit the public-blog use case (mostly read, SEO-sensitive); App Router lets us co-locate route groups for the public surface and admin dashboard cleanly. shadcn/ui chosen because we own the component code and can theme it freely.
+- **Next.js 16 (App Router) + React 19 + Tailwind v4**: Server components fit the public-blog use case (mostly read, SEO-sensitive); App Router lets us co-locate route groups for the public surface and admin dashboard cleanly. Tailwind v4 is CSS-first — design tokens are declared with `@theme {}` in `globals.css`, not in a `tailwind.config.ts`. shadcn/ui chosen because we own the component code and can theme it freely; initialized at scaffold time but components are added on demand by features that need them.
 - **Python + FastAPI**: The pipeline does heavy lifting against two LLM/AI APIs — Python's ecosystem (Anthropic SDK, `passlib`, APScheduler) is the path of least resistance. FastAPI gives us typed routers and Pydantic validation cheaply.
 - **PostgreSQL 17**: Standard, well-supported on Railway/Render. Postgres array column type fits the `tags VARCHAR[]` field without a join table. Pinned to `postgres:17-alpine` in local Docker — matches the developer's host Homebrew client (17.7), so client/server versions stay aligned. The `db` service exposes host port **5433** (not 5432) to avoid a bind conflict with the host's local Postgres install.
 - **SQLAlchemy + Alembic**: Mature combo; Alembic gives us migration history, which matters because schema changes flow through the architecture-change gate (see CLAUDE.md).
@@ -273,6 +276,12 @@ Respond in JSON only:
 
 New entries at the top.
 
+### 2026-05-09 — Frontend stack: Next.js 16 + React 19 + Tailwind v4
+**Context**: `frontend-skeleton` feature scaffolds the Next.js app. The original spec called for Next.js 14, but `create-next-app@latest` now installs Next 16 + React 19 + Tailwind v4. No code yet depends on Next 14 specifics.
+**Decision**: Adopt the current stable stack — Next.js 16 (App Router) + React 19 + Tailwind v4 — instead of pinning to Next 14. Source layout is `frontend/src/app/`. shadcn/ui initialized at scaffold time (`components.json` + `lib/utils.ts` only); no components installed yet — features that need them install on demand. Design tokens live in `frontend/src/app/globals.css` as CSS custom properties and are surfaced as Tailwind utility classes via the `@theme {}` directive (Tailwind v4's CSS-first config). There is no `tailwind.config.ts`. Fonts (Inter + JetBrains Mono) are loaded via `next/font/google` and exposed as `--font-inter` / `--font-jetbrains-mono`, then mapped to Tailwind's `font-sans` / `font-mono` inside `@theme`.
+**Rationale**: No reason to pin to an older major when nothing depends on it yet; future features build on the latest stable APIs. Tailwind v4's CSS-first theme matches the design-token-driven approach in `Design/README.md` cleanly — tokens stay in one file, in CSS.
+**Tradeoffs**: Next 16 has breaking changes from Next 14/15 (see `frontend/AGENTS.md`) — anyone with Next 14-era muscle memory should consult the bundled docs in `frontend/node_modules/next/dist/docs/` before writing new code. The Tailwind v4 `@theme {}` pattern is unfamiliar to anyone who only knows v3's `tailwind.config.ts`. shadcn components (when added later) will reference shadcn's expected token names (`--background`, `--foreground`, etc.) — the first feature that adds a component will need to alias those to our design tokens.
+
 ### 2026-05-09 — Database foundation: native ENUMs, app-side UUIDs, sync ORM, settings seeded in migration
 **Context**: `database-foundation` feature ships the persistent data layer (4 SQLAlchemy models + Alembic baseline + `seed_admin.py`). Several small choices needed pinning before downstream features depend on them.
 **Decision**:
@@ -332,6 +341,10 @@ Each entry below is one `/start-feature <name>` plan. Features are sized to ship
 #### `auth-login`
 - **Goal:** `/auth/login` + `/auth/logout` + NextAuth wiring + login page
 - **Done when:** Sign in as the seeded admin and reach `/dashboard`; 2-hour session enforced
+
+#### `ci-pipeline`
+- **Goal:** GitHub Actions workflow at `.github/workflows/ci.yml` that runs backend (`pytest` against a Postgres service container, after `alembic upgrade head`) and frontend (`lint` + `typecheck` + `test` + `build`) on every PR and on pushes to `main`. Branch protection on `main` requires this check to pass before merging.
+- **Done when:** A PR with a deliberately broken test shows a red ✗ and is blocked from merging; a clean PR shows green and merges normally.
 
 ---
 

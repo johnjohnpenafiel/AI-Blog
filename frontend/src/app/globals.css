@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+/* Design tokens — source of truth: Design/README.md */
+:root {
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --border: #222222;
+  --text-primary: #f0f0f0;
+  --text-secondary: #888888;
+  --accent: #1a3fff;
+  --accent-glow: rgb(26 63 255 / 0.3);
+  --accent-dim: #0f2299;
+}
+
+/*
+ * Tailwind v4 theme — exposes design tokens as utility classes.
+ * Mapping (CSS var → utility prefix):
+ *   --bg              → bg-bg
+ *   --surface         → bg-surface
+ *   --border          → border-border
+ *   --text-primary    → text-fg
+ *   --text-secondary  → text-muted
+ *   --accent          → bg-accent / text-accent / border-accent
+ *   --accent-glow     → bg-accent-glow
+ *   --accent-dim      → bg-accent-dim
+ */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-fg: var(--text-primary);
+  --color-muted: var(--text-secondary);
+  --color-accent: var(--accent);
+  --color-accent-glow: var(--accent-glow);
+  --color-accent-dim: var(--accent-dim);
+
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+}
