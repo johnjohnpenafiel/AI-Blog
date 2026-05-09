@@ -34,6 +34,21 @@
   --color-accent-glow: var(--accent-glow);
   --color-accent-dim: var(--accent-dim);
 
+  /* shadcn/ui token aliases — components reference these names internally
+     (e.g. `bg-primary`, `text-primary-foreground`, `border-input`).
+     Mapping to project design tokens here keeps the design system in one file. */
+  --color-background: var(--bg);
+  --color-foreground: var(--text-primary);
+  --color-primary: var(--accent);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--surface);
+  --color-secondary-foreground: var(--text-primary);
+  --color-muted-foreground: var(--text-secondary);
+  --color-input: var(--border);
+  --color-ring: var(--accent);
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains-mono);
 }
