@@ -48,18 +48,83 @@ Ask the user which they prefer:
 - **Delete now**: remove the file and stage the deletion for the next commit.
 - **Delete on merge**: leave the file in place so it appears in the PR for reviewers, then delete it in the merge commit.
 
-## 6. Suggest a commit/PR title and body
-Draft from the plan's Goal and delivered tasks. Show it to the user; let them edit. Use this shape:
+## 6. Draft the commit message
+
+Ask once whether there's a related GitHub issue to close — if yes, include `Fixes #N` (or `Closes #N`) so it auto-closes on merge to the default branch.
+
+Follow the repository's existing commit style (`git log --oneline -10` to check). Default to a present-tense imperative subject. Don't add a `Co-Authored-By` line unless the project's git history shows one is customary.
 
 ```
-<short imperative title>
+<short imperative subject derived from plan goal>
 
-<1–2 sentence body summarizing what this delivers>
+<1–3 sentence body summarizing what this delivers and why>
 
-Fixes #<issue-number>  ← include if there's a related GitHub issue
+Fixes #<N>  ← if relevant
 ```
 
-## 7. GitHub Issues link
-Ask if there's a related `gh` issue to close. If yes, include `Fixes #N` (or `Closes #N`) in the commit/PR message — GitHub auto-closes it on merge to the default branch.
+## 7. Draft the PR title and body
 
-Don't push or merge for the user — they handle that. This command finishes when the file is updated and the commit message is drafted.
+Title: same short imperative as the commit subject (or shorter if the commit was scoped narrowly).
+
+Body shape (use a HEREDOC when calling `gh pr create` so formatting survives):
+
+```markdown
+## Summary
+- <bullet from delivered tasks>
+- <bullet>
+
+## Test plan
+- [x] <verification item from plan, [x] if validated, [ ] if pending>
+- [x] <…>
+
+Closes #<N>  ← if relevant
+```
+
+Pull `## Summary` from the plan's delivered tasks. Pull `## Test plan` from the plan's `## Verification` section.
+
+## 8. Branch handling
+
+Run `git branch --show-current`. Three cases:
+
+- **On the repo's default branch** (`main` or `master`): create and check out `feature/<plan-name>` *before* committing. Refuse to commit to the default branch directly.
+- **On `feature/<plan-name>` already**: proceed.
+- **On any other branch**: ask the user — could be intentional (integration branch, hotfix branch). Don't assume.
+
+## 9. Single approval gate
+
+Show the user, in one message:
+
+1. **`git status --short`** — modified + untracked
+2. **`git diff HEAD --stat`** — scale of the change
+3. **Files to stage** — explicit paths you'll `git add`. Per CLAUDE.md guidance: never `git add -A` or `git add .`. Name files explicitly so `.env`, credentials, or large binaries can't slip in.
+4. **Commit message** — the message drafted in step 6
+5. **PR title and body** — drafted in step 7
+
+Ask once: *"Approve commit + push + open PR? (yes / edit / cancel)"*
+
+- **yes** → proceed to step 10
+- **edit** → ask which part(s) to revise (commit message, PR body, files to stage), redraft, return to gate
+- **cancel** → stop. The plan file is already `done`; the user can commit manually later.
+
+Never proceed without an explicit "yes."
+
+## 10. Execute
+
+Run sequentially (each depends on the previous):
+
+1. `git checkout -b feature/<plan-name>` — only if step 8 said we're on the default branch
+2. `git add <explicit file list>` — no `-A`, no `.`
+3. `git commit` with the HEREDOC message. **Never** use `--no-verify`, `--amend`, `--no-gpg-sign`, or any other hook/sign-bypass flag.
+4. If a pre-commit hook fails: surface the failure, fix the underlying cause, re-stage the fix, create a **new** commit (never `--amend` — the original commit didn't happen, so amending would modify the previous commit and risk losing work).
+5. `git push -u origin feature/<plan-name>` — sets upstream tracking
+6. `gh pr create --title "<title>" --body "$(cat <<'EOF' ... EOF)"` — HEREDOC body
+7. Capture the PR URL from `gh pr create` output
+
+## 11. Report
+
+Show the user:
+- New commit SHA (`git log -1 --oneline`)
+- Branch + remote tracking ref
+- PR URL
+
+Stop there. Don't merge for the user — they own that step.
