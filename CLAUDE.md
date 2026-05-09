@@ -10,11 +10,22 @@ Automated bi-weekly blog on AI and operational technology in the automotive indu
 - Frontend build: `cd frontend && npm run build` — TBD
 - Frontend typecheck: `cd frontend && npm run typecheck` — TBD
 - Frontend lint: `cd frontend && npm run lint` — TBD
-- Backend dev: `cd backend && uvicorn main:app --reload` — TBD (no FastAPI scaffold yet)
-- Backend tests: `cd backend && pytest` — TBD
-- DB migrations: `cd backend && alembic upgrade head` — TBD
-- Stack up (Docker): `docker compose up -d` — TBD
-- Seed admin: `cd backend && python scripts/seed_admin.py` — TBD
+- Backend dev: `cd backend && uvicorn main:app --reload` (or run via Docker — see below)
+- Backend tests: `cd backend && pytest`
+- DB migrations: `cd backend && alembic upgrade head` — TBD (lands in `database-foundation`)
+- Stack up (Docker): `docker compose up -d --build` (backend on `:8000`, Postgres on host `:5433`)
+- Stack down: `docker compose down` (add `-v` to wipe Postgres data)
+- Seed admin: `cd backend && python scripts/seed_admin.py` — TBD (lands in `database-foundation`)
+
+# Collaboration mode
+
+The user is new to **FastAPI** and **Docker Compose** and is learning both while building this project. When work touches either of these technologies:
+
+- Be an educator and guide alongside being an implementer.
+- Briefly explain the *why* behind non-obvious choices (decorator behavior, dependency injection, container networking, volume mounts, env var passing, etc.) before or just after applying them.
+- Call out FastAPI/Docker idioms when they first appear so the user builds a mental model, not just a working file.
+- Keep moving — this is a real project on a schedule. Default to short, in-line teaching beats long lectures. If a concept needs more depth, offer "want me to expand on this?" instead of dumping it.
+- Other technologies in the stack (Next.js, TypeScript, Postgres, etc.) do NOT need this treatment unless the user asks.
 
 # Code style
 

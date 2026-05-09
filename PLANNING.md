@@ -79,7 +79,7 @@ The audience is dealership operators, automotive tech executives, and industry o
 
 - **Next.js 14 (App Router)**: Server components fit the public-blog use case (mostly read, SEO-sensitive); App Router lets us co-locate route groups for the public surface and admin dashboard cleanly. shadcn/ui chosen because we own the component code and can theme it freely.
 - **Python + FastAPI**: The pipeline does heavy lifting against two LLM/AI APIs — Python's ecosystem (Anthropic SDK, `passlib`, APScheduler) is the path of least resistance. FastAPI gives us typed routers and Pydantic validation cheaply.
-- **PostgreSQL**: Standard, well-supported on Railway/Render. Postgres array column type fits the `tags VARCHAR[]` field without a join table.
+- **PostgreSQL 17**: Standard, well-supported on Railway/Render. Postgres array column type fits the `tags VARCHAR[]` field without a join table. Pinned to `postgres:17-alpine` in local Docker — matches the developer's host Homebrew client (17.7), so client/server versions stay aligned. The `db` service exposes host port **5433** (not 5432) to avoid a bind conflict with the host's local Postgres install.
 - **SQLAlchemy + Alembic**: Mature combo; Alembic gives us migration history, which matters because schema changes flow through the architecture-change gate (see CLAUDE.md).
 - **APScheduler in-process**: Simple deployment — no separate worker process for the bi-weekly cron. Tradeoff: a horizontally scaled backend would need to designate one scheduler-owning worker. Not a concern at MVP scale (single instance).
 - **NextAuth credentials provider**: Single admin, no SSO, no third-party identity. Credentials provider is the lowest-friction option. 2-hour session TTL chosen to balance convenience against the risk of an unattended laptop with the admin dashboard open.
@@ -273,6 +273,12 @@ Respond in JSON only:
 
 New entries at the top.
 
+### 2026-05-08 — Postgres 17 pinned; host port 5433 in local Docker
+**Context**: `backend-skeleton` feature scaffolds `docker-compose.yml`. Developer machine already runs Homebrew Postgres 17.7 as a launchd service bound to host port 5432.
+**Decision**: Pin the `db` service to `postgres:17-alpine` and map host port **5433 → container 5432**. Container-internal connection string remains `postgresql://...@db:5432/...`; host-side tools connect via `localhost:5433`.
+**Rationale**: Matching major versions (host client 17.7 ↔ container server 17.x) avoids client/server warnings and behavior drift. Host port 5433 sidesteps the bind conflict without requiring the developer to stop the local Postgres service.
+**Tradeoffs**: Anyone joining the project who *doesn't* have a local Postgres on 5432 will still connect via 5433 — slight surprise, but documented in `.env.example` and PLANNING.md. If the project later moves to managed Postgres on Railway/Render, the host port mapping is irrelevant.
+
 ### 2026-05-08 — Initial stack and architecture frozen
 **Context**: First session on the project. SPEC.md and DELOREAN_UI_BRIEF.md describe the system in detail; ai-workflow toolkit prescribes the foundation files.
 **Decision**: Adopt the full SPEC.md stack as-is — Next.js 14 (App Router) + FastAPI + Postgres + SQLAlchemy/Alembic + NextAuth credentials + APScheduler + Claude `claude-sonnet-4-20250514` + Perplexity Sonar. Fold SPEC.md into this PLANNING.md (delete SPEC.md). Move DELOREAN_UI_BRIEF.md to `Design/README.md`. Adopt the full ai-workflow toolkit (CLAUDE.md, PLANNING.md, slash commands, block-new-feature-plan hook).
@@ -296,35 +302,98 @@ Explicitly NOT in MVP. These were considered and deferred — do not infer them 
 
 ## Roadmap (development phases)
 
-These come from the original SPEC. Each phase will be opened as one or more `/start-feature` plans when work begins.
+Each entry below is one `/start-feature <name>` plan. Features are sized to ship in 1–3 sessions and one PR. Sequence top-to-bottom within a phase; the 2-plan concurrency cap allows occasional parallelism on independent features (e.g. `backend-skeleton` and `frontend-skeleton`).
 
 ### Phase 1 — Foundation
-- Repo setup, Docker Compose, PostgreSQL
-- FastAPI skeleton with all routers
-- Database models + Alembic migrations
-- NextAuth login/logout
+
+#### `backend-skeleton`
+- **Goal:** FastAPI app + Docker Compose + Postgres running locally
+- **Done when:** `docker compose up` boots; `GET /health` returns 200
+
+#### `database-foundation`
+- **Goal:** SQLAlchemy models for all 4 tables + Alembic initial migration + `seed_admin.py`
+- **Done when:** `alembic upgrade head` creates tables; seed script creates the admin user idempotently
+
+#### `frontend-skeleton`
+- **Goal:** Next.js 14 + Tailwind + shadcn/ui + design tokens wired in
+- **Done when:** `npm run dev` boots; color tokens render; layout shell exists
+
+#### `auth-login`
+- **Goal:** `/auth/login` + `/auth/logout` + NextAuth wiring + login page
+- **Done when:** Sign in as the seeded admin and reach `/dashboard`; 2-hour session enforced
+
+---
 
 ### Phase 2 — Pipeline
-- Perplexity Sonar integration (`news_fetcher.py`)
-- Claude blog generator (`blog_writer.py`)
-- APScheduler cron setup
-- Manual trigger endpoint
+
+#### `news-fetcher`
+- **Goal:** Perplexity Sonar service running the 5 intent queries with ≥3-article threshold
+- **Done when:** `fetch_qualifying_articles()` returns articles or logs a skip; mocked tests cover both paths
+
+#### `blog-writer`
+- **Goal:** Claude service that returns the structured post JSON (title/slug/summary/body/tags/sources)
+- **Done when:** `generate_post(articles)` returns valid schema; malformed responses fail loud
+
+#### `pipeline-orchestrator`
+- **Goal:** End-to-end fetch → generate → route + `POST /pipeline/run` + `GET /pipeline/status`
+- **Done when:** Manual trigger creates a `posts` row at the correct status per `publishing_mode`
+
+#### `scheduler-cron`
+- **Goal:** APScheduler bi-weekly cron in-process + settings PATCH for day-of-week
+- **Done when:** Scheduler boots with FastAPI; configured day fires the pipeline at 8 AM
+
+---
 
 ### Phase 3 — Admin UI
-- Dashboard overview
-- Review queue with post preview
-- Scheduled posts view
-- Published posts view
-- Settings page
+
+#### `dashboard-shell-and-overview`
+- **Goal:** Persistent sidebar + pipeline status dot + 4 stat cards + Trigger Pipeline / Go To Queue actions
+- **Done when:** Sidebar renders on every `/dashboard` route; stats reflect DB; trigger fires a run
+
+#### `review-queue`
+- **Goal:** Pending-review list + review panel with Accept (publish-now or schedule), Reject, Regenerate with feedback
+- **Done when:** All three actions hit backend endpoints and update post status
+
+#### `scheduled-and-published`
+- **Goal:** `/dashboard/scheduled` (edit-schedule, publish-now, back-to-queue) + `/dashboard/published` (read-only with view-post link)
+- **Done when:** Per-row actions work; published list links to `/blog/[slug]`
+
+#### `settings-page`
+- **Goal:** Publishing mode toggle + schedule day selector + manual trigger + session/logout
+- **Done when:** `PATCH /settings` persists; trigger fires the pipeline; logout ends session
+
+---
 
 ### Phase 4 — Public blog (DeLorean)
-- Homepage with post grid and tag filter
-- Individual post page with markdown rendering and share buttons
-- About page
-- SEO: slug generation, meta tags, Open Graph
+
+#### `public-shell-and-homepage`
+- **Goal:** Public nav + footer + homepage (hero, tag filter, posts grid, grid overlay, glow orb)
+- **Done when:** `/` renders with the latest post in the hero; tag filter narrows the grid client-side; design tokens applied throughout
+
+#### `post-page`
+- **Goal:** `/blog/[slug]` with header, markdown body, share bar (X/LinkedIn/Copy), sources, plus per-post meta + OG tags
+- **Done when:** Any published slug renders fully; share buttons + copy-link confirmation work; OG tags visible in page source
+
+#### `about-page`
+- **Goal:** `/about` with atmospheric hero + content sections per `Design/README.md`
+- **Done when:** Page renders; nav and footer links resolve
+
+---
 
 ### Phase 5 — Polish & deploy
-- Error handling, retry logic on Claude and Perplexity API failures
-- Loading states, empty states in UI
-- Environment config for production
-- Deploy to Railway or Render
+
+#### `pipeline-resilience`
+- **Goal:** Retry + backoff on Claude/Perplexity failures + structured error logs + graceful skip on permanent failure
+- **Done when:** Forced failure triggers retry; permanent failure logs and skips cleanly without partial DB state
+
+#### `ui-polish`
+- **Goal:** Loading skeletons + empty states across both surfaces
+- **Done when:** Every async list shows a skeleton while loading and an empty-state when no data
+
+#### `production-config`
+- **Goal:** Production env handling + Docker profiles + healthchecks + build hardening
+- **Done when:** App boots from production `.env`; healthchecks pass; no dev-mode warnings
+
+#### `deploy`
+- **Goal:** Deploy to Railway or Render with persistent Postgres + DNS
+- **Done when:** Production URL serves the blog; admin login works; scheduler fires on schedule
