@@ -11,11 +11,11 @@ Automated bi-weekly blog on AI and operational technology in the automotive indu
 - Frontend typecheck: `cd frontend && npm run typecheck` — TBD
 - Frontend lint: `cd frontend && npm run lint` — TBD
 - Backend dev: `cd backend && uvicorn main:app --reload` (or run via Docker — see below)
-- Backend tests: `cd backend && pytest`
-- DB migrations: `cd backend && alembic upgrade head` — TBD (lands in `database-foundation`)
+- Backend tests: `docker compose run --rm backend pytest` (needs the `db` service running for DB-touching tests)
+- DB migrations: `docker compose run --rm backend alembic upgrade head`
 - Stack up (Docker): `docker compose up -d --build` (backend on `:8000`, Postgres on host `:5433`)
 - Stack down: `docker compose down` (add `-v` to wipe Postgres data)
-- Seed admin: `cd backend && python scripts/seed_admin.py` — TBD (lands in `database-foundation`)
+- Seed admin: `docker compose run --rm backend python scripts/seed_admin.py` (reads `ADMIN_EMAIL` / `ADMIN_PASSWORD` from `.env`; idempotent)
 
 # Collaboration mode
 

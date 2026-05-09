@@ -273,6 +273,17 @@ Respond in JSON only:
 
 New entries at the top.
 
+### 2026-05-09 — Database foundation: native ENUMs, app-side UUIDs, sync ORM, settings seeded in migration
+**Context**: `database-foundation` feature ships the persistent data layer (4 SQLAlchemy models + Alembic baseline + `seed_admin.py`). Several small choices needed pinning before downstream features depend on them.
+**Decision**:
+- Use Postgres native `ENUM` types for `post_status` and `publishing_mode`, defined once and reused across `posts.status`, `posts.publishing_mode`, and `settings.publishing_mode`. The initial migration creates each type explicitly via `postgresql.ENUM(..., create_type=False).create(bind, checkfirst=True)` so columns can reference them without duplicate `CREATE TYPE` errors; `downgrade()` drops the types after the tables.
+- Generate UUID primary keys app-side via `uuid.uuid4` as the SQLAlchemy column default — no `pgcrypto` / `uuid-ossp` extension required.
+- Seed the single `settings` row directly in the initial migration (`INSERT ... VALUES (1, 'approve_only', 'monday', 'biweekly')`). Means `alembic upgrade head` is sufficient; no separate seed-settings step.
+- Use sync SQLAlchemy 2.x + `psycopg2-binary`. `database.py` exposes `engine`, `SessionLocal`, `Base`, and a `get_db()` generator for FastAPI's `Depends`.
+- `passlib[bcrypt]==1.7.4` with `bcrypt==4.0.1` pinned. The 4.0.1 pin avoids the noisy `(trapped) error reading bcrypt version` warning that appears with passlib 1.7.4 + bcrypt ≥ 4.1.
+**Rationale**: Native ENUMs give DB-level integrity — invalid values can't slip in via raw SQL. App-side UUIDs avoid extension management and work identically across environments. Seeding `settings` in the migration makes the post-migration state self-sufficient (no "remember to also run X"). Sync ORM matches the rest of the FastAPI app's sync style and keeps the learning surface smaller for now.
+**Tradeoffs**: Adding a value to `post_status` or `publishing_mode` later requires an explicit `ALTER TYPE ... ADD VALUE` migration — not as flexible as VARCHAR + CHECK. Sync sessions mean blocking I/O in request handlers; if request volume grows, swapping to async SQLAlchemy is a discrete future migration. The bcrypt 4.0.1 pin is a known-good silence-the-warning workaround; revisit when passlib publishes a release that handles bcrypt 4.1+ cleanly.
+
 ### 2026-05-08 — Postgres 17 pinned; host port 5433 in local Docker
 **Context**: `backend-skeleton` feature scaffolds `docker-compose.yml`. Developer machine already runs Homebrew Postgres 17.7 as a launchd service bound to host port 5432.
 **Decision**: Pin the `db` service to `postgres:17-alpine` and map host port **5433 → container 5432**. Container-internal connection string remains `postgresql://...@db:5432/...`; host-side tools connect via `localhost:5433`.
