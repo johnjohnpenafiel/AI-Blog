@@ -64,6 +64,7 @@ A "feature" is net-new user-facing functionality. Bugs, hotfixes, dependency upg
 - Hard limit: max 2 plans `in-progress` at once. A `PreToolUse` hook enforces this (`.claude/hooks/block-new-feature-plan.py`).
 - A plan in `blocked` or `paused` doesn't count against the limit, but the user must have explicitly set the status.
 - When a feature merges, delete the file in the merge commit.
+- The slash commands and hooks under `.claude/` are synced from the canonical toolkit at `~/Development/ai-workflow/`. Look there for the upstream source, additional templates (e.g. `feature-plan.template.md`), and workflow docs.
 
 # Gotchas
 
