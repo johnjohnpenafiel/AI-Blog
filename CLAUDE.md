@@ -4,12 +4,13 @@ Automated bi-weekly blog on AI and operational technology in the automotive indu
 
 # Bash commands
 
-> The frontend and backend are not yet scaffolded. Update each entry below as soon as the corresponding scaffold lands. Don't run a command from this list until it's been confirmed to exist.
+> Update each entry below as soon as the corresponding scaffold lands. Don't run a command from this list until it's been confirmed to exist.
 
-- Frontend dev: `cd frontend && npm run dev` — TBD (no Next.js scaffold yet)
-- Frontend build: `cd frontend && npm run build` — TBD
-- Frontend typecheck: `cd frontend && npm run typecheck` — TBD
-- Frontend lint: `cd frontend && npm run lint` — TBD
+- Frontend dev: `cd frontend && npm run dev` (boots Next.js on `:3000`)
+- Frontend build: `cd frontend && npm run build`
+- Frontend typecheck: `cd frontend && npm run typecheck`
+- Frontend lint: `cd frontend && npm run lint`
+- Frontend tests: `cd frontend && npm test` (Vitest, headless)
 - Backend dev: `cd backend && uvicorn main:app --reload` (or run via Docker — see below)
 - Backend tests: `docker compose run --rm backend pytest` (needs the `db` service running for DB-touching tests)
 - DB migrations: `docker compose run --rm backend alembic upgrade head`
