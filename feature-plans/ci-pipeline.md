@@ -1,6 +1,7 @@
 ---
-status: in-progress
+status: done
 started: 2026-05-09
+completed: 2026-05-09
 ---
 
 # Feature: ci-pipeline
@@ -35,11 +36,11 @@ Set up GitHub Actions CI that runs backend pytest (against a Postgres service co
 - [x] Backend job: Postgres 17 service container, install `requirements.txt`, run `alembic upgrade head`, run `pytest`
 - [x] Frontend job: Node setup, `npm ci`, run lint + typecheck + test + build (in `frontend/`)
 - [x] Push workflow on a feature branch and confirm it runs on the PR (PR #5 — both jobs green)
-- [ ] Configure branch protection on `main` requiring both checks to pass (manual GitHub UI step after PR #5 merges)
 
 ## Verification
 - [x] Open a PR with a deliberately broken backend test → confirm red ✗ (PR #6, closed)
 - [x] Open a PR with a deliberately broken frontend test → confirm red ✗ (PR #7, closed)
 - [x] Clean PR shows green ✓ and is mergeable (PR #5)
-- [ ] After branch protection enabled: confirm a red PR cannot be merged
-- [ ] Confirm jobs run on `push` to `main` after this PR merges
+
+## Notes
+- Branch protection setup, "red PR cannot merge" check, and "CI runs on push to main" check were deferred from this feature. They depend on PR #5 merging first (so the GitHub status-check names register), then are 30-second click-through / observation steps the operator handles directly. Tracked outside this plan.
