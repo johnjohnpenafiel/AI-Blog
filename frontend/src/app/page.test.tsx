@@ -22,6 +22,6 @@ describe("token verification page", () => {
       expect(swatch, `swatch for ${token} should be present`).not.toBeNull();
     }
 
-    expect(screen.getByText(/Design tokens are/)).toBeInTheDocument();
+    expect(screen.getByText(/THIS_TEXT_DOES_NOT_EXIST_REDPATH/)).toBeInTheDocument();
   });
 });
