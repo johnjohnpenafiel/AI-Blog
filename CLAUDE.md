@@ -1,6 +1,6 @@
 # AI-Blog (DeLorean)
 
-Automated bi-weekly blog on AI and operational technology in the automotive industry. Two surfaces: a public-facing blog (DeLorean) and a private admin dashboard for the single operator.
+Automated twice-weekly blog on AI and operational technology in the automotive industry. The pipeline runs on a fixed Monday + Thursday cadence at 8 AM. Two surfaces: a public-facing blog (DeLorean) and a private admin dashboard for the single operator.
 
 # Bash commands
 

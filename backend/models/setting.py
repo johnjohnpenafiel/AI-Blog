@@ -16,11 +16,10 @@ class Setting(Base):
         nullable=False,
         default="approve_only",
     )
-    schedule_day: Mapped[str] = mapped_column(String, nullable=False, default="monday")
     schedule_frequency: Mapped[str] = mapped_column(
         String,
         nullable=False,
-        default="biweekly",
+        default="twice_weekly",
     )
     last_run_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),

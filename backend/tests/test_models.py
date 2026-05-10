@@ -48,5 +48,4 @@ def test_post_defaults_apply_on_flush(db):
 def test_settings_row_seeded_by_migration(db):
     s = db.query(Setting).filter(Setting.id == 1).one()
     assert s.publishing_mode == "approve_only"
-    assert s.schedule_day == "monday"
-    assert s.schedule_frequency == "biweekly"
+    assert s.schedule_frequency == "twice_weekly"
