@@ -4,7 +4,7 @@
 
 ## Project overview
 
-DeLorean is an automated bi-weekly blog covering AI and operational technology developments in the automotive industry. The system has two surfaces: a public-facing blog where readers discover and share posts, and a private admin dashboard where a single operator manages the publishing pipeline, reviews AI-generated content, and configures system behavior. Content is generated end-to-end by an automated pipeline that fetches news from Perplexity Sonar, drafts a post with Claude, and either publishes immediately or routes to a review queue based on the configured publishing mode.
+DeLorean is an automated twice-weekly blog covering AI and operational technology developments in the automotive industry. The system has two surfaces: a public-facing blog where readers discover and share posts, and a private admin dashboard where a single operator manages the publishing pipeline, reviews AI-generated content, and configures system behavior. Content is generated end-to-end by an automated pipeline that fetches news from Perplexity Sonar, drafts a post with Claude, and either publishes immediately or routes to a review queue based on the configured publishing mode.
 
 The audience is dealership operators, automotive tech executives, and industry observers — not car enthusiasts. Codebase intervention is reserved for bugs, updates, and new features only; the publishing loop runs without code changes.
 
@@ -32,13 +32,13 @@ The audience is dealership operators, automotive tech executives, and industry o
 ### Components
 
 - **Frontend** (`frontend/`): Next.js 16 (App Router) + React 19 + Tailwind CSS v4 + shadcn/ui. Source layout is `src/app/`. Two route groups: `(public)` for the DeLorean blog (homepage, post pages, about) and `dashboard/` for the admin UI (overview, queue, scheduled, published, settings). NextAuth handles credential-based login for the admin only.
-- **Backend** (`backend/`): Python + FastAPI. Routers: `posts.py`, `pipeline.py`, `settings.py`, plus auth endpoints. Services: `news_fetcher.py` (Perplexity), `blog_writer.py` (Claude), `publisher.py` (status routing). `scheduler.py` runs APScheduler in-process for the bi-weekly cron.
+- **Backend** (`backend/`): Python + FastAPI. Routers: `posts.py`, `pipeline.py`, `settings.py`, plus auth endpoints. Services: `news_fetcher.py` (Perplexity), `blog_writer.py` (Claude), `publisher.py` (status routing). `scheduler.py` runs APScheduler in-process for the twice-weekly (Mon + Thu) cron.
 - **Database**: PostgreSQL. Schema managed by SQLAlchemy models + Alembic migrations.
 - **External services**:
   - Anthropic Claude API (`claude-sonnet-4-20250514`) — blog generation.
   - Perplexity Sonar API — news aggregation with intent-based queries.
 - **Auth**: NextAuth.js, credentials provider, single seeded admin user, 2-hour session TTL. Passwords stored as bcrypt hashes via `passlib`.
-- **Environment**: Docker Compose for local dev. Deployable to Railway, Render, or a VPS.
+- **Environment**: Docker Compose for local dev. Production hosting is split across Vercel (frontend), Render (backend), and Neon (Postgres) — see the Hosting section below.
 
 ### Repository layout
 
@@ -84,10 +84,28 @@ The audience is dealership operators, automotive tech executives, and industry o
 - **Python + FastAPI**: The pipeline does heavy lifting against two LLM/AI APIs — Python's ecosystem (Anthropic SDK, `passlib`, APScheduler) is the path of least resistance. FastAPI gives us typed routers and Pydantic validation cheaply.
 - **PostgreSQL 17**: Standard, well-supported on Railway/Render. Postgres array column type fits the `tags VARCHAR[]` field without a join table. Pinned to `postgres:17-alpine` in local Docker — matches the developer's host Homebrew client (17.7), so client/server versions stay aligned. The `db` service exposes host port **5433** (not 5432) to avoid a bind conflict with the host's local Postgres install.
 - **SQLAlchemy + Alembic**: Mature combo; Alembic gives us migration history, which matters because schema changes flow through the architecture-change gate (see CLAUDE.md).
-- **APScheduler in-process**: Simple deployment — no separate worker process for the bi-weekly cron. Tradeoff: a horizontally scaled backend would need to designate one scheduler-owning worker. Not a concern at MVP scale (single instance).
+- **APScheduler in-process**: Simple deployment — no separate worker process for the twice-weekly cron. Tradeoff: a horizontally scaled backend would need to designate one scheduler-owning worker. Not a concern at MVP scale (single instance).
 - **NextAuth credentials provider**: Single admin, no SSO, no third-party identity. Credentials provider is the lowest-friction option. 2-hour session TTL chosen to balance convenience against the risk of an unattended laptop with the admin dashboard open.
 - **Anthropic Claude (`claude-sonnet-4-20250514`)**: Sonnet hits the cost/quality balance for 600–900-word posts. Pinned to a specific snapshot ID so generation behavior doesn't drift mid-cycle.
 - **Perplexity Sonar**: Replaces a build-our-own news fetcher + relevance filter. Sonar understands intent and returns pre-filtered results with source citations, removing a whole layer of curation logic from our codebase.
+
+## Hosting
+
+Production deployment splits across three vendors, each picked for what it does best. Total cost ≈ **$8–10/mo** at MVP scale.
+
+| Layer | Service | Tier | Cost |
+|---|---|---|---|
+| Frontend (Next.js 16) | Vercel | Free | $0 |
+| Backend (FastAPI + APScheduler) | Render | Starter (always-on web service) | $7/mo |
+| Database (Postgres 17) | Neon | Free (3 GB) | $0 |
+| Post generation | Anthropic Claude Sonnet 4 | Pay-per-use | ~$0.50–1.50/mo |
+| News fetching | Perplexity Sonar | Pay-per-use | ~$0.50–1.50/mo |
+
+Notes:
+- Render Starter is required (not Free) because APScheduler runs in-process and must stay resident to fire the Mon/Thu cron — Render's free tier spins down after 15 min of idle.
+- Pin Render and Neon to the same US region to keep backend↔DB latency in the single-digit-ms range.
+- Neon's free tier autosuspends on inactivity; first query after idle has a small wake-up cost (~500 ms–2 s). Invisible at this traffic level.
+- The choice of vendor for each layer is independent of the architecture — swapping any one (e.g. Render → Fly.io for backend, Neon → Supabase for DB) is a deployment-config change, not a code change.
 
 ## Data model
 
@@ -132,8 +150,7 @@ The audience is dealership operators, automotive tech executives, and industry o
 |---|---|---|
 | id | INT | PK (single row) |
 | publishing_mode | ENUM | `auto` or `approve_only` |
-| schedule_day | VARCHAR | e.g. `monday` |
-| schedule_frequency | VARCHAR | `biweekly` |
+| schedule_frequency | VARCHAR | `twice_weekly` (cadence days are hardcoded Mon + Thu in the scheduler — not stored here) |
 | last_run_at | TIMESTAMP | |
 | next_run_at | TIMESTAMP | |
 
@@ -259,8 +276,8 @@ Respond in JSON only:
 | **Approve Only** | Post is generated and placed in the review queue. Admin must accept before it publishes. Once accepted, admin can publish instantly or schedule for a future date/time. |
 
 ### Scheduling
-- APScheduler bi-weekly cron, default every other Monday at 8:00 AM.
-- Day-of-week is configurable via Settings; frequency is fixed at bi-weekly (not exposed in UI).
+- APScheduler twice-weekly cron — fires every Monday and every Thursday at 8:00 AM.
+- Both the days (Mon + Thu) and the frequency are fixed in code. Neither is exposed in the Settings UI.
 - Manual trigger always available from the dashboard.
 
 ## Constraints and non-negotiables
@@ -268,13 +285,29 @@ Respond in JSON only:
 - **Single dark theme.** No light/dark toggle. Color tokens defined in `Design/README.md`.
 - **No images in the UI.** Typography and color carry the design across both surfaces.
 - **Single admin user.** No registration flow, no multi-user roles.
-- **Bi-weekly cadence is fixed.** Day-of-week configurable; frequency is not.
+- **Twice-weekly cadence is fixed.** The pipeline fires every Monday and Thursday at 8 AM. Neither the days nor the frequency are exposed in the Settings UI.
 - **Source transparency.** Every post must list its sources (title, publisher, link, date) — this is part of the editorial contract with the audience.
 - **Secrets stay in `.env`.** `ANTHROPIC_API_KEY`, `PERPLEXITY_API_KEY`, `NEXTAUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL` never committed.
 
 ## Decision log
 
 New entries at the top.
+
+### 2026-05-09 — Hosting target: Vercel (frontend) + Render Starter (backend) + Neon free (Postgres)
+**Context**: Original spec listed "Railway, Render, or VPS" as deployable targets without picking one. Operator wanted a concrete, cost-clear answer before Phase 5 deploy work begins. Operator also already runs Vercel + Neon + Render on another project, so vendor familiarity is a real factor.
+**Decision**: Frontend on **Vercel free**. Backend on **Render Starter ($7/mo, always-on)** — Starter is required because APScheduler runs in-process and the free tier spins down. Database on **Neon free tier (3 GB)** — well above what this dataset needs and cheaper than Render's paid Postgres. All-in cost ≈ $8–10/mo (hosting + LLM/Sonar API usage at twice-weekly cadence). See the Hosting section above for the full table.
+**Rationale**: Each layer goes to the vendor that does it best — Vercel is Next.js's home turf, Neon's free tier is genuinely production-grade for this workload, Render's Starter is the cheapest always-on Python host that supports the in-process scheduler. Operator already has accounts and operational familiarity with all three.
+**Tradeoffs**: Three vendors instead of one — three dashboards, three status pages. Region alignment between Render and Neon must be set carefully or backend↔DB latency suffers. Neon free tier autosuspends, adding small wake-up latency on first request after idle (acceptable at this traffic level). The Render Starter box is small (512 MB / 0.5 CPU); if the backend ever grows heavier (e.g. moves LLM post-processing in-process), bump to Standard. Future migration off any single vendor is a deployment-config change, not a code change.
+
+### 2026-05-09 — Cadence change: twice-weekly (Mon + Thu) replaces bi-weekly; both days and frequency are hardcoded
+**Context**: Original spec called for a bi-weekly cadence (every other Monday). Operator clarified the actual goal is two posts per week. Forcing the conversation early — before `scheduler-cron` is built — keeps the change cheap (only docs + the seeded settings row exist; no scheduler code yet).
+**Decision**:
+- Pipeline fires **every Monday and every Thursday at 8:00 AM**. Both days and the frequency are constants in the scheduler code, not settings.
+- The `settings.schedule_day` column is dropped (it had no purpose once days became fixed). `settings.schedule_frequency` is kept as a VARCHAR but its value is updated from `'biweekly'` to `'twice_weekly'` — vestigial today, but cheaper to retain than to rip out the column and update every reference.
+- The Settings UI no longer exposes a day-of-week selector. Schedule is rendered read-only as `MON + THU AT 8:00 AM`.
+- Approximate run volume: ~8–9 runs/month (~104/year). API costs (Perplexity Sonar + Claude Sonnet 4) remain well under $5/month at this volume; hosting still dominates total cost.
+**Rationale**: Two fixed days is the simplest possible scheduler — a single APScheduler `CronTrigger(day_of_week='mon,thu', hour=8)` handles it. Removing both knobs from the UI is consistent with the existing "frequency is fixed, not configurable" philosophy and reduces the settings-page scope. Doing this *before* the scheduler is built avoids writing throwaway day-of-week PATCH plumbing.
+**Tradeoffs**: If a future operator wants Tue + Fri (or any other pair), it's a code change — not a settings change. That's acceptable at single-operator MVP scale; revisit if/when a second operator joins or operator preferences shift. The retained `schedule_frequency` column is technically cruft (only one valid value), but dropping it would force a settings API change for no user-facing benefit.
 
 ### 2026-05-09 — Auth: NextAuth owns the session; FastAPI is stateless; Next 16 `proxy.ts` enforces the gate
 **Context**: `auth-login` feature ships the auth boundary. Two design choices needed pinning before downstream protected endpoints land.
@@ -297,7 +330,7 @@ New entries at the top.
 **Decision**:
 - Use Postgres native `ENUM` types for `post_status` and `publishing_mode`, defined once and reused across `posts.status`, `posts.publishing_mode`, and `settings.publishing_mode`. The initial migration creates each type explicitly via `postgresql.ENUM(..., create_type=False).create(bind, checkfirst=True)` so columns can reference them without duplicate `CREATE TYPE` errors; `downgrade()` drops the types after the tables.
 - Generate UUID primary keys app-side via `uuid.uuid4` as the SQLAlchemy column default — no `pgcrypto` / `uuid-ossp` extension required.
-- Seed the single `settings` row directly in the initial migration (`INSERT ... VALUES (1, 'approve_only', 'monday', 'biweekly')`). Means `alembic upgrade head` is sufficient; no separate seed-settings step.
+- Seed the single `settings` row directly in the initial migration. Means `alembic upgrade head` is sufficient; no separate seed-settings step. (The original seed used `schedule_frequency='biweekly'` and a `schedule_day='monday'` column; both were superseded on 2026-05-09 when cadence switched to twice-weekly — see decision log entry of that date.)
 - Use sync SQLAlchemy 2.x + `psycopg2-binary`. `database.py` exposes `engine`, `SessionLocal`, `Base`, and a `get_db()` generator for FastAPI's `Depends`.
 - `passlib[bcrypt]==1.7.4` with `bcrypt==4.0.1` pinned. The 4.0.1 pin avoids the noisy `(trapped) error reading bcrypt version` warning that appears with passlib 1.7.4 + bcrypt ≥ 4.1.
 **Rationale**: Native ENUMs give DB-level integrity — invalid values can't slip in via raw SQL. App-side UUIDs avoid extension management and work identically across environments. Seeding `settings` in the migration makes the post-migration state self-sufficient (no "remember to also run X"). Sync ORM matches the rest of the FastAPI app's sync style and keeps the learning surface smaller for now.
@@ -373,8 +406,8 @@ Each entry below is one `/start-feature <name>` plan. Features are sized to ship
 - **Done when:** Manual trigger creates a `posts` row at the correct status per `publishing_mode`
 
 #### `scheduler-cron`
-- **Goal:** APScheduler bi-weekly cron in-process + settings PATCH for day-of-week
-- **Done when:** Scheduler boots with FastAPI; configured day fires the pipeline at 8 AM
+- **Goal:** APScheduler twice-weekly cron in-process — Mon + Thu at 8 AM, both days hardcoded
+- **Done when:** Scheduler boots with FastAPI; both Mon and Thu fire the pipeline at 8 AM; no settings field is consulted for cadence
 
 ---
 
@@ -393,8 +426,8 @@ Each entry below is one `/start-feature <name>` plan. Features are sized to ship
 - **Done when:** Per-row actions work; published list links to `/blog/[slug]`
 
 #### `settings-page`
-- **Goal:** Publishing mode toggle + schedule day selector + manual trigger + session/logout
-- **Done when:** `PATCH /settings` persists; trigger fires the pipeline; logout ends session
+- **Goal:** Publishing mode toggle + manual trigger + session/logout. Schedule is shown read-only ("Mon + Thu at 8 AM") since cadence is hardcoded.
+- **Done when:** `PATCH /settings` persists publishing mode; trigger fires the pipeline; logout ends session
 
 ---
 

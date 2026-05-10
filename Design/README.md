@@ -2,7 +2,7 @@
 
 ## What Is DeLorean
 
-DeLorean is an automated bi-weekly blog covering AI and operational technology developments in the automotive industry. It has two surfaces:
+DeLorean is an automated twice-weekly blog covering AI and operational technology developments in the automotive industry. It has two surfaces:
 
 - **Public Blog (DeLorean)** — where readers discover and read posts
 - **Admin Dashboard** — where a single operator manages the publishing pipeline
@@ -305,11 +305,10 @@ All dashboard pages share this shell:
 - Toggle: `AUTO` | `APPROVE ONLY`
 - Description of each mode shown below toggle
 
-**Schedule**
+**Schedule** (read-only)
 - Label: `PIPELINE SCHEDULE`
-- Current schedule displayed: e.g. `EVERY OTHER MONDAY AT 8:00 AM`
-- Day-of-week selector (dropdown or segmented control)
-- Note: frequency is fixed at bi-weekly, not configurable in UI
+- Current schedule displayed: `MON + THU AT 8:00 AM`
+- Note: cadence (both days and frequency) is fixed in code and not configurable in UI
 
 **Pipeline**
 - Label: `MANUAL CONTROLS`
