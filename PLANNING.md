@@ -367,25 +367,25 @@ Explicitly NOT in MVP. These were considered and deferred — do not infer them 
 
 Each entry below is one `/start-feature <name>` plan. Features are sized to ship in 1–3 sessions and one PR. Sequence top-to-bottom within a phase; the 2-plan concurrency cap allows occasional parallelism on independent features (e.g. `backend-skeleton` and `frontend-skeleton`).
 
-### Phase 1 — Foundation
+### Phase 1 — Foundation - **COMPLETED**
 
-#### `backend-skeleton`
+#### `backend-skeleton` *Done*
 - **Goal:** FastAPI app + Docker Compose + Postgres running locally
 - **Done when:** `docker compose up` boots; `GET /health` returns 200
 
-#### `database-foundation`
+#### `database-foundation` *Done*
 - **Goal:** SQLAlchemy models for all 4 tables + Alembic initial migration + `seed_admin.py`
 - **Done when:** `alembic upgrade head` creates tables; seed script creates the admin user idempotently
 
-#### `frontend-skeleton`
+#### `frontend-skeleton` *Done*
 - **Goal:** Next.js 14 + Tailwind + shadcn/ui + design tokens wired in
 - **Done when:** `npm run dev` boots; color tokens render; layout shell exists
 
-#### `auth-login`
+#### `auth-login` *Done*
 - **Goal:** `/auth/login` + `/auth/logout` + NextAuth wiring + login page
 - **Done when:** Sign in as the seeded admin and reach `/dashboard`; 2-hour session enforced
 
-#### `ci-pipeline`
+#### `ci-pipeline` *Done*
 - **Goal:** GitHub Actions workflow at `.github/workflows/ci.yml` that runs backend (`pytest` against a Postgres service container, after `alembic upgrade head`) and frontend (`lint` + `typecheck` + `test` + `build`) on every PR and on pushes to `main`. Branch protection on `main` requires this check to pass before merging.
 - **Done when:** A PR with a deliberately broken test shows a red ✗ and is blocked from merging; a clean PR shows green and merges normally.
 
