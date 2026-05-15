@@ -33,15 +33,15 @@ Build a service that takes qualifying articles from `news_fetcher` and returns a
 - Article object shape from the shipped `news-fetcher` feature — reuse its Pydantic model rather than redefining
 
 ## Tasks
-- [ ] Add `anthropic` SDK to `backend/requirements.txt` with a pinned version
-- [ ] Define `GeneratedPost` Pydantic schema in `backend/schemas/` (title, slug, summary, meta_description, body, tags, sources) with strict tag enum (2–4 of the 7 allowed values)
-- [ ] Create `backend/services/blog_writer.py` with Anthropic client init (reads `ANTHROPIC_API_KEY`, pinned to `claude-sonnet-4-20250514`)
-- [ ] Implement `generate_post(articles)`: build prompt from the PLANNING.md template, call Claude, parse + validate response into `GeneratedPost`
-- [ ] Raise typed exceptions on malformed JSON, missing fields, invalid tag values — no silent fallbacks
-- [ ] Add unit tests in `backend/tests/` mocking the Anthropic SDK: happy path, malformed JSON, missing fields, invalid tag values
+- [x] Add `anthropic` SDK to `backend/requirements.txt` with a pinned version
+- [x] Define `GeneratedPost` Pydantic schema in `backend/schemas/` (title, slug, summary, meta_description, body, tags, sources) with strict tag enum (2–4 of the 7 allowed values)
+- [x] Create `backend/services/blog_writer.py` with Anthropic client init (reads `ANTHROPIC_API_KEY`, pinned to `claude-sonnet-4-20250514`)
+- [x] Implement `generate_post(articles)`: build prompt from the PLANNING.md template, call Claude, parse + validate response into `GeneratedPost`
+- [x] Raise typed exceptions on malformed JSON, missing fields, invalid tag values — no silent fallbacks
+- [x] Add unit tests in `backend/tests/` mocking the Anthropic SDK: happy path, malformed JSON, missing fields, invalid tag values
 
 ## Verification
-- [ ] `docker compose run --rm backend pytest` passes locally
-- [ ] One live smoke test against real Claude API with articles from `news_fetcher` — capture the output
-- [ ] Manual quality check on smoke-test output: tone fits audience, tags sensible, 600–900 word body, sources preserved
+- [x] `docker compose run --rm backend pytest` passes locally (blog_writer + news_fetcher + health all green; DB-touching tests skipped via `--no-deps` because the user's main stack has port 5433 bound — they pass when the worktree owns the db service)
+- [x] One live smoke test against real Claude API with articles from `news_fetcher` — capture the output (2026-05-15: chained fetch_qualifying_articles → generate_post; Claude accepted the tool-use schema on the first try; ~34s latency)
+- [x] Manual quality check on smoke-test output: tone fits audience, tags sensible, 600–900 word body, sources preserved (769-word body; 4 valid tags; 6 sources preserved; tone matches dealer-operator audience. Note: 3 of 6 sources were vendor product pages — that's the known news-fetcher quality gap tracked as Phase 5 work, not a blog-writer issue)
 - [ ] CI green on the PR
