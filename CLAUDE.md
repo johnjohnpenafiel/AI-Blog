@@ -46,9 +46,9 @@ The user is new to **FastAPI** and **Docker Compose** and is learning both while
 
 # Architecture context
 
-See @PLANNING.md for the system architecture, stack decisions, data model, API contracts, pipeline logic, and decision log.
+See @PLANNING.md for the system architecture, stack decisions, data model, API contracts, and pipeline logic. The full decision log is in `PLANNING-decisions.md` (not `@`-imported — read it on demand when you need the *why* behind a past choice).
 
-Before making architectural changes (new tables, new endpoints, schema migrations, scheduler behavior changes, new top-level modules): STOP, confirm with the user, then update @PLANNING.md in the same commit. Documentation drift here is the most common source of stale context.
+Before making architectural changes (new tables, new endpoints, schema migrations, scheduler behavior changes, new top-level modules): STOP, confirm with the user, then update both files in the same commit — PLANNING.md to reflect the *new state*, and PLANNING-decisions.md with a dated entry capturing the *why and tradeoffs*. Documentation drift here is the most common source of stale context.
 
 # UI / design work
 
