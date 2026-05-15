@@ -202,7 +202,13 @@ def test_overlap_returns_409(client: TestClient) -> None:
     assert response.json()["detail"] == "pipeline already running"
 
 
-def test_status_endpoint_shape(client: TestClient) -> None:
+def test_status_endpoint_shape(client: TestClient, db: Session) -> None:
+    # Reset next_run_at so the None branch is exercised regardless of
+    # whether the scheduler has booted against the dev DB.
+    setting = db.query(Setting).filter(Setting.id == 1).one()
+    setting.next_run_at = None
+    db.flush()
+
     response = client.get("/pipeline/status")
     assert response.status_code == 200
     body = response.json()
