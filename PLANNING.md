@@ -336,21 +336,21 @@ Each entry below is one `/start-feature <name>` plan. Features are sized to ship
 
 ---
 
-### Phase 2 — Pipeline
+### Phase 2 — Pipeline **COMPLETED**
 
-#### `news-fetcher`
+#### `news-fetcher` *Done*
 - **Goal:** Perplexity Sonar service running the 5 intent queries with ≥3-article threshold
 - **Done when:** `fetch_qualifying_articles()` returns articles or logs a skip; mocked tests cover both paths
 
-#### `blog-writer`
+#### `blog-writer` *Done*
 - **Goal:** Claude service that returns the structured post JSON (title/slug/summary/body/tags/sources)
 - **Done when:** `generate_post(articles)` returns valid schema; malformed responses fail loud
 
-#### `pipeline-orchestrator`
+#### `pipeline-orchestrator` *Done*
 - **Goal:** End-to-end fetch → generate → route + `POST /pipeline/run` + `GET /pipeline/status`
 - **Done when:** Manual trigger creates a `posts` row at the correct status per `publishing_mode`
 
-#### `scheduler-cron`
+#### `scheduler-cron` *Done*
 - **Goal:** APScheduler twice-weekly cron in-process — Mon + Thu at 8 AM, both days hardcoded
 - **Done when:** Scheduler boots with FastAPI; both Mon and Thu fire the pipeline at 8 AM; no settings field is consulted for cadence
 
