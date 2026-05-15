@@ -87,7 +87,7 @@ The audience is dealership operators, automotive tech executives, and industry o
 - **APScheduler in-process**: Simple deployment — no separate worker process for the twice-weekly cron. Tradeoff: a horizontally scaled backend would need to designate one scheduler-owning worker. Not a concern at MVP scale (single instance).
 - **NextAuth credentials provider**: Single admin, no SSO, no third-party identity. Credentials provider is the lowest-friction option. 2-hour session TTL chosen to balance convenience against the risk of an unattended laptop with the admin dashboard open.
 - **Anthropic Claude (`claude-sonnet-4-20250514`)**: Sonnet hits the cost/quality balance for 600–900-word posts. Pinned to a specific snapshot ID so generation behavior doesn't drift mid-cycle.
-- **Perplexity Sonar**: Replaces a build-our-own news fetcher + relevance filter. Sonar understands intent and returns pre-filtered results with source citations, removing a whole layer of curation logic from our codebase.
+- **Perplexity Sonar (`/search` endpoint)**: Replaces a build-our-own news fetcher + relevance filter. Sonar's hybrid semantic + LLM-ranked retrieval understands intent and returns pre-filtered results with source citations, removing a whole layer of curation logic from our codebase. We target the dedicated `/search` endpoint (not `/chat/completions`) — it returns raw retrieved articles without the LLM synthesis step we'd otherwise discard, and accepts batched queries so the 5 intent queries fit in one HTTP call. See the 2026-05-13 decision-log entry for the full rationale.
 
 ## Hosting
 
@@ -194,7 +194,7 @@ Notes:
 
 ### Step 1 — News fetching (`backend/services/news_fetcher.py`)
 
-Send intent-based queries to Perplexity Sonar:
+Send intent-based queries to Perplexity Sonar's `/search` endpoint in a single batched call (`query: string[]`, `search_recency_filter: "week"`):
 
 - `"AI tools being used in car dealerships past 2 weeks"`
 - `"AI voice agents for automotive sales and customer service"`
@@ -292,6 +292,27 @@ Respond in JSON only:
 ## Decision log
 
 New entries at the top.
+
+### 2026-05-13 — News fetcher minimum article threshold: ≥3 qualifying articles per run
+**Context**: `news-fetcher` (Phase 2) needs a floor on how many articles must survive Sonar's response (after URL-dedup) before a run proceeds to `blog-writer`. The original spec mentioned "≥3" without explaining why. Operator asked for the rationale before shipping, so the value lives in code as `MIN_ARTICLES = 3` with the reasoning captured here rather than inline.
+**Decision**: A pipeline run requires **≥3 unique articles** (after URL-dedup) to proceed. Below the threshold, `fetch_qualifying_articles()` returns an empty list and the orchestrator (when it lands) skips the run, logged but not retried. The threshold is a module-level constant in `backend/services/news_fetcher.py` — not exposed in the Settings UI, not stored in the `settings` table. Editorial decisions like this stay in code, consistent with how the twice-weekly cadence is handled.
+**Rationale**:
+- **1 article** → the post would be a paraphrase of one news item. No synthesis, just a rehash. Below the editorial bar.
+- **2 articles** → can compare/contrast, but fragile. If both articles cover the same incident from different angles, you effectively have 1 story.
+- **3+ articles** → can credibly identify a *pattern* or *trend*. Three independent data points start to suggest a theme. The post can say "here's what's happening across the industry" instead of "here's one thing that happened."
+
+The blog's audience (dealership operators, automotive tech executives) wants analysis, not aggregation. Sources transparency is part of the editorial contract — a list of 3+ sources signals "we did our homework." Two would still publish credibly, but the post would be thinner.
+**Tradeoffs**: Three is a defensible default, not a hard truth — you could ship at 2 or 4. Hardcoding it (rather than putting it in `settings`) means an editorial taste change is a one-line PR, not a UI toggle. Worth revisiting after a few months of real runs: if Sonar consistently returns 6–10 qualifying articles per run, the threshold isn't the binding constraint and can stay where it is; if it's bumping up against 3 frequently, that's a signal to either widen the intent queries or accept thinner posts (lower the threshold to 2).
+
+### 2026-05-13 — News fetcher uses Perplexity `/search`, not `/chat/completions`
+**Context**: `news-fetcher` (Phase 2) is starting implementation. Perplexity exposes two relevant endpoints — the OpenAI-compatible `POST /chat/completions` with `model: "sonar"` (returns a synthesized prose answer plus citations), and a newer dedicated `POST /search` (returns raw retrieved articles, no synthesis). The original "Pipeline logic / Step 1 — News fetching" section said "send intent-based queries to Perplexity Sonar" without specifying which endpoint, leaving the choice open.
+**Decision**: Use `POST https://api.perplexity.ai/search`. Send all 5 intent queries in a single request via the endpoint's `query: string[]` parameter (batched). Apply `search_recency_filter: "week"` (closest match to the "past 2 weeks" intent the queries imply). Parse the `results[]` array into a Pydantic `Article` model (`title`, `url`, `publisher`, `published_date`, `snippet`). Derive `publisher` client-side from the URL hostname (`urlparse(url).hostname`, strip leading `www.`) since neither Sonar endpoint returns it as a field. Hostname → friendly-name mapping (e.g. `techcrunch.com` → "TechCrunch") is deferred — ship with raw hostnames and revisit only if source citations look ugly in real posts.
+**Rationale**: Perplexity's semantic + LLM-ranked retrieval ("hybrid search ... LLM ranking ... documents divided into fine-grained units individually surfaced and scored") happens in the retrieval layer that sits **beneath** both endpoints. `/chat/completions` adds an LLM synthesis step **on top** that produces a prose answer — content the `blog-writer` step will regenerate from scratch with Claude anyway, so we'd discard it. `/search` skips that wasted synthesis step, returns articles directly as a structured array, and accepts batched queries (one HTTP call instead of five — lower latency, fewer failure modes). The original "Sonar replaces a build-our-own news fetcher + relevance filter" rationale is preserved because the relevance filtering capability lives in the retrieval layer, not the synthesis layer. Cost difference is a rounding error (fractions of a cent per run) — not a decision factor.
+**Tradeoffs**: If Perplexity ever differentiates ranking quality between the two endpoints (e.g. gives `/chat/completions` exclusive access to a higher-quality reranker), `/search` becomes the lesser product. Not currently documented but possible. Mitigation: the client wrapper isolates the endpoint choice in one module so swapping is cheap. Neither endpoint returns `publisher` — deriving from hostname gives `techcrunch.com` not `"TechCrunch"`; readers see hostnames in source citations until/unless we add a mapping table. Recency filter `"week"` doesn't perfectly match the original "past 2 weeks" phrasing in the queries — the next-best option is `"month"`, which is too wide; we accept the slight narrowing.
+**References**:
+- API reference: https://docs.perplexity.ai/api-reference/search-post
+- Sonar quickstart: https://docs.perplexity.ai/docs/sonar/quickstart
+- Search API announcement: https://www.perplexity.ai/hub/blog/introducing-the-perplexity-search-api
 
 ### 2026-05-09 — Hosting target: Vercel (frontend) + Render Starter (backend) + Neon free (Postgres)
 **Context**: Original spec listed "Railway, Render, or VPS" as deployable targets without picking one. Operator wanted a concrete, cost-clear answer before Phase 5 deploy work begins. Operator also already runs Vercel + Neon + Render on another project, so vendor familiarity is a real factor.
@@ -452,6 +473,11 @@ Each entry below is one `/start-feature <name>` plan. Features are sized to ship
 #### `pipeline-resilience`
 - **Goal:** Retry + backoff on Claude/Perplexity failures + structured error logs + graceful skip on permanent failure
 - **Done when:** Forced failure triggers retry; permanent failure logs and skips cleanly without partial DB state
+
+#### `news-fetcher-quality-filter`
+- **Goal:** Filter non-news content (vendor product pages, marketing landing pages) out of Sonar `/search` results inside `news_fetcher` itself, so the ≥3 threshold counts only real news. Approach TBD — options include: tighter Sonar query phrasing, `search_domain_filter` blocklist of known vendor domains, a small Claude classification call per result, or a rule-based heuristic on URL/snippet patterns.
+- **Why:** First smoke test (2026-05-15) of news-fetcher returned 10 articles, 3 of which were vendor product pages (e.g. `owini.ai`, `drivecentric.com`, `spyne.ai`) rather than news articles. Filtering downstream in `blog-writer` would entangle relevance with synthesis and would let marketing pages consume slots that real news could've filled — pushing borderline runs under the threshold for the wrong reason. Per PLANNING.md, news-fetcher's job is news aggregation; this is a fetch-layer correctness gap.
+- **Done when:** Across a representative sample of real Sonar runs, ≥80% of returned articles are news (not vendor/marketing); the threshold logic operates on filtered counts.
 
 #### `ui-polish`
 - **Goal:** Loading skeletons + empty states across both surfaces
