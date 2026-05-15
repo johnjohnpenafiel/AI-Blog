@@ -67,3 +67,6 @@ htmlcov/
 
 # Claude Code local overrides (project-level shared settings.json IS tracked)
 .claude/settings.local.json
+
+# Smoke / scratch scripts (local-only, not for CI or prod)
+backend/scripts/smoke_*.py
