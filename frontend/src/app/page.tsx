@@ -3,10 +3,10 @@ const tokens = [
   { name: "--surface", value: "#111111", swatchClass: "bg-surface" },
   { name: "--border", value: "#222222", swatchClass: "bg-border" },
   { name: "--text-primary", value: "#f0f0f0", swatchClass: "bg-fg" },
-  { name: "--text-secondary", value: "#888888", swatchClass: "bg-muted" },
-  { name: "--accent", value: "#1a3fff", swatchClass: "bg-accent" },
-  { name: "--accent-glow", value: "rgb(26 63 255 / 0.3)", swatchClass: "bg-accent-glow" },
-  { name: "--accent-dim", value: "#0f2299", swatchClass: "bg-accent-dim" },
+  { name: "--text-secondary", value: "#555555", swatchClass: "bg-muted" },
+  { name: "--accent", value: "#ff6a00", swatchClass: "bg-accent" },
+  { name: "--accent-glow", value: "rgb(255 106 0 / 0.12)", swatchClass: "bg-accent-glow" },
+  { name: "--accent-dim", value: "#cc5500", swatchClass: "bg-accent-dim" },
 ] as const;
 
 const fontSamples = [

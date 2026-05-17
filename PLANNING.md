@@ -358,21 +358,25 @@ Each entry below is one `/start-feature <name>` plan. Features are sized to ship
 
 ### Phase 3 — Admin UI
 
-#### `dashboard-shell-and-overview`
-- **Goal:** Persistent sidebar + pipeline status dot + 4 stat cards + Trigger Pipeline / Go To Queue actions
-- **Done when:** Sidebar renders on every `/dashboard` route; stats reflect DB; trigger fires a run
+#### `dashboard-shell`
+- **Goal:** Persistent sidebar + main shell + design-token v2.0 overhaul + Chakra Petch font + body grid + auth `proxy.ts` + placeholder pages + `ChamferedPanel` primitive + bottom pipeline status dot.
+- **Done when:** Sidebar renders on every `/dashboard/*` route; unauthenticated `/dashboard` redirects to `/login`; status dot reflects `GET /pipeline/status`; tokens + chamfer geometry match `Design/README.md` v2.0.
 
 #### `review-queue`
-- **Goal:** Pending-review list + review panel with Accept (publish-now or schedule), Reject, Regenerate with feedback
-- **Done when:** All three actions hit backend endpoints and update post status
+- **Goal:** Pending-review list + review panel with Accept (publish-now or schedule), Reject, Regenerate with feedback. Builds `GET /posts` (status filter + `total`); wires sidebar QUEUE badge live.
+- **Done when:** All three actions hit backend endpoints and update post status; QUEUE badge reflects DB.
 
 #### `scheduled-and-published`
-- **Goal:** `/dashboard/scheduled` (edit-schedule, publish-now, back-to-queue) + `/dashboard/published` (read-only with view-post link)
-- **Done when:** Per-row actions work; published list links to `/blog/[slug]`
+- **Goal:** `/dashboard/scheduled` (edit-schedule, publish-now, back-to-queue) + `/dashboard/published` (read-only with view-post link). Reuses `GET /posts`.
+- **Done when:** Per-row actions work; published list links to `/blog/[slug]`.
 
 #### `settings-page`
-- **Goal:** Publishing mode toggle + manual trigger + session/logout. Schedule is shown read-only ("Mon + Thu at 8 AM") since cadence is hardcoded.
-- **Done when:** `PATCH /settings` persists publishing mode; trigger fires the pipeline; logout ends session
+- **Goal:** Publishing mode toggle + manual trigger + session/logout. Schedule is shown read-only ("Mon + Thu at 8 AM") since cadence is hardcoded. Builds `GET /settings` + `PATCH /settings`.
+- **Done when:** `PATCH /settings` persists publishing mode; trigger fires the pipeline; logout ends session.
+
+#### `dashboard-overview`
+- **Goal:** 4 Tier 2 stat cards (Posts Published, Pending Review — orange-activated when >0, Last Run, Next Run) + Trigger Pipeline + conditional Go To Queue. Composes endpoints built by earlier phase-3 features.
+- **Done when:** All 4 cards display values pulled from the backend; trigger fires a run and status dot flips to RUNNING; live-ish refresh while running.
 
 ---
 

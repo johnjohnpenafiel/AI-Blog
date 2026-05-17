@@ -1,54 +1,106 @@
 @import "tailwindcss";
 
-/* Design tokens — source of truth: Design/README.md */
+/* Design tokens — source of truth: Design/README.md v2.0 (orange + chamfer system) */
 :root {
+  /* Depth — inverted layering */
   --bg: #0a0a0a;
+  --structural: #000000;
   --surface: #111111;
+  --surface-raised: #181818;
+
+  /* Borders */
   --border: #222222;
+  --border-dim: #1a1a1a;
+
+  /* Text */
   --text-primary: #f0f0f0;
-  --text-secondary: #888888;
-  --accent: #1a3fff;
-  --accent-glow: rgb(26 63 255 / 0.3);
-  --accent-dim: #0f2299;
+  --text-secondary: #555555;
+  --text-dim: #333333;
+
+  /* Accent — orange #ff6a00 is the only accent in the system */
+  --accent: #ff6a00;
+  --accent-dim: #cc5500;
+  --accent-glow: rgb(255 106 0 / 0.12);
+  --accent-structural: rgb(255 106 0 / 0.4);
+
+  /* Grid overlay — orange @ 6%, 48px cells, applied to <body> below */
+  --grid: rgb(255 106 0 / 0.06);
+  --grid-size: 48px;
+
+  /* Semantic — sparingly, only for state */
+  --success: #00c47d;
+  --warning: #ff9a40;
+  --destructive: #e03434;
 }
 
 /*
  * Tailwind v4 theme — exposes design tokens as utility classes.
- * Mapping (CSS var → utility prefix):
- *   --bg              → bg-bg
- *   --surface         → bg-surface
- *   --border          → border-border
- *   --text-primary    → text-fg
- *   --text-secondary  → text-muted
- *   --accent          → bg-accent / text-accent / border-accent
- *   --accent-glow     → bg-accent-glow
- *   --accent-dim      → bg-accent-dim
+ *
+ * Project tokens (use these in app code):
+ *   --bg                 → bg-bg
+ *   --structural         → bg-structural
+ *   --surface            → bg-surface
+ *   --surface-raised     → bg-surface-raised
+ *   --border             → border-border
+ *   --border-dim         → border-border-dim
+ *   --text-primary       → text-fg
+ *   --text-secondary     → text-muted
+ *   --text-dim           → text-dim
+ *   --accent             → bg-accent / text-accent / border-accent
+ *   --accent-dim         → bg-accent-dim
+ *   --accent-glow        → bg-accent-glow
+ *   --accent-structural  → border-accent-structural
+ *   --success            → text-success / bg-success
+ *   --warning            → text-warning / bg-warning
+ *   --destructive        → text-destructive / bg-destructive
+ *
+ * shadcn/ui alias names (components reference these internally — keep mapped to project tokens):
+ *   --color-background, --color-foreground, --color-primary, --color-secondary,
+ *   --color-muted-foreground, --color-input, --color-ring, --color-destructive.
  */
 @theme inline {
   --color-bg: var(--bg);
+  --color-structural: var(--structural);
   --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
   --color-border: var(--border);
+  --color-border-dim: var(--border-dim);
   --color-fg: var(--text-primary);
   --color-muted: var(--text-secondary);
+  --color-dim: var(--text-dim);
   --color-accent: var(--accent);
-  --color-accent-glow: var(--accent-glow);
   --color-accent-dim: var(--accent-dim);
+  --color-accent-glow: var(--accent-glow);
+  --color-accent-structural: var(--accent-structural);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-destructive: var(--destructive);
 
-  /* shadcn/ui token aliases — components reference these names internally
-     (e.g. `bg-primary`, `text-primary-foreground`, `border-input`).
-     Mapping to project design tokens here keeps the design system in one file. */
+  /* shadcn aliases */
   --color-background: var(--bg);
   --color-foreground: var(--text-primary);
   --color-primary: var(--accent);
-  --color-primary-foreground: #ffffff;
+  --color-primary-foreground: #0a0a0a;
   --color-secondary: var(--surface);
   --color-secondary-foreground: var(--text-primary);
   --color-muted-foreground: var(--text-secondary);
   --color-input: var(--border);
   --color-ring: var(--accent);
-  --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
 
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains-mono);
+  --font-display: var(--font-chakra-petch);
+}
+
+/* Body grid overlay — orange @ 6%, 48px cells. Applies sitewide.
+   The recessed --structural panels (#000) sit on top and naturally hide the
+   grid where they cover the body — the desired effect (the grid is the
+   chassis surface texture; the recesses are cuts into it). */
+body {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
 }

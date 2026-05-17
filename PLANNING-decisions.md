@@ -1,8 +1,20 @@
 # AI-Blog (DeLorean) — Decision log
 
 > Architectural and product decisions with their full context, rationale, and tradeoffs. Split from PLANNING.md to keep the latter under the auto-load size threshold. Read this file on demand when you need to know *why* a past choice was made.
+>
+> **Visual design decisions live separately** in `Design/decisions.md` — color tokens, typography, geometry, layout language, and similar UI choices are logged there alongside `Design/README.md`. This file stays focused on architecture, product, and stack concerns.
 
 New entries at the top.
+
+### 2026-05-17 — Phase 3 reordered: overview lands last, not first
+**Context**: The original Phase 3 sequence opened with `dashboard-shell-and-overview` — bundling the shell (sidebar + main layout) with the `/dashboard` overview page. While auditing the feature plan we discovered the overview's 4 stat cards summarize data (`posts` counts, publishing mode) that lives in tables exposed by *later* phase-3 features. Building overview first would force this feature to either (a) build `GET /posts` and `GET /settings` endpoints that logically belong to `review-queue` and `settings-page`, or (b) ship stat cards with placeholder data that don't meet the success criterion "values pulled from the backend."
+**Decision**: Split the feature into `dashboard-shell` (shell + tokens + proxy + chamfer primitive + placeholders) and `dashboard-overview` (stat cards + quick actions). Reorder Phase 3 to: `dashboard-shell` → `review-queue` → `scheduled-and-published` → `settings-page` → `dashboard-overview`. Each feature now builds the endpoint it directly needs; the overview lands at the end as a thin composition layer over endpoints that already exist.
+**Rationale**:
+- **Endpoint emergence is natural, not forced.** `review-queue` needs the *list* of pending posts (so `GET /posts` is built there, with a `total` field that doubles as the count source overview later consumes). `settings-page` needs `GET /settings` to render the publishing-mode toggle. Each endpoint is built by the feature that's its primary consumer.
+- **No interim functionality loss.** `Design/README.md` already puts a `TRIGGER MANUAL RUN` button on the Settings page — the operator gets a way to fire pipelines once `settings-page` ships, well before overview. Every phase-3 page is independently usable via the sidebar.
+- **Smaller, more reviewable shell PR.** Shell becomes pure UI + foundation (tokens, fonts, body grid, `ChamferedPanel` primitive, `proxy.ts`, placeholder pages). No data fetching except `GET /pipeline/status` (already built in Phase 2) for the bottom status dot.
+- **Sidebar QUEUE badge** ships as a hardcoded `0` slot in the shell feature and gets wired live during `review-queue` — the chrome stays stable, only the data source changes.
+**Tradeoffs**: The operator no longer gets a glanceable cockpit *first* — the summary view is the final phase-3 deliverable. Acceptable because: (1) each intermediate page does its own job standalone, and (2) building overview first would have meant either fake data or premature endpoints, both worse than waiting. Out-of-scope blockers also folded into the shell feature: design tokens were stale (still on the pre-v2.0 blue palette) and `/dashboard*` had no auth gate — both are small and trivially included in the shell PR rather than spun out as additional follow-ups.
 
 ### 2026-05-13 — News fetcher minimum article threshold: ≥3 qualifying articles per run
 **Context**: `news-fetcher` (Phase 2) needs a floor on how many articles must survive Sonar's response (after URL-dedup) before a run proceeds to `blog-writer`. The original spec mentioned "≥3" without explaining why. Operator asked for the rationale before shipping, so the value lives in code as `MIN_ARTICLES = 3` with the reasoning captured here rather than inline.
