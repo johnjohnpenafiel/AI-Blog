@@ -6,6 +6,7 @@ import { useQueueCount } from "@/components/dashboard/queue-count-context";
 import { listPosts, type PostListItem } from "@/lib/api";
 
 import { QueueCard } from "./queue-card";
+import { QueueEmptyState } from "./queue-empty-state";
 import { ReviewPanel } from "./review-panel";
 
 type LoadState = "loading" | "ready" | "error";
@@ -67,11 +68,7 @@ export function QueueClient() {
         </p>
       )}
 
-      {loadState === "ready" && items.length === 0 && (
-        <p className="font-mono text-xs tracking-[0.2em] text-dim uppercase">
-          {"// No posts pending review"}
-        </p>
-      )}
+      {loadState === "ready" && items.length === 0 && <QueueEmptyState />}
 
       {loadState === "ready" && items.length > 0 && (
         <ul className="flex flex-col gap-4">
