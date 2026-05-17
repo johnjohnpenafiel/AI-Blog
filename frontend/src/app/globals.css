@@ -93,6 +93,26 @@
   --font-display: var(--font-chakra-petch);
 }
 
+/* Running pipeline status dot — slow, calm "breathing" pulse.
+   Combines a glow expansion with a subtle opacity dip so the dot itself
+   pulses softly without flicker. */
+@keyframes pulse-glow {
+  0%, 40% {
+    background-color: #3d2a15;
+    box-shadow: none;
+  }
+  50%, 90% {
+    background-color: #ff6a00;
+    box-shadow:
+      0 0 10px rgb(255 106 0 / 0.9),
+      0 0 20px rgb(255 106 0 / 0.5);
+  }
+  100% {
+    background-color: #3d2a15;
+    box-shadow: none;
+  }
+}
+
 /* Body grid overlay — orange @ 6%, 48px cells. Applies sitewide.
    The recessed --structural panels (#000) sit on top and naturally hide the
    grid where they cover the body — the desired effect (the grid is the

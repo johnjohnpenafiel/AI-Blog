@@ -52,8 +52,10 @@ export function PipelineStatusDot() {
         aria-hidden
         className="inline-block h-[7px] w-[7px]"
         style={{
-          backgroundColor: dotColor,
-          boxShadow: isRunning ? "0 0 8px var(--accent)" : "none",
+          backgroundColor: isRunning ? undefined : dotColor,
+          animation: isRunning
+            ? "pulse-glow 1.2s ease-in-out infinite"
+            : undefined,
         }}
       />
       <span style={{ color: dotColor }}>{label}</span>
