@@ -1,3 +1,5 @@
+import { QueueClient } from "@/components/dashboard/queue/queue-client";
+
 export default function QueuePage() {
   return (
     <div className="flex flex-col gap-6">
@@ -10,9 +12,7 @@ export default function QueuePage() {
         </h1>
       </header>
 
-      <p className="font-mono text-xs tracking-[0.2em] text-muted uppercase">
-        Ships in the <code className="text-fg">review-queue</code> feature.
-      </p>
+      <QueueClient />
     </div>
   );
 }

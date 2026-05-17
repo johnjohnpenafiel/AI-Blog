@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from models import Post, Setting, Source
+from schemas.blog_writer import GeneratedPost
 from services import publisher
 from services.blog_writer import generate_post
 from services.news_fetcher import fetch_qualifying_articles
@@ -33,6 +34,77 @@ class PipelineSuccessResult:
 PipelineResult = PipelineSkipResult | PipelineSuccessResult
 
 
+def persist_generated_post(
+    db: Session,
+    generated: GeneratedPost,
+    *,
+    mode: str,
+    attempt: int = 1,
+) -> Post:
+    """Create a new Post + Source rows from a generated payload.
+
+    Does NOT commit — the caller owns the transaction.
+    """
+    post = Post(
+        slug=generated.slug,
+        title=generated.title,
+        content=generated.body,
+        summary=generated.summary,
+        meta_description=generated.meta_description,
+        tags=list(generated.tags),
+        publishing_mode=mode,
+        generation_attempt=attempt,
+    )
+    db.add(post)
+    db.flush()
+
+    for src in generated.sources:
+        db.add(
+            Source(
+                post_id=post.id,
+                title=src.title,
+                url=src.url,
+                publisher=src.publisher,
+                published_date=src.published_date,
+            )
+        )
+
+    return post
+
+
+def overwrite_generated_post(
+    db: Session, post: Post, generated: GeneratedPost
+) -> None:
+    """Replace an existing post's content and sources in-place.
+
+    Mutates `post` and rewrites its source rows. Does NOT bump
+    `generation_attempt` or change `status` — the caller owns those.
+    Does NOT commit.
+    """
+    post.slug = generated.slug
+    post.title = generated.title
+    post.content = generated.body
+    post.summary = generated.summary
+    post.meta_description = generated.meta_description
+    post.tags = list(generated.tags)
+
+    db.query(Source).filter(Source.post_id == post.id).delete(
+        synchronize_session=False
+    )
+    db.flush()
+
+    for src in generated.sources:
+        db.add(
+            Source(
+                post_id=post.id,
+                title=src.title,
+                url=src.url,
+                publisher=src.publisher,
+                published_date=src.published_date,
+            )
+        )
+
+
 def run_pipeline(db: Session) -> PipelineResult:
     settings = db.query(Setting).filter(Setting.id == 1).one()
     mode = settings.publishing_mode
@@ -48,29 +120,7 @@ def run_pipeline(db: Session) -> PipelineResult:
 
     generated = generate_post(articles)
 
-    post = Post(
-        slug=generated.slug,
-        title=generated.title,
-        content=generated.body,
-        summary=generated.summary,
-        meta_description=generated.meta_description,
-        tags=list(generated.tags),
-        publishing_mode=mode,
-        generation_attempt=1,
-    )
-    db.add(post)
-    db.flush()
-
-    for src in generated.sources:
-        db.add(
-            Source(
-                post_id=post.id,
-                title=src.title,
-                url=src.url,
-                publisher=src.publisher,
-                published_date=src.published_date,
-            )
-        )
+    post = persist_generated_post(db, generated, mode=mode, attempt=1)
 
     publisher.route_post(post, mode)
     settings.last_run_at = datetime.now(timezone.utc)
