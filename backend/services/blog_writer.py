@@ -34,8 +34,13 @@ Requirements:
 
 Articles:
 {articles_json}
-
+{feedback_block}
 Call the submit_post tool with your finished post."""
+
+FEEDBACK_BLOCK_TEMPLATE = """
+Editor revision feedback (apply this when revising the post):
+{feedback}
+"""
 
 
 def _build_tool_schema() -> dict:
@@ -54,10 +59,17 @@ class BlogWriterError(Exception):
     """Raised when Claude's response cannot be turned into a valid GeneratedPost."""
 
 
-def _render_prompt(articles: list[Article]) -> str:
+def _render_prompt(articles: list[Article], feedback: str | None = None) -> str:
     articles_payload = [a.model_dump(mode="json") for a in articles]
     articles_json = json.dumps(articles_payload, indent=2)
-    return PROMPT_TEMPLATE.format(articles_json=articles_json)
+    feedback_block = (
+        FEEDBACK_BLOCK_TEMPLATE.format(feedback=feedback.strip())
+        if feedback and feedback.strip()
+        else ""
+    )
+    return PROMPT_TEMPLATE.format(
+        articles_json=articles_json, feedback_block=feedback_block
+    )
 
 
 def _extract_tool_input(response) -> dict:
@@ -69,12 +81,19 @@ def _extract_tool_input(response) -> dict:
     )
 
 
-def generate_post(articles: list[Article]) -> GeneratedPost:
+def generate_post(
+    articles: list[Article], feedback: str | None = None
+) -> GeneratedPost:
     api_key = os.environ["ANTHROPIC_API_KEY"]
     client = anthropic.Anthropic(api_key=api_key)
 
-    prompt = _render_prompt(articles)
-    logger.info("calling Claude (%s) with %d articles", MODEL, len(articles))
+    prompt = _render_prompt(articles, feedback=feedback)
+    logger.info(
+        "calling Claude (%s) with %d articles, feedback=%s",
+        MODEL,
+        len(articles),
+        bool(feedback and feedback.strip()),
+    )
 
     response = client.messages.create(
         model=MODEL,

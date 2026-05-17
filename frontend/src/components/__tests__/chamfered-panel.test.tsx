@@ -74,7 +74,7 @@ describe("ChamferedPanel", () => {
         <p>content</p>
       </ChamferedPanel>,
     );
-    expect(container.querySelectorAll("svg line").length).toBe(1);
+    expect(container.querySelectorAll("svg line[data-role='chamfer']").length).toBe(1);
   });
 
   it("renders two chamfer diagonals for dual cut", () => {
@@ -83,7 +83,7 @@ describe("ChamferedPanel", () => {
         <p>btn</p>
       </ChamferedPanel>,
     );
-    expect(container.querySelectorAll("svg line").length).toBe(2);
+    expect(container.querySelectorAll("svg line[data-role='chamfer']").length).toBe(2);
   });
 
   it("renders four chamfer diagonals for quad cut", () => {
@@ -92,7 +92,7 @@ describe("ChamferedPanel", () => {
         <span>tag</span>
       </ChamferedPanel>,
     );
-    expect(container.querySelectorAll("svg line").length).toBe(4);
+    expect(container.querySelectorAll("svg line[data-role='chamfer']").length).toBe(4);
   });
 
   it("renders children content above the clipped background", () => {

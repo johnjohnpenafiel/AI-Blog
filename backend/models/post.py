@@ -1,11 +1,15 @@
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Enum, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
+
+if TYPE_CHECKING:
+    from models.source import Source
 
 post_status_enum = Enum(
     "draft",
@@ -70,3 +74,10 @@ class Post(Base):
     )
     meta_description: Mapped[str] = mapped_column(String, nullable=False)
     generation_attempt: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+    sources: Mapped[list["Source"]] = relationship(
+        "Source",
+        back_populates="post",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )

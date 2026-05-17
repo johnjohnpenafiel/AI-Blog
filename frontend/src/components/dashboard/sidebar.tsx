@@ -9,6 +9,7 @@ import { ChamferedPanel } from "@/components/chamfered-panel";
 import { cn } from "@/lib/utils";
 
 import { PipelineStatusDot } from "./pipeline-status-dot";
+import { useQueueCount } from "./queue-count-context";
 
 interface NavItem {
   label: string;
@@ -16,9 +17,9 @@ interface NavItem {
   badgeCount?: number;
 }
 
-const NAV_ITEMS: NavItem[] = [
+const BASE_NAV_ITEMS: NavItem[] = [
   { label: "Overview", href: "/dashboard" },
-  { label: "Queue", href: "/dashboard/queue", badgeCount: 0 },
+  { label: "Queue", href: "/dashboard/queue" },
   { label: "Scheduled", href: "/dashboard/scheduled" },
   { label: "Published", href: "/dashboard/published" },
   { label: "Settings", href: "/dashboard/settings" },
@@ -32,6 +33,13 @@ function isActive(pathname: string, href: string): boolean {
 export function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { count: queueCount } = useQueueCount();
+
+  const navItems: NavItem[] = BASE_NAV_ITEMS.map((item) =>
+    item.href === "/dashboard/queue"
+      ? { ...item, badgeCount: queueCount ?? undefined }
+      : item,
+  );
 
   // Auto-close when viewport grows past the breakpoint (covers the
   // edge case where the user resizes with the drawer still open).
@@ -130,7 +138,7 @@ export function Sidebar() {
             </div>
 
             <ul className="flex flex-col gap-1">
-              {NAV_ITEMS.map((item) => {
+              {navItems.map((item) => {
                 const active = isActive(pathname, item.href);
                 return (
                   <li key={item.href}>

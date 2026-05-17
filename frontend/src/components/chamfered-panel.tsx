@@ -38,6 +38,8 @@ interface ChamferedPanelProps {
   className?: string;
   style?: CSSProperties;
   background?: string;
+  perimeterStroke?: string;
+  chamferStroke?: string;
   children?: ReactNode;
 }
 
@@ -49,17 +51,6 @@ function getClipPath(cut: ChamferCut, n: number): string {
       return `polygon(${n}px 0%, 100% 0%, 100% calc(100% - ${n}px), calc(100% - ${n}px) 100%, 0% 100%, 0% ${n}px)`;
     case "quad":
       return `polygon(${n}px 0%, calc(100% - ${n}px) 0%, 100% ${n}px, 100% calc(100% - ${n}px), calc(100% - ${n}px) 100%, ${n}px 100%, 0% calc(100% - ${n}px), 0% ${n}px)`;
-  }
-}
-
-function getPolygonPoints(cut: ChamferCut, n: number, w: number, h: number): string {
-  switch (cut) {
-    case "single":
-      return `${n},0 ${w},0 ${w},${h} 0,${h} 0,${n}`;
-    case "dual":
-      return `${n},0 ${w},0 ${w},${h - n} ${w - n},${h} 0,${h} 0,${n}`;
-    case "quad":
-      return `${n},0 ${w - n},0 ${w},${n} ${w},${h - n} ${w - n},${h} ${n},${h} 0,${h - n} 0,${n}`;
   }
 }
 
@@ -81,6 +72,37 @@ function getChamferLines(
   return lines;
 }
 
+function getStraightEdges(
+  cut: ChamferCut,
+  n: number,
+  w: number,
+  h: number,
+): Array<{ x1: number; y1: number; x2: number; y2: number }> {
+  switch (cut) {
+    case "single":
+      return [
+        { x1: n, y1: 0, x2: w, y2: 0 }, // top
+        { x1: w, y1: 0, x2: w, y2: h }, // right
+        { x1: w, y1: h, x2: 0, y2: h }, // bottom
+        { x1: 0, y1: h, x2: 0, y2: n }, // left
+      ];
+    case "dual":
+      return [
+        { x1: n, y1: 0, x2: w, y2: 0 }, // top
+        { x1: w, y1: 0, x2: w, y2: h - n }, // right
+        { x1: w - n, y1: h, x2: 0, y2: h }, // bottom
+        { x1: 0, y1: h, x2: 0, y2: n }, // left
+      ];
+    case "quad":
+      return [
+        { x1: n, y1: 0, x2: w - n, y2: 0 }, // top
+        { x1: w, y1: n, x2: w, y2: h - n }, // right
+        { x1: w - n, y1: h, x2: n, y2: h }, // bottom
+        { x1: 0, y1: h - n, x2: 0, y2: n }, // left
+      ];
+  }
+}
+
 export function ChamferedPanel({
   tier = "component",
   size = "card",
@@ -88,6 +110,8 @@ export function ChamferedPanel({
   className,
   style,
   background,
+  perimeterStroke,
+  chamferStroke,
   children,
 }: ChamferedPanelProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -119,9 +143,10 @@ export function ChamferedPanel({
 
   const defaultBg = tier === "structural" ? "var(--structural)" : "var(--surface)";
   const fillBackground = background ?? defaultBg;
-  const perimeterStroke =
+  const defaultPerimeter =
     tier === "structural" ? "var(--accent-structural)" : "var(--border)";
-  const chamferStroke = "var(--accent)";
+  const resolvedPerimeter = perimeterStroke ?? defaultPerimeter;
+  const resolvedChamferStroke = chamferStroke ?? "var(--accent)";
   const chamferOpacity = tier === "structural" ? 0.7 : 1;
   const chamferWidth = tier === "structural" ? 2 : 1.5;
 
@@ -150,21 +175,28 @@ export function ChamferedPanel({
           viewBox={`0 0 ${dims.w} ${dims.h}`}
           preserveAspectRatio="none"
         >
-          <polygon
-            points={getPolygonPoints(resolvedCut, n, dims.w, dims.h)}
-            fill="none"
-            stroke={perimeterStroke}
-            strokeWidth={1}
-            vectorEffect="non-scaling-stroke"
-          />
+          {getStraightEdges(resolvedCut, n, dims.w, dims.h).map((edge, i) => (
+            <line
+              key={`edge-${i}`}
+              data-role="edge"
+              x1={edge.x1}
+              y1={edge.y1}
+              x2={edge.x2}
+              y2={edge.y2}
+              stroke={resolvedPerimeter}
+              strokeWidth={1}
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
           {getChamferLines(resolvedCut, n, dims.w, dims.h).map((line, i) => (
             <line
               key={i}
+              data-role="chamfer"
               x1={line.x1}
               y1={line.y1}
               x2={line.x2}
               y2={line.y2}
-              stroke={chamferStroke}
+              stroke={resolvedChamferStroke}
               strokeOpacity={chamferOpacity}
               strokeWidth={chamferWidth}
               vectorEffect="non-scaling-stroke"

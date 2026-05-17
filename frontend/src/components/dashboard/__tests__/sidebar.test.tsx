@@ -1,7 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 
+import { QueueCountProvider } from "@/components/dashboard/queue-count-context";
 import { Sidebar } from "@/components/dashboard/sidebar";
+
+function renderSidebar() {
+  return render(
+    <QueueCountProvider>
+      <Sidebar />
+    </QueueCountProvider>,
+  );
+}
 
 const usePathnameMock = vi.fn<() => string>();
 
@@ -41,7 +50,7 @@ afterEach(() => {
 describe("Sidebar", () => {
   it("renders all five nav links", () => {
     usePathnameMock.mockReturnValue("/dashboard");
-    render(<Sidebar />);
+    renderSidebar();
 
     for (const label of ["Overview", "Queue", "Scheduled", "Published", "Settings"]) {
       expect(screen.getByRole("link", { name: new RegExp(label, "i") })).toBeInTheDocument();
@@ -50,7 +59,7 @@ describe("Sidebar", () => {
 
   it("marks the Overview link active when pathname is /dashboard", () => {
     usePathnameMock.mockReturnValue("/dashboard");
-    render(<Sidebar />);
+    renderSidebar();
 
     const overview = screen.getByRole("link", { name: /overview/i });
     expect(overview.getAttribute("aria-current")).toBe("page");
@@ -61,7 +70,7 @@ describe("Sidebar", () => {
 
   it("marks the Queue link active when pathname is /dashboard/queue", () => {
     usePathnameMock.mockReturnValue("/dashboard/queue");
-    render(<Sidebar />);
+    renderSidebar();
 
     const queue = screen.getByRole("link", { name: /queue/i });
     expect(queue.getAttribute("aria-current")).toBe("page");
@@ -72,7 +81,7 @@ describe("Sidebar", () => {
 
   it("does not mark Overview active when on a deeper /dashboard/* route", () => {
     usePathnameMock.mockReturnValue("/dashboard/scheduled");
-    render(<Sidebar />);
+    renderSidebar();
 
     const overview = screen.getByRole("link", { name: /overview/i });
     expect(overview.getAttribute("aria-current")).toBeNull();
@@ -80,7 +89,7 @@ describe("Sidebar", () => {
 
   it("renders the Logout button", () => {
     usePathnameMock.mockReturnValue("/dashboard");
-    render(<Sidebar />);
+    renderSidebar();
 
     expect(screen.getByRole("button", { name: /logout/i })).toBeInTheDocument();
   });
