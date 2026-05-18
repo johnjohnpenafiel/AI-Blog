@@ -1,9 +1,15 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
 from routers import auth, pipeline, posts
 from scheduler import shutdown_scheduler, start_scheduler
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 
 
 # `lifespan` is FastAPI's replacement for the deprecated
