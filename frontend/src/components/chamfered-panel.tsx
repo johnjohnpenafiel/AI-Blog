@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 export type ChamferTier = "structural" | "component";
 export type ChamferSize = "sidebar" | "shell" | "card" | "button" | "tag";
-export type ChamferCut = "single" | "dual" | "quad";
+export type ChamferCut = "single" | "dual" | "quad" | "left" | "right";
 
 const CUT_PX: Record<ChamferSize, number> = {
   sidebar: 20,
@@ -51,6 +51,10 @@ function getClipPath(cut: ChamferCut, n: number): string {
       return `polygon(${n}px 0%, 100% 0%, 100% calc(100% - ${n}px), calc(100% - ${n}px) 100%, 0% 100%, 0% ${n}px)`;
     case "quad":
       return `polygon(${n}px 0%, calc(100% - ${n}px) 0%, 100% ${n}px, 100% calc(100% - ${n}px), calc(100% - ${n}px) 100%, ${n}px 100%, 0% calc(100% - ${n}px), 0% ${n}px)`;
+    case "left":
+      return `polygon(${n}px 0%, 100% 0%, 100% 100%, ${n}px 100%, 0% calc(100% - ${n}px), 0% ${n}px)`;
+    case "right":
+      return `polygon(0% 0%, calc(100% - ${n}px) 0%, 100% ${n}px, 100% calc(100% - ${n}px), calc(100% - ${n}px) 100%, 0% 100%)`;
   }
 }
 
@@ -60,9 +64,18 @@ function getChamferLines(
   w: number,
   h: number,
 ): Array<{ x1: number; y1: number; x2: number; y2: number }> {
-  const lines = [{ x1: 0, y1: n, x2: n, y2: 0 }]; // TL — present in all cut variants
+  if (cut === "right") {
+    return [
+      { x1: w - n, y1: 0, x2: w, y2: n }, // TR
+      { x1: w, y1: h - n, x2: w - n, y2: h }, // BR
+    ];
+  }
+  const lines = [{ x1: 0, y1: n, x2: n, y2: 0 }]; // TL — present in remaining variants
   if (cut === "dual") {
     lines.push({ x1: w, y1: h - n, x2: w - n, y2: h }); // BR
+  }
+  if (cut === "left") {
+    lines.push({ x1: n, y1: h, x2: 0, y2: h - n }); // BL
   }
   if (cut === "quad") {
     lines.push({ x1: w - n, y1: 0, x2: w, y2: n }); // TR
@@ -99,6 +112,20 @@ function getStraightEdges(
         { x1: w, y1: n, x2: w, y2: h - n }, // right
         { x1: w - n, y1: h, x2: n, y2: h }, // bottom
         { x1: 0, y1: h - n, x2: 0, y2: n }, // left
+      ];
+    case "left":
+      return [
+        { x1: n, y1: 0, x2: w, y2: 0 }, // top
+        { x1: w, y1: 0, x2: w, y2: h }, // right
+        { x1: w, y1: h, x2: n, y2: h }, // bottom
+        { x1: 0, y1: h - n, x2: 0, y2: n }, // left
+      ];
+    case "right":
+      return [
+        { x1: 0, y1: 0, x2: w - n, y2: 0 }, // top
+        { x1: w, y1: n, x2: w, y2: h - n }, // right
+        { x1: w - n, y1: h, x2: 0, y2: h }, // bottom
+        { x1: 0, y1: h, x2: 0, y2: 0 }, // left
       ];
   }
 }
