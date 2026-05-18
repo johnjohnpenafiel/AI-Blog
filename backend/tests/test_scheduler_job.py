@@ -61,3 +61,67 @@ def test_run_pipeline_job_swallows_pipeline_errors(
     db.expire_all()
     after = db.query(Setting).filter(Setting.id == 1).one().next_run_at
     assert after == before
+
+
+def test_publish_scheduled_job_calls_service(db: SASession) -> None:
+    """The interval-job wrapper opens a session, calls publish_due_posts."""
+    factory = _session_factory_bound_to(db)
+    with patch.object(
+        scheduler_module, "publish_due_posts", return_value=0
+    ) as mock_pub, patch.object(
+        scheduler_module, "SessionLocal", side_effect=factory
+    ):
+        scheduler_module._publish_scheduled_job()
+
+    assert mock_pub.call_count == 1
+
+
+def test_publish_scheduled_job_logs_when_count_positive(
+    db: SASession, caplog: object
+) -> None:
+    factory = _session_factory_bound_to(db)
+    with caplog.at_level(logging.INFO, logger="scheduler"):
+        with patch.object(
+            scheduler_module, "publish_due_posts", return_value=2
+        ), patch.object(scheduler_module, "SessionLocal", side_effect=factory):
+            scheduler_module._publish_scheduled_job()
+
+    assert any(
+        "scheduled-publisher published 2 post(s)" in rec.message
+        for rec in caplog.records
+    )
+
+
+def test_publish_scheduled_job_silent_when_count_zero(
+    db: SASession, caplog: object
+) -> None:
+    factory = _session_factory_bound_to(db)
+    with caplog.at_level(logging.INFO, logger="scheduler"):
+        with patch.object(
+            scheduler_module, "publish_due_posts", return_value=0
+        ), patch.object(scheduler_module, "SessionLocal", side_effect=factory):
+            scheduler_module._publish_scheduled_job()
+
+    assert not any(
+        "scheduled-publisher" in rec.message for rec in caplog.records
+    )
+
+
+def test_publish_scheduled_job_swallows_errors(
+    db: SASession, caplog: object
+) -> None:
+    factory = _session_factory_bound_to(db)
+
+    def _boom(_db):
+        raise RuntimeError("publisher blew up")
+
+    with caplog.at_level(logging.ERROR, logger="scheduler"):
+        with patch.object(
+            scheduler_module, "publish_due_posts", side_effect=_boom
+        ), patch.object(scheduler_module, "SessionLocal", side_effect=factory):
+            # Must not raise.
+            scheduler_module._publish_scheduled_job()
+
+    assert any(
+        "scheduled-publisher tick failed" in rec.message for rec in caplog.records
+    )
