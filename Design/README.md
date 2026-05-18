@@ -39,7 +39,7 @@ The reference feeling: a premium engineering publication crossed with a fighter-
 | `--accent` | `#ff6a00` | The only accent. Active states, CTAs, chamfer cut lines, glow. |
 | `--accent-dim` | `#cc5500` | Hover on orange elements. |
 | `--accent-glow` | `rgba(255, 106, 0, 0.12)` | Soft orange tint behind active nav items and hero atmosphere. |
-| `--accent-structural` | `rgba(255, 106, 0, 0.40)` | Tier 1 structural borders (sidebar, main shell). |
+| `--accent-structural` | `rgba(255, 106, 0, 0.60)` | Tier 1 structural borders (sidebar, main shell). |
 | `--grid` | `rgba(255, 106, 0, 0.06)` | Body grid overlay color. 48px cells. |
 
 **Semantic colors** (use sparingly — only for state, never decoration):
@@ -96,7 +96,8 @@ The reading: **cards sit on top of the structural shell, which is recessed into 
 | Pattern | Where | Notes |
 |---|---|---|
 | **SINGLE** — top-left only | Content panels (cards, stat cards, post cards) | Bottom-right stays square. Reads as "content." |
-| **DUAL** — top-left + bottom-right (opposite corners) | Buttons, structural shells | Diagonal feel — top-right + bottom-left stay square. Reads as "interactive" or "structural." |
+| **DUAL** — top-left + bottom-right (opposite corners) | Buttons | Diagonal feel — top-right + bottom-left stay square. Reads as "interactive." |
+| **MIRRORED** — both cuts on the same vertical edge | Structural shells | Sidebar cuts on its left edge (top-left + bottom-left); main shell cuts on its right edge (top-right + bottom-right). The two panels mirror each other across the gutter, reading as interlocking armor plates rather than independent boxes. |
 | **QUAD** — all four corners | Tags, badges, inputs | Smallest cut (6–8px). Reads as "chip." |
 
 **Two non-negotiable rules:**
@@ -112,8 +113,7 @@ The reading: **cards sit on top of the structural shell, which is recessed into 
 Borders signal hierarchy. There are **two tiers**, and the distinction is what makes the UI feel architected rather than decorated. Orange is the structural language: where it appears defines what is *load-bearing* versus what is *contained within.*
 
 **Tier 1 — Structural Borders**
-- **Full perimeter orange at 40% opacity** (`--accent-structural`)
-- Chamfer cut lines brighter (~70% opacity) for emphasis
+- **Uniform perimeter orange at 60% opacity** (`--accent-structural`) — the chamfer cut lines use the same color and opacity as the straight edges, so the border reads as one continuous line all the way around the clipped shape. No separate brighter stroke on the diagonal.
 - Applies to: sidebar, main dashboard shell, full-page modal panels
 - Reads as: the architectural skeleton — the walls of the room
 
@@ -129,7 +129,7 @@ The two tiers always nest. Structural orange defines the room; component borders
 
 - **Body grid overlay** — orange at 6% opacity, 48px cells, 1px lines. Runs continuously across the entire page on both surfaces. CSS: two `linear-gradient` backgrounds stacked, no mask required.
 - **Left accent vertical bar** — 2–3px solid `--accent` bar on the left edge of post cards and active sidebar items. Visual anchor and "selected" indicator.
-- **Orange diagonal cut line** — the chamfer signature. 1.5–2px stroke on every clipped corner. Tier 1 cuts run at 70% opacity; Tier 2 cuts run at 100%.
+- **Orange diagonal cut line** — the chamfer signature. 1.5–2px stroke on every clipped corner. Tier 1 cuts match the structural perimeter (60% opacity, same color) so the border reads uniformly; Tier 2 cuts run at 100% to pop against the dark perimeter.
 - **Orange radial glow** — large blurred circle in `--accent-glow`, used as atmospheric background on the homepage hero and about-page hero only. Implemented as a CSS `radial-gradient` or blurred `div` — not an image.
 - **Horizontal rule lines** — `1px solid --border-dim` for section separators and the terminal-readout treatment inside the homepage hero.
 - **Monospaced all-caps chrome** — every label, tag, button, and piece of metadata. Never used for article body text.
@@ -302,8 +302,8 @@ All dashboard pages share this shell:
 
 **Sidebar (persistent left, ~220px) — Tier 1 Structural**
 - Background: `--structural` (`#000`) — recessed into the body chassis
-- Border: full orange perimeter at 40% opacity (`--accent-structural`), chamfer cuts at ~70% opacity for emphasis
-- Chamfer: 20px dual (top-left + bottom-right)
+- Border: uniform orange perimeter at 60% opacity (`--accent-structural`) — chamfer cuts share the same color and opacity, no brighter accent on the diagonal
+- Chamfer: 20px mirrored on the left edge (top-left + bottom-left). The sidebar's cuts mirror the main shell's cuts across the central gutter.
 - Top: `DELOREAN / ADMIN` wordmark — Chakra Petch 700 for "DELOREAN" (optional two-tone), JetBrains Mono `--text-dim` for `/ ADMIN`
 - Nav links (JetBrains Mono, all-caps, 9–10px, 0.25em tracking):
   - `OVERVIEW`
@@ -319,7 +319,8 @@ All dashboard pages share this shell:
 
 **Main content area** — right of sidebar, **Tier 1 Structural**
 - Background: `--structural` (`#000`) — also recessed
-- Same Tier 1 orange perimeter @ 40% + 20px dual chamfer
+- Same Tier 1 uniform orange perimeter @ 60% — chamfer cuts match the perimeter color/opacity, no brighter diagonal stroke
+- Chamfer: 20px mirrored on the right edge (top-right + bottom-right). Mirrors the sidebar's left-edge cuts across the central gutter.
 - Scrollable, full height
 - Page title at the top: Chakra Petch 700, 22–32px (e.g. `Pipeline Overview`)
 - Page label above title: `// PAGE` or section-numbered like `// 01` — JetBrains Mono `--text-dim`
@@ -423,9 +424,9 @@ All dashboard pages share this shell:
 
 | Component | Surface | Tier | Chamfer | Border | Notes |
 |---|---|---|---|---|---|
-| Sidebar | Admin | 1 Structural | 20px dual | `--accent` @ 40% perim, ~70% on cuts | `--structural` `#000` background. Active item: 2px accent left border + glow tint. |
-| Main shell | Admin | 1 Structural | 20px dual | `--accent` @ 40% perim, ~70% on cuts | `--structural` `#000` background. Wraps every dashboard page. |
-| Review panel | Admin | 1 Structural | 20px dual | `--accent` @ 40% perim, ~70% on cuts | Slide-in or full-page. `--structural` background. |
+| Sidebar | Admin | 1 Structural | 20px mirrored-left (TL+BL) | Uniform `--accent-structural` @ 60% on perim and cuts | `--structural` `#000` background. Mirrors the main shell across the central gutter. Active item: 2px accent left border + glow tint. |
+| Main shell | Admin | 1 Structural | 20px mirrored-right (TR+BR) | Uniform `--accent-structural` @ 60% on perim and cuts | `--structural` `#000` background. Wraps every dashboard page. Mirrors the sidebar across the central gutter. |
+| Review panel | Admin | 1 Structural | 20px dual | `--accent-structural` @ 60% perim, `--accent` on cuts | Slide-in or full-page. `--structural` background. |
 | Stat card | Admin | 2 Component | 16px top-left only | `--border` perim, `--accent` on cut | Inter 900 value. Pending Review activates orange when > 0. |
 | Post card (blog index) | Public | 2 Component | 16px top-left only | `--border` perim, `--accent` on cut | Left accent bar + Chakra Petch title. |
 | Queue/Scheduled/Published row | Admin | 2 Component | 16px top-left only | `--border` perim, `--accent` on cut | Same as stat card chrome, list layout. |

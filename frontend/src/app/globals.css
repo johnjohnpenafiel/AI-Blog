@@ -21,7 +21,7 @@
   --accent: #ff6a00;
   --accent-dim: #cc5500;
   --accent-glow: rgb(255 106 0 / 0.12);
-  --accent-structural: rgb(255 106 0 / 0.4);
+  --accent-structural: rgb(255 106 0 / 0.6);
 
   /* Grid overlay — orange @ 6%, 48px cells, applied to <body> below */
   --grid: rgb(255 106 0 / 0.06);
