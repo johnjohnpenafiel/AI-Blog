@@ -11,6 +11,18 @@ If `$ARGUMENTS` is empty:
 - If more than one, ask the user which.
 - If none, stop and tell the user there's nothing to complete.
 
+## 0.5. Detect mode — pre-merge or post-merge cleanup
+
+Run `git fetch -p` once. Then decide:
+
+**Post-merge cleanup mode** if EITHER of these is true:
+- `git branch --merged <default-branch>` lists `feature/<plan-name>` (the branch is fully merged into main/master), OR
+- A local `feature/<plan-name>` exists but `origin/feature/<plan-name>` does NOT (remote branch already deleted — typical after merging the PR on GitHub with auto-delete).
+
+If post-merge cleanup mode → skip directly to **Step 12**. Do not run steps 1–11; the PR has already shipped and only local cleanup remains.
+
+**Pre-merge mode** otherwise → continue with steps 1–11 below.
+
 ## 1. Read the plan file
 Error if `feature-plans/<name>.md` doesn't exist. Warn if status isn't `in-progress` (might already be done, paused, or abandoned).
 
@@ -128,3 +140,29 @@ Show the user:
 - PR URL
 
 Stop there. Don't merge for the user — they own that step.
+
+---
+
+## 12. Post-merge cleanup (when step 0.5 detected this mode)
+
+The PR is already merged. The user merged it via GitHub and almost certainly checked "delete branch" on the PR page, so the remote is gone. Three things remain: switch to main, drop the local branch, and remove the plan file from the repo. Commit straight to the default branch — this is housekeeping, not a feature, and doesn't need its own PR.
+
+Run sequentially:
+
+1. **Show current state** — `git status` and `git branch -vv` (so the user sees where they were before we switch).
+2. **Audit the plan's unchecked boxes** — if any `- [ ]` remain, list them. They're likely manual-verification items that were validated during testing but never ticked. Since we're about to delete the file, no need to tick them — just confirm with the user that nothing real is still outstanding. If real work is outstanding, STOP and tell the user the feature isn't actually done.
+3. **Switch and pull**: `git checkout <default-branch>` then `git pull`. Verify the merge commit is present in the log.
+4. **Delete the local feature branch**: `git branch -d feature/<plan-name>`. If git refuses with "not fully merged" (squash-merge can confuse the merge detector), confirm with the user before using `-D`.
+5. **Stage the plan file deletion**: `git rm feature-plans/<plan-name>.md`.
+6. **Commit straight to the default branch** with message:
+   ```
+   remove completed <plan-name> feature plan
+   ```
+   Match the repository's existing commit style by checking `git log --oneline -10` for prior plan-removal commits.
+7. **Push**: `git push origin <default-branch>`. If branch protection rejects the push, surface the error to the user — they can either bypass (if they're admin) or open a small cleanup PR. Don't bypass without permission.
+8. **Report**:
+   - The new commit SHA on the default branch
+   - Confirmation the local feature branch is gone
+   - Confirmation the plan file is gone
+
+Stop there. Working tree should be clean and in sync with the remote.
