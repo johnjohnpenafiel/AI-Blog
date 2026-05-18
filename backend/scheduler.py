@@ -16,10 +16,12 @@ from datetime import datetime, timedelta, timezone
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.interval import IntervalTrigger
 
 from database import SessionLocal
 from models import Setting
 from services.pipeline import run_pipeline
+from services.publisher import publish_due_posts
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +80,20 @@ def _run_pipeline_job() -> None:
         logger.exception("scheduled pipeline fire failed")
 
 
+def _publish_scheduled_job() -> None:
+    """Interval-job entry point. Flips due posts to published; silent on no-op."""
+    try:
+        db = SessionLocal()
+        try:
+            count = publish_due_posts(db)
+            if count > 0:
+                logger.info("scheduled-publisher published %d post(s)", count)
+        finally:
+            db.close()
+    except Exception:
+        logger.exception("scheduled-publisher tick failed")
+
+
 def start_scheduler() -> None:
     global scheduler
     if scheduler is not None and scheduler.running:
@@ -97,6 +113,14 @@ def start_scheduler() -> None:
         replace_existing=True,
         coalesce=True,
         misfire_grace_time=3600,
+    )
+    scheduler.add_job(
+        _publish_scheduled_job,
+        IntervalTrigger(minutes=1),
+        id="scheduled-publisher",
+        replace_existing=True,
+        coalesce=True,
+        misfire_grace_time=300,
     )
     scheduler.start()
 
