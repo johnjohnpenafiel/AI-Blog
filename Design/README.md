@@ -321,9 +321,15 @@ All dashboard pages share this shell:
 - Background: `--structural` (`#000`) — also recessed
 - Same Tier 1 uniform orange perimeter @ 60% — chamfer cuts match the perimeter color/opacity, no brighter diagonal stroke
 - Chamfer: 20px mirrored on the right edge (top-right + bottom-right). Mirrors the sidebar's left-edge cuts across the central gutter.
-- Scrollable, full height
 - Page title at the top: Chakra Petch 700, 22–32px (e.g. `Pipeline Overview`)
 - Page label above title: `// PAGE` or section-numbered like `// 01` — JetBrains Mono `--text-dim`
+
+**Scroll behavior — locked viewport, fixed header** (applies to every dashboard route)
+- The dashboard viewport is **pinned to `100vh`**. The body never scrolls. The sidebar and main shell stay fully visible at all times — their chamfered corners never leave the screen.
+- Inside the main shell, the **page label + page title are fixed** at the top of the shell. They do not scroll with content.
+- Only the content region **below the title scrolls.** Long lists (queue, scheduled, published) scroll within that bounded region while the chassis (sidebar, shell, title) stays stationary.
+- No top fade or gradient mask on the scroll area — content hard-cuts at the bottom edge of the title row as it scrolls under.
+- Implementation lives in `frontend/src/components/dashboard/page-shell.tsx` (`DashboardPageShell`). Every dashboard route renders through it. Do NOT bypass it — adding a page that scrolls the viewport itself breaks the chassis-as-cockpit reading.
 
 ---
 
