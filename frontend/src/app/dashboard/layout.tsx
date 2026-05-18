@@ -7,18 +7,16 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <QueueCountProvider>
-      <div className="flex min-h-screen flex-row gap-3 p-3">
+      <div className="flex h-screen flex-row gap-3 overflow-hidden p-3">
         <Sidebar />
         <ChamferedPanel
           tier="structural"
           size="shell"
           cut="right"
           chamferStroke="var(--accent-structural)"
-          className="min-h-[calc(100vh-1.5rem)] flex-1"
+          className="h-[calc(100vh-1.5rem)] flex-1 overflow-hidden"
         >
-          <div className="h-full overflow-y-auto px-5 pt-20 pb-8 md:px-8 md:pt-8">
-            {children}
-          </div>
+          {children}
         </ChamferedPanel>
       </div>
     </QueueCountProvider>
