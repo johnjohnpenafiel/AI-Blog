@@ -67,6 +67,33 @@ def _seed_pending_post(
     return post
 
 
+def _seed_accepted_post(
+    db: Session,
+    *,
+    slug: str = "accepted-post",
+    title: str = "Accepted Post",
+    scheduled_at: datetime | None = None,
+) -> Post:
+    if scheduled_at is None:
+        scheduled_at = datetime.now(timezone.utc) + timedelta(days=2)
+    post = Post(
+        slug=slug,
+        title=title,
+        content="# Body\n\nAccepted content.",
+        summary="Accepted summary.",
+        meta_description="Accepted meta description.",
+        tags=["Voice AI", "CRM"],
+        publishing_mode="approve_only",
+        status="accepted",
+        scheduled_at=scheduled_at,
+        generation_attempt=1,
+    )
+    db.add(post)
+    db.flush()
+    db.refresh(post)
+    return post
+
+
 def _generated_revision(slug: str = "regenerated-slug") -> GeneratedPost:
     return GeneratedPost(
         title="Regenerated Title",
@@ -317,4 +344,148 @@ def test_regenerate_on_non_pending_returns_409(
     db.flush()
 
     response = client.post(f"/posts/{post.id}/regenerate", json={})
+    assert response.status_code == 409
+
+
+# ---- POST /posts/{id}/reschedule ----------------------------------------
+
+
+def test_reschedule_updates_scheduled_at(
+    client: TestClient, db: Session
+) -> None:
+    post = _seed_accepted_post(db, slug="reschedule-1")
+    new_time = datetime.now(timezone.utc) + timedelta(days=5)
+
+    response = client.post(
+        f"/posts/{post.id}/reschedule",
+        json={"scheduled_at": new_time.isoformat()},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "accepted"
+    assert body["scheduled_at"] is not None
+
+    db.expire_all()
+    fresh = db.query(Post).filter(Post.id == post.id).one()
+    assert fresh.status == "accepted"
+    assert fresh.scheduled_at is not None
+    # Tolerate microsecond/format round-trip; compare to the second.
+    assert abs((fresh.scheduled_at - new_time).total_seconds()) < 1
+
+
+def test_reschedule_rejects_past_datetime(
+    client: TestClient, db: Session
+) -> None:
+    post = _seed_accepted_post(db, slug="reschedule-past")
+    past = datetime.now(timezone.utc) - timedelta(days=1)
+
+    response = client.post(
+        f"/posts/{post.id}/reschedule",
+        json={"scheduled_at": past.isoformat()},
+    )
+    assert response.status_code == 422
+
+
+def test_reschedule_rejects_naive_datetime(
+    client: TestClient, db: Session
+) -> None:
+    post = _seed_accepted_post(db, slug="reschedule-naive")
+
+    response = client.post(
+        f"/posts/{post.id}/reschedule",
+        json={"scheduled_at": "2030-01-01T08:00:00"},
+    )
+    assert response.status_code == 422
+
+
+def test_reschedule_on_pending_returns_409(
+    client: TestClient, db: Session
+) -> None:
+    post = _seed_pending_post(db, slug="reschedule-conflict")
+    future = datetime.now(timezone.utc) + timedelta(days=1)
+
+    response = client.post(
+        f"/posts/{post.id}/reschedule",
+        json={"scheduled_at": future.isoformat()},
+    )
+    assert response.status_code == 409
+
+
+# ---- POST /posts/{id}/unschedule ----------------------------------------
+
+
+def test_unschedule_flips_to_pending_review(
+    client: TestClient, db: Session
+) -> None:
+    post = _seed_accepted_post(db, slug="unschedule-1")
+
+    response = client.post(f"/posts/{post.id}/unschedule")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "pending_review"
+    assert body["scheduled_at"] is None
+
+    db.expire_all()
+    fresh = db.query(Post).filter(Post.id == post.id).one()
+    assert fresh.status == "pending_review"
+    assert fresh.scheduled_at is None
+
+
+def test_unschedule_on_pending_returns_409(
+    client: TestClient, db: Session
+) -> None:
+    post = _seed_pending_post(db, slug="unschedule-pending")
+
+    response = client.post(f"/posts/{post.id}/unschedule")
+    assert response.status_code == 409
+
+
+def test_unschedule_on_published_returns_409(
+    client: TestClient, db: Session
+) -> None:
+    post = _seed_accepted_post(db, slug="unschedule-published")
+    post.status = "published"
+    db.flush()
+
+    response = client.post(f"/posts/{post.id}/unschedule")
+    assert response.status_code == 409
+
+
+# ---- POST /posts/{id}/publish -------------------------------------------
+
+
+def test_publish_flips_accepted_to_published(
+    client: TestClient, db: Session
+) -> None:
+    post = _seed_accepted_post(db, slug="publish-1")
+
+    response = client.post(f"/posts/{post.id}/publish")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "published"
+    assert body["published_at"] is not None
+    assert body["scheduled_at"] is None
+
+    db.expire_all()
+    fresh = db.query(Post).filter(Post.id == post.id).one()
+    assert fresh.status == "published"
+    assert fresh.published_at is not None
+    assert fresh.scheduled_at is None
+
+
+def test_publish_on_pending_returns_409(client: TestClient, db: Session) -> None:
+    post = _seed_pending_post(db, slug="publish-pending")
+
+    response = client.post(f"/posts/{post.id}/publish")
+    assert response.status_code == 409
+
+
+def test_publish_on_already_published_returns_409(
+    client: TestClient, db: Session
+) -> None:
+    post = _seed_accepted_post(db, slug="publish-twice")
+    post.status = "published"
+    db.flush()
+
+    response = client.post(f"/posts/{post.id}/publish")
     assert response.status_code == 409

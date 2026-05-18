@@ -1,3 +1,5 @@
+import { ScheduledClient } from "@/components/dashboard/scheduled/scheduled-client";
+
 export default function ScheduledPage() {
   return (
     <div className="flex flex-col gap-6">
@@ -10,10 +12,7 @@ export default function ScheduledPage() {
         </h1>
       </header>
 
-      <p className="font-mono text-xs tracking-[0.2em] text-muted uppercase">
-        Ships in the{" "}
-        <code className="text-fg">scheduled-and-published</code> feature.
-      </p>
+      <ScheduledClient />
     </div>
   );
 }

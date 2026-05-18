@@ -18,6 +18,7 @@ from schemas.posts import (
     PostOut,
     PostStatus,
     RegenerateRequest,
+    RescheduleRequest,
 )
 from services.blog_writer import generate_post
 from services.news_fetcher import Article
@@ -40,12 +41,16 @@ def _load_post_or_404(db: Session, post_id: uuid.UUID) -> Post:
     return post
 
 
-def _require_pending_review(post: Post) -> None:
-    if post.status != "pending_review":
+def _require_status(post: Post, expected: str) -> None:
+    if post.status != expected:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"post not in pending_review (current={post.status})",
+            detail=f"post not in {expected} (current={post.status})",
         )
+
+
+def _require_pending_review(post: Post) -> None:
+    _require_status(post, "pending_review")
 
 
 @router.get("", response_model=PostListResponse)
@@ -144,4 +149,47 @@ def regenerate_post(
         post.generation_attempt,
         bool(body.feedback and body.feedback.strip()),
     )
+    return post
+
+
+@router.post("/{post_id}/reschedule", response_model=PostOut)
+def reschedule_post(
+    post_id: uuid.UUID,
+    body: RescheduleRequest,
+    db: Session = Depends(get_db),
+) -> Post:
+    post = _load_post_or_404(db, post_id)
+    _require_status(post, "accepted")
+
+    post.scheduled_at = body.scheduled_at
+    db.commit()
+    db.refresh(post)
+    logger.info("post rescheduled: id=%s scheduled_at=%s", post.id, post.scheduled_at)
+    return post
+
+
+@router.post("/{post_id}/unschedule", response_model=PostOut)
+def unschedule_post(post_id: uuid.UUID, db: Session = Depends(get_db)) -> Post:
+    post = _load_post_or_404(db, post_id)
+    _require_status(post, "accepted")
+
+    post.status = "pending_review"
+    post.scheduled_at = None
+    db.commit()
+    db.refresh(post)
+    logger.info("post unscheduled: id=%s", post.id)
+    return post
+
+
+@router.post("/{post_id}/publish", response_model=PostOut)
+def publish_post(post_id: uuid.UUID, db: Session = Depends(get_db)) -> Post:
+    post = _load_post_or_404(db, post_id)
+    _require_status(post, "accepted")
+
+    post.status = "published"
+    post.published_at = datetime.now(timezone.utc)
+    post.scheduled_at = None
+    db.commit()
+    db.refresh(post)
+    logger.info("post published: id=%s", post.id)
     return post

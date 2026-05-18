@@ -10,6 +10,7 @@ import {
   rejectPost,
   type PostDetail,
 } from "@/lib/api";
+import { formatDateTime } from "@/lib/utils";
 
 import { AcceptModal } from "./accept-modal";
 import { MarkdownBody } from "./markdown-body";
@@ -24,23 +25,6 @@ interface ReviewPanelProps {
 }
 
 type PendingAction = "accept" | "reject" | "regenerate" | null;
-
-function formatDateTime(iso: string): string {
-  try {
-    const d = new Date(iso);
-    return d
-      .toLocaleString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-      .toUpperCase();
-  } catch {
-    return iso;
-  }
-}
 
 export function ReviewPanel({
   postId,

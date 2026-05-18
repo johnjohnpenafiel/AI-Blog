@@ -1,3 +1,5 @@
+import { PublishedClient } from "@/components/dashboard/published/published-client";
+
 export default function PublishedPage() {
   return (
     <div className="flex flex-col gap-6">
@@ -10,10 +12,7 @@ export default function PublishedPage() {
         </h1>
       </header>
 
-      <p className="font-mono text-xs tracking-[0.2em] text-muted uppercase">
-        Ships in the{" "}
-        <code className="text-fg">scheduled-and-published</code> feature.
-      </p>
+      <PublishedClient />
     </div>
   );
 }

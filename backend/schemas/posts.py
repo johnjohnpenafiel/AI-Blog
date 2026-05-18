@@ -41,6 +41,8 @@ class PostListItem(BaseModel):
     tags: list[str]
     status: PostStatus
     created_at: datetime
+    scheduled_at: datetime | None = None
+    published_at: datetime | None = None
     generation_attempt: int
 
 
@@ -71,6 +73,14 @@ class PostListResponse(BaseModel):
     total: int
 
 
+def _validate_future_aware(value: datetime) -> datetime:
+    if value.tzinfo is None or value.tzinfo.utcoffset(value) is None:
+        raise ValueError("scheduled_at must be timezone-aware")
+    if value <= datetime.now(timezone.utc):
+        raise ValueError("scheduled_at must be in the future")
+    return value
+
+
 class AcceptRequest(BaseModel):
     """Body for POST /posts/{id}/accept. Empty body = publish now."""
 
@@ -81,11 +91,18 @@ class AcceptRequest(BaseModel):
     def _must_be_future_aware(cls, value: datetime | None) -> datetime | None:
         if value is None:
             return value
-        if value.tzinfo is None or value.tzinfo.utcoffset(value) is None:
-            raise ValueError("scheduled_at must be timezone-aware")
-        if value <= datetime.now(timezone.utc):
-            raise ValueError("scheduled_at must be in the future")
-        return value
+        return _validate_future_aware(value)
+
+
+class RescheduleRequest(BaseModel):
+    """Body for POST /posts/{id}/reschedule. scheduled_at is required."""
+
+    scheduled_at: datetime
+
+    @field_validator("scheduled_at")
+    @classmethod
+    def _must_be_future_aware(cls, value: datetime) -> datetime:
+        return _validate_future_aware(value)
 
 
 class RegenerateRequest(BaseModel):
