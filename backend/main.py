@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from routers import auth, pipeline, posts
+from routers import auth, pipeline, posts, settings
 from scheduler import shutdown_scheduler, start_scheduler
 
 logging.basicConfig(
@@ -29,6 +29,7 @@ app = FastAPI(title="DeLorean Backend", version="0.1.0", lifespan=lifespan)
 app.include_router(auth.router)
 app.include_router(pipeline.router)
 app.include_router(posts.router)
+app.include_router(settings.router)
 
 
 @app.get("/health")

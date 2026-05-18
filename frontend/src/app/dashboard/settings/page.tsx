@@ -1,3 +1,5 @@
+import { SettingsClient } from "@/components/dashboard/settings/settings-client";
+
 export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-6">
@@ -10,9 +12,7 @@ export default function SettingsPage() {
         </h1>
       </header>
 
-      <p className="font-mono text-xs tracking-[0.2em] text-muted uppercase">
-        Ships in the <code className="text-fg">settings-page</code> feature.
-      </p>
+      <SettingsClient />
     </div>
   );
 }
