@@ -139,9 +139,12 @@ def test_list_posts_filters_by_status_and_returns_total(
     response = client.get("/posts", params={"status": "pending_review"})
     assert response.status_code == 200
     body = response.json()
-    assert body["total"] == 2
+    # Defensive against pre-existing dev-DB rows: assert ours are present
+    # and the published row is filtered out.
+    assert body["total"] >= 2
     slugs = {item["slug"] for item in body["items"]}
-    assert slugs == {"pending-a", "pending-b"}
+    assert {"pending-a", "pending-b"}.issubset(slugs)
+    assert "published-x" not in slugs
 
 
 def test_list_posts_returns_all_when_no_filter(

@@ -32,7 +32,7 @@ The audience is dealership operators, automotive tech executives, and industry o
 ### Components
 
 - **Frontend** (`frontend/`): Next.js 16 (App Router) + React 19 + Tailwind CSS v4 + shadcn/ui. Source layout is `src/app/`. Two route groups: `(public)` for the DeLorean blog (homepage, post pages, about) and `dashboard/` for the admin UI (overview, queue, scheduled, published, settings). NextAuth handles credential-based login for the admin only.
-- **Backend** (`backend/`): Python + FastAPI. Routers: `posts.py`, `pipeline.py`, `settings.py`, plus auth endpoints. Services: `news_fetcher.py` (Perplexity), `blog_writer.py` (Claude), `publisher.py` (status routing). `scheduler.py` runs APScheduler in-process for the twice-weekly (Mon + Thu) cron.
+- **Backend** (`backend/`): Python + FastAPI. Routers: `posts.py`, `pipeline.py`, `settings.py`, plus auth endpoints. Services: `news_fetcher.py` (Perplexity), `blog_writer.py` (Claude), `publisher.py` (status routing + `publish_due_posts` bulk-publisher). `scheduler.py` runs APScheduler in-process for the twice-weekly (Mon + Thu) cron AND a 1-minute interval job (`scheduled-publisher`) that flips accepted posts whose `scheduled_at` has passed to `published`.
 - **Database**: PostgreSQL. Schema managed by SQLAlchemy models + Alembic migrations.
 - **External services**:
   - Anthropic Claude API (`claude-sonnet-4-20250514`) — blog generation.
