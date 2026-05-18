@@ -37,6 +37,8 @@ export interface PostListItem {
   tags: string[];
   status: PostStatus;
   created_at: string;
+  scheduled_at: string | null;
+  published_at: string | null;
   generation_attempt: number;
 }
 
@@ -44,8 +46,6 @@ export interface PostDetail extends PostListItem {
   meta_description: string;
   content: string;
   publishing_mode: PublishingMode;
-  scheduled_at: string | null;
-  published_at: string | null;
   updated_at: string;
   sources: PostSource[];
 }
@@ -57,10 +57,14 @@ export interface PostListResponse {
 
 export async function listPosts(
   status?: PostStatus,
+  opts?: { limit?: number; offset?: number },
 ): Promise<PostListResponse> {
-  const url = status
-    ? `/api/posts?status=${encodeURIComponent(status)}`
-    : "/api/posts";
+  const params = new URLSearchParams();
+  if (status) params.set("status", status);
+  if (opts?.limit !== undefined) params.set("limit", String(opts.limit));
+  if (opts?.offset !== undefined) params.set("offset", String(opts.offset));
+  const qs = params.toString();
+  const url = qs ? `/api/posts?${qs}` : "/api/posts";
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) {
     throw new Error(`Posts list fetch failed: ${res.status}`);
@@ -80,7 +84,7 @@ export async function getPost(id: string): Promise<PostDetail> {
 
 async function postPostAction(
   id: string,
-  action: "accept" | "reject" | "regenerate",
+  action: "accept" | "reject" | "regenerate" | "reschedule" | "unschedule" | "publish",
   body?: Record<string, unknown>,
 ): Promise<PostDetail> {
   const res = await fetch(
@@ -127,4 +131,19 @@ export function regeneratePost(
     "regenerate",
     trimmed ? { feedback: trimmed } : {},
   );
+}
+
+export function reschedulePost(
+  id: string,
+  scheduledAt: string,
+): Promise<PostDetail> {
+  return postPostAction(id, "reschedule", { scheduled_at: scheduledAt });
+}
+
+export function unschedulePost(id: string): Promise<PostDetail> {
+  return postPostAction(id, "unschedule");
+}
+
+export function publishPost(id: string): Promise<PostDetail> {
+  return postPostAction(id, "publish");
 }

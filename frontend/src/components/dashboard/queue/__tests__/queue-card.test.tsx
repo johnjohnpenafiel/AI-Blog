@@ -12,6 +12,8 @@ const POST: PostListItem = {
   tags: ["Voice AI", "CRM"],
   status: "pending_review",
   created_at: "2026-05-15T08:00:00Z",
+  scheduled_at: null,
+  published_at: null,
   generation_attempt: 1,
 };
 
