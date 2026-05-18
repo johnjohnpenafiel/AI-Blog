@@ -147,3 +147,83 @@ export function unschedulePost(id: string): Promise<PostDetail> {
 export function publishPost(id: string): Promise<PostDetail> {
   return postPostAction(id, "publish");
 }
+
+export interface Settings {
+  publishing_mode: PublishingMode;
+  schedule_frequency: string;
+  last_run_at: string | null;
+  next_run_at: string | null;
+}
+
+export async function getSettings(): Promise<Settings> {
+  const res = await fetch("/api/settings", { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`Settings fetch failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function updateSettings(body: {
+  publishing_mode: PublishingMode;
+}): Promise<Settings> {
+  const res = await fetch("/api/settings", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const detail = await res
+      .json()
+      .then((j) => (typeof j?.detail === "string" ? j.detail : null))
+      .catch(() => null);
+    throw new Error(detail ?? `Settings update failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+export interface PipelineRunSuccess {
+  skipped: false;
+  post_id: string;
+  slug: string;
+  status: PostStatus;
+  publishing_mode: PublishingMode;
+  published_at: string | null;
+}
+
+export interface PipelineRunSkipped {
+  skipped: true;
+  reason: string;
+  article_count: number;
+}
+
+export type PipelineRunResult = PipelineRunSuccess | PipelineRunSkipped;
+
+export class PipelineConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PipelineConflictError";
+  }
+}
+
+export async function triggerPipelineRun(): Promise<PipelineRunResult> {
+  const res = await fetch("/api/pipeline/run", {
+    method: "POST",
+    cache: "no-store",
+  });
+  if (res.status === 409) {
+    const detail = await res
+      .json()
+      .then((j) => (typeof j?.detail === "string" ? j.detail : null))
+      .catch(() => null);
+    throw new PipelineConflictError(detail ?? "pipeline already running");
+  }
+  if (!res.ok) {
+    const detail = await res
+      .json()
+      .then((j) => (typeof j?.detail === "string" ? j.detail : null))
+      .catch(() => null);
+    throw new Error(detail ?? `Pipeline run failed: ${res.status}`);
+  }
+  return res.json();
+}
