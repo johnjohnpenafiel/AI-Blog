@@ -40,7 +40,7 @@ export function RegenerateForm({
           onClick={() => onSubmit(value)}
           className="bg-accent px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-[var(--bg)] uppercase transition-colors hover:bg-[var(--accent-dim)] disabled:opacity-50"
         >
-          ⚡ Submit for regeneration
+          Submit for regeneration
         </button>
         <button
           type="button"

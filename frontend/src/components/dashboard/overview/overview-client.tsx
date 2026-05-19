@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useQueueCount } from "@/components/dashboard/queue-count-context";
+import { SectionHeader } from "@/components/dashboard/section-header";
 import {
   getPipelineStatus,
   listPosts,
@@ -10,6 +11,7 @@ import {
 } from "@/lib/api";
 import {
   formatRelative,
+  formatRelativeFuture,
   formatTimeOfDay,
   formatWeekdayDateUpper,
 } from "@/lib/utils";
@@ -150,45 +152,65 @@ export function OverviewClient() {
   const published = publishedCount ?? 0;
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Posts Published"
-          value={published}
-          testId="stat-posts-published"
-        />
-        <StatCard
-          label="Pending Review"
-          value={pending}
-          activated={pending > 0}
-          testId="stat-pending-review"
-        />
-        <StatCard
-          label="Last Run"
-          value={formatRelative(lastRunAt)}
-          valueClassName="font-display text-[22px] font-semibold"
-          testId="stat-last-run"
-        />
-        <StatCard
-          label="Next Run"
-          value={formatWeekdayDateUpper(nextRunAt)}
-          valueClassName="font-display text-[22px] font-semibold"
-          subLine={
-            nextRunAt ? (
-              <span className="text-accent">{formatTimeOfDay(nextRunAt)}</span>
-            ) : null
-          }
-          testId="stat-next-run"
-        />
-      </div>
+    <div className="flex min-h-full flex-col gap-10">
+      <section className="flex flex-col gap-5">
+        <SectionHeader index="01" label="Status" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            label="Posts Published"
+            value={published}
+            testId="stat-posts-published"
+          />
+          <StatCard
+            label="Pending Review"
+            value={pending}
+            activated={pending > 0}
+            subLine="Awaiting operator"
+            testId="stat-pending-review"
+          />
+          <StatCard
+            label="Last Run"
+            value={formatRelative(lastRunAt)}
+            valueClassName="font-display text-[24px] font-bold"
+            subLine={
+              lastRunAt
+                ? `${formatWeekdayDateUpper(lastRunAt)} · ${formatTimeOfDay(lastRunAt)}`
+                : null
+            }
+            testId="stat-last-run"
+          />
+          <StatCard
+            label="Next Run"
+            value={formatWeekdayDateUpper(nextRunAt)}
+            valueClassName="font-display text-[24px] font-bold"
+            subLine={
+              nextRunAt ? (
+                <span className="text-accent">
+                  {formatTimeOfDay(nextRunAt)} · {formatRelativeFuture(nextRunAt)}
+                </span>
+              ) : null
+            }
+            footer={<>Cadence — Mon · Thu · 08:00</>}
+            testId="stat-next-run"
+          />
+        </div>
+      </section>
 
-      <div className="flex flex-wrap items-start gap-3">
-        <TriggerPipelineButton
-          onStarted={handlePipelineStarted}
-          onCompleted={handlePipelineCompleted}
-        />
-        {pending > 0 && <GoToQueueButton />}
-      </div>
+      <section className="flex flex-col gap-5">
+        <SectionHeader index="02" label="Quick Actions" />
+        <div className="flex flex-wrap items-start gap-3">
+          <TriggerPipelineButton
+            onStarted={handlePipelineStarted}
+            onCompleted={handlePipelineCompleted}
+          />
+          <GoToQueueButton dim={pending === 0} />
+        </div>
+      </section>
+
+      <footer className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-border-dim pt-5 font-mono text-[10px] tracking-[0.25em] text-dim uppercase">
+        <span>Delorean v1</span>
+        <span>Built by John John</span>
+      </footer>
     </div>
   );
 }

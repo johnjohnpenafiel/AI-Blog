@@ -23,8 +23,8 @@
   --accent-glow: rgb(255 106 0 / 0.12);
   --accent-structural: rgb(255 106 0 / 0.6);
 
-  /* Grid overlay — orange @ 6%, 48px cells, applied to <body> below */
-  --grid: rgb(255 106 0 / 0.06);
+  /* Grid overlay — near-blend gray, 48px cells, applied to <body> below */
+  --grid: #141414;
   --grid-size: 48px;
 
   /* Semantic — sparingly, only for state */
@@ -113,7 +113,7 @@
   }
 }
 
-/* Body grid overlay — orange @ 6%, 48px cells. Applies sitewide.
+/* Body grid overlay — near-blend gray lines, 48px cells. Applies sitewide.
    The recessed --structural panels (#000) sit on top and naturally hide the
    grid where they cover the body — the desired effect (the grid is the
    chassis surface texture; the recesses are cuts into it). */
@@ -123,4 +123,5 @@ body {
     linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: var(--grid-size) var(--grid-size);
+  background-position: 24px 24px;
 }

@@ -18,10 +18,6 @@ vi.mock("next/navigation", () => ({
   usePathname: () => usePathnameMock(),
 }));
 
-vi.mock("next-auth/react", () => ({
-  signOut: vi.fn(),
-}));
-
 beforeEach(() => {
   vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({
     x: 0,
@@ -87,10 +83,4 @@ describe("Sidebar", () => {
     expect(overview.getAttribute("aria-current")).toBeNull();
   });
 
-  it("renders the Logout button", () => {
-    usePathnameMock.mockReturnValue("/dashboard");
-    renderSidebar();
-
-    expect(screen.getByRole("button", { name: /logout/i })).toBeInTheDocument();
-  });
 });

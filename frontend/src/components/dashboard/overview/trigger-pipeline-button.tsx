@@ -60,7 +60,7 @@ export function TriggerPipelineButton({
           )}
           data-testid="overview-trigger-pipeline"
         >
-          {pending ? "Running…" : "⚡ Trigger Pipeline"}
+          {pending ? "Running…" : "Trigger Pipeline"}
         </button>
       </ChamferedPanel>
       {error && (

@@ -77,7 +77,7 @@ export function AcceptModal({
                 className="bg-accent px-4 py-3 font-mono text-[11px] tracking-[0.25em] text-[var(--bg)] uppercase transition-colors hover:bg-[var(--accent-dim)] disabled:opacity-50"
                 data-testid="accept-publish-now"
               >
-                ⚡ Publish now
+                Publish now
               </button>
               <button
                 type="button"

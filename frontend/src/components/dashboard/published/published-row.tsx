@@ -13,12 +13,7 @@ export function PublishedRow({ post }: PublishedRowProps) {
   return (
     <ChamferedPanel tier="component" size="card" className="w-full">
       <div className="px-5 py-5" data-testid="published-row">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2">
-            {post.tags.map((tag) => (
-              <Tag key={tag} label={tag} />
-            ))}
-          </div>
+        <div className="flex items-center justify-end gap-3">
           <span className="flex items-center gap-2 font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
             <span
               aria-hidden="true"
@@ -37,7 +32,12 @@ export function PublishedRow({ post }: PublishedRowProps) {
           {post.summary}
         </p>
 
-        <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-2">
+            {post.tags.map((tag) => (
+              <Tag key={tag} label={tag} />
+            ))}
+          </div>
           <a
             href={`/blog/${post.slug}`}
             target="_blank"

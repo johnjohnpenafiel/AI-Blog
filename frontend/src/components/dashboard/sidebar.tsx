@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
-
 import { ChamferedPanel } from "@/components/chamfered-panel";
 import { cn } from "@/lib/utils";
 
@@ -110,30 +108,18 @@ export function Sidebar() {
           size="sidebar"
           cut="left"
           chamferStroke="var(--accent-structural)"
-          className="h-[calc(100vh-1.5rem)] w-[260px] md:w-[220px]"
+          className="h-[calc(100vh-1.5rem)] w-[280px] md:w-[260px]"
         >
           <nav
             aria-label="Dashboard"
-            className="flex h-full flex-col px-5 py-6"
+            className="flex h-full flex-col px-5 pt-20 pb-12"
           >
-            <div className="mb-10 flex items-start justify-between">
-              <Link
-                href="/dashboard"
-                onClick={() => setMobileOpen(false)}
-                className="block"
-              >
-                <span className="font-display text-[20px] font-bold tracking-[0.02em] text-fg">
-                  DE<span className="text-accent">LOR</span>EAN
-                </span>
-                <span className="ml-1 font-mono text-[10px] tracking-[0.25em] text-dim uppercase">
-                  / Admin
-                </span>
-              </Link>
+            <div className="mb-10 flex items-start justify-end md:hidden">
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close navigation"
-                className="font-mono text-[14px] leading-none text-dim hover:text-fg md:hidden"
+                className="font-mono text-[14px] leading-none text-dim hover:text-fg"
               >
                 ✕
               </button>
@@ -149,7 +135,7 @@ export function Sidebar() {
                       onClick={() => setMobileOpen(false)}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex items-center justify-between border-l-2 py-2 pl-4 pr-2 font-mono text-[10px] tracking-[0.25em] uppercase transition-colors",
+                        "flex items-center justify-between border-l-2 py-2.5 pl-5 pr-3 font-mono text-[11px] tracking-[0.25em] uppercase transition-colors",
                         active
                           ? "border-l-accent bg-accent-glow text-accent"
                           : "border-l-transparent text-dim hover:text-fg",
@@ -167,15 +153,8 @@ export function Sidebar() {
               })}
             </ul>
 
-            <div className="mt-auto flex flex-col gap-3 border-t border-border-dim pt-5">
+            <div className="mt-auto flex flex-col gap-3 border-t border-border-dim px-1 pt-5 md:px-3">
               <PipelineStatusDot />
-              <button
-                type="button"
-                onClick={() => signOut({ callbackUrl: "/login" })}
-                className="text-left font-mono text-[10px] tracking-[0.25em] text-dim uppercase hover:text-fg"
-              >
-                Logout
-              </button>
             </div>
           </nav>
         </ChamferedPanel>

@@ -63,6 +63,28 @@ export function formatRelative(
   return formatDate(iso);
 }
 
+export function formatRelativeFuture(
+  iso: string | null,
+  now: Date = new Date(),
+): string {
+  if (!iso) return "—";
+  let then: Date;
+  try {
+    then = new Date(iso);
+  } catch {
+    return "—";
+  }
+  const diffMs = then.getTime() - now.getTime();
+  if (Number.isNaN(diffMs)) return "—";
+  if (diffMs <= 0) return "DUE NOW";
+  const min = Math.round(diffMs / 60_000);
+  if (min < 60) return `IN ${min} MIN`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `IN ${hr} ${hr === 1 ? "HR" : "HRS"}`;
+  const day = Math.round(hr / 24);
+  return `IN ${day} ${day === 1 ? "DAY" : "DAYS"}`;
+}
+
 export function formatWeekdayDateUpper(iso: string | null): string {
   if (!iso) return "—";
   try {

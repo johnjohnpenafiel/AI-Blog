@@ -207,7 +207,7 @@ export function SettingsClient() {
               )}
               data-testid="trigger-pipeline-run"
             >
-              {runPending ? "Running…" : "⚡ Trigger Manual Run"}
+              {runPending ? "Running…" : "Trigger Manual Run"}
             </button>
           </ChamferedPanel>
 

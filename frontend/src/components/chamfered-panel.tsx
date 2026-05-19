@@ -39,7 +39,9 @@ interface ChamferedPanelProps {
   style?: CSSProperties;
   background?: string;
   perimeterStroke?: string;
+  perimeterWidth?: number;
   chamferStroke?: string;
+  chamferWidth?: number;
   children?: ReactNode;
 }
 
@@ -138,7 +140,9 @@ export function ChamferedPanel({
   style,
   background,
   perimeterStroke,
+  perimeterWidth,
   chamferStroke,
+  chamferWidth: chamferWidthProp,
   children,
 }: ChamferedPanelProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -175,7 +179,7 @@ export function ChamferedPanel({
   const resolvedPerimeter = perimeterStroke ?? defaultPerimeter;
   const resolvedChamferStroke = chamferStroke ?? "var(--accent)";
   const chamferOpacity = tier === "structural" ? 0.7 : 1;
-  const chamferWidth = tier === "structural" ? 2 : 1.5;
+  const chamferWidth = chamferWidthProp ?? (tier === "structural" ? 2 : 1.5);
 
   return (
     <div ref={ref} className={cn("relative", className)} style={style}>
@@ -211,7 +215,7 @@ export function ChamferedPanel({
               x2={edge.x2}
               y2={edge.y2}
               stroke={resolvedPerimeter}
-              strokeWidth={1}
+              strokeWidth={perimeterWidth ?? 1}
               vectorEffect="non-scaling-stroke"
             />
           ))}
