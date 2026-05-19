@@ -19,7 +19,7 @@ This document defines the visual design direction and page-by-page UI structure 
 
 ### Aesthetic Direction
 
-Dark operational command-center, retrofuturist Tron. The chassis is matte black with a faint orange grid; major structural panels (sidebar, main shell) are **recessed cuts** into the chassis rather than boxes stacked on top. Every shape — cards, buttons, tags, inputs — has a chamfered corner with an orange diagonal cut line; this is the signature element of the language. UI chrome is monospaced and terminal-flavored; article body text stays clean and readable.
+Dark operational command-center, retrofuturist Tron. The chassis is matte black with a faint gray grid; major structural panels (sidebar, main shell) are **recessed cuts** into the chassis rather than boxes stacked on top. Every shape — cards, buttons, tags, inputs — has a chamfered corner with an orange diagonal cut line; this is the signature element of the language. UI chrome is monospaced and terminal-flavored; article body text stays clean and readable.
 
 The reference feeling: a premium engineering publication crossed with a fighter-jet HUD. Intentional, controlled, cinematic. Orange is the only accent, used sparingly to mark structure, active states, and CTAs.
 
@@ -40,7 +40,7 @@ The reference feeling: a premium engineering publication crossed with a fighter-
 | `--accent-dim` | `#cc5500` | Hover on orange elements. |
 | `--accent-glow` | `rgba(255, 106, 0, 0.12)` | Soft orange tint behind active nav items and hero atmosphere. |
 | `--accent-structural` | `rgba(255, 106, 0, 0.60)` | Tier 1 structural borders (sidebar, main shell). |
-| `--grid` | `rgba(255, 106, 0, 0.06)` | Body grid overlay color. 48px cells. |
+| `--grid` | `#141414` | Body grid overlay color. 48px cells. Near-blend gray — chassis texture without orange tint. |
 
 **Semantic colors** (use sparingly — only for state, never decoration):
 
@@ -56,7 +56,7 @@ DeLorean **inverts conventional dark UI layering.** Most dark interfaces make ca
 
 Four layers, back-to-front:
 
-1. **Body** `#0a0a0a` + orange grid @ 6% — the chassis surface (texture layer)
+1. **Body** `#0a0a0a` + gray grid `#141414` — the chassis surface (texture layer)
 2. **Structural** `#000000` — sidebar, main shell, full-page modal panels (recessed into body)
 3. **Cards** `#111111` — stat panels, post cards, review panels (lifted above shell)
 4. **Raised** `#181818` — hover / active states on cards (elevated further)
@@ -127,13 +127,37 @@ The two tiers always nest. Structural orange defines the room; component borders
 
 ### Decorative Elements
 
-- **Body grid overlay** — orange at 6% opacity, 48px cells, 1px lines. Runs continuously across the entire page on both surfaces. CSS: two `linear-gradient` backgrounds stacked, no mask required.
+- **Body grid overlay** — near-blend gray (`#141414`), 48px cells, 1px lines. Runs continuously across the entire page on both surfaces. CSS: two `linear-gradient` backgrounds stacked, `background-position: 24px 24px` to center the grid visually, no mask required. The depth cue (textured chassis vs. recessed pure-black panels) is preserved by contrast alone — the grid color is neutral so it doesn't dilute the orange accent.
 - **Left accent vertical bar** — 2–3px solid `--accent` bar on the left edge of post cards and active sidebar items. Visual anchor and "selected" indicator.
 - **Orange diagonal cut line** — the chamfer signature. 1.5–2px stroke on every clipped corner. Tier 1 cuts match the structural perimeter (60% opacity, same color) so the border reads uniformly; Tier 2 cuts run at 100% to pop against the dark perimeter.
 - **Orange radial glow** — large blurred circle in `--accent-glow`, used as atmospheric background on the homepage hero and about-page hero only. Implemented as a CSS `radial-gradient` or blurred `div` — not an image.
 - **Horizontal rule lines** — `1px solid --border-dim` for section separators and the terminal-readout treatment inside the homepage hero.
 - **Monospaced all-caps chrome** — every label, tag, button, and piece of metadata. Never used for article body text.
 - **Two-tone titles** — selective: hero titles, key display headings. Primary words in `--text-primary`, key terms in `--accent`. Applied to emphasize, not globally.
+
+### Section Headers
+
+Content sections within a page (both surfaces) are introduced by a `SectionHeader` that combines a label and a terminal-style horizontal rule:
+
+- **Counter + label** — JetBrains Mono, all-caps. A zero-padded index (`// 01`, `// 02`, …) in `--accent`, followed by the section name in `--text-secondary`. The `//` prefix is the established section-identifier idiom across both surfaces.
+- **Horizontal rule** — `1px solid --border-dim`, extending from the label to the right edge. It reads as a terminal separator, not a card border.
+- No background fill, no chamfer — just type and a line. Sections are named, not boxed.
+
+**Indexing**: counters are zero-padded integers in display order (`01`, `02`, …). If a section is conditional (e.g. only shown when data exists), the visible counter should still be sequential — re-number rather than leaving gaps.
+
+### Data Cards
+
+Stat cards and data panels expose related information through a three-slot value hierarchy. **If the data exists and is related, show it — don't hide available information.**
+
+| Slot | Weight | When to populate |
+|---|---|---|
+| **Primary value** | Large, bold, center-dominant | Always — the most scannable datum |
+| **Sub-line** | 10px JetBrains Mono, `--text-muted` | When a complementary dimension adds meaning (e.g. absolute date for a relative timestamp, countdown for a future date) |
+| **Footer** | 10px JetBrains Mono, `--text-dim` | Persistent context that doesn't change with live data (e.g. cadence, source label) |
+
+Activated cards (`--accent` state) apply `--accent` to the sub-line as well as the primary value. Footer stays `--text-dim` regardless — it is ambient context, not an alert.
+
+Keep values concise: `MON MAY 18`, `IN 2 DAYS`, `08:00`. Never fill a slot with a placeholder when data is unavailable — omit the slot entirely.
 
 ### Rules
 
@@ -335,22 +359,29 @@ All dashboard pages share this shell:
 
 ### Page: `/dashboard` — Overview
 
-**Stats Row — Tier 2 Component**
-- 4 stat cards in a row, each:
+**Section `// 01` — Status**
+- `SectionHeader` with index `01` and label `Status`
+- 4 stat cards in a row (Tier 2 Component), each:
   - `--surface` (`#111`) background — lifted above the structural shell
   - 16px **single top-left chamfer** (bottom-right stays square)
   - Tier 2 border: dark perimeter `--border`, orange ONLY on the chamfer cut line
   - **Label** (JetBrains Mono `--text-dim`, 8–9px, 0.25em tracking)
-  - **Value** (Inter 900, 36–56px, `--text-primary`)
-  - Stat cards:
-    - `POSTS PUBLISHED` — count, with optional sub-line `+ N THIS WEEK` (JetBrains Mono `--text-secondary`)
-    - `PENDING REVIEW` — count. **Activates orange when > 0:** label in `--accent`, value in `--accent`, solid 3px `--accent` left border (the attention signal)
-    - `LAST RUN` — relative timestamp (e.g. `2 DAYS AGO`) — uses smaller value (20–24px, can use Chakra Petch)
-    - `NEXT RUN` — absolute date (e.g. `MON MAY 18`) with sub-line `08:00 AM` in `--accent` JetBrains Mono
+  - **Primary value** — large, center-dominant (Chakra Petch bold for time-based cards, Inter 900 or similar for counts)
+  - Sub-lines and footers per the Data Cards principle (see Design System):
+    - `POSTS PUBLISHED` — count as primary value
+    - `PENDING REVIEW` — count as primary value. **Activates orange when > 0:** label, value, and sub-line all in `--accent`. Sub-line: `AWAITING OPERATOR`
+    - `LAST RUN` — relative timestamp (e.g. `2 DAYS AGO`) as primary value. Sub-line: exact date + time (e.g. `MON MAY 18 · 08:00`)
+    - `NEXT RUN` — weekday + date (e.g. `MON MAY 18`) as primary value. Sub-line: time + countdown (e.g. `08:00 · IN 2 DAYS`) in `--accent`. Footer: `Cadence — Mon · Thu · 08:00` in `--text-dim`
 
-**Quick Actions**
-- `⚡ TRIGGER PIPELINE` — primary button: 12px dual chamfer, `--accent` fill, dark text (`#0a0a0a`), JetBrains Mono all-caps
-- `GO TO QUEUE →` — outline button: 12px dual chamfer, transparent background, `--accent` outline, `--accent` text. Shown only if pending review count > 0.
+**Section `// 02` — Quick Actions**
+- `SectionHeader` with index `02` and label `Quick Actions`
+- `TRIGGER PIPELINE` — primary button: 12px dual chamfer, `--accent` fill, dark text (`#0a0a0a`), JetBrains Mono all-caps
+- `GO TO QUEUE →` — outline button: 12px dual chamfer, transparent background, `--accent` outline, `--accent` text. **Always visible.** Dims to 50% opacity when pending review count is 0 (not hidden — the affordance is persistent so the operator always knows where to go).
+
+**Page footer**
+- Bottom of the content area, separated by `--border-dim` horizontal rule
+- JetBrains Mono, 10px, all-caps, `--text-dim`
+- Left: product name and version. Right: attribution line.
 
 ---
 
@@ -444,7 +475,7 @@ All dashboard pages share this shell:
 | Nav badge (sidebar) | Admin | — | 4px quad | `--accent` fill | Dark text. Shows pending count. |
 | Status dot | Admin | — | — | — | 7px square. Running: orange + `box-shadow` glow. |
 | Two-tone title | Both | — | — | — | Chakra Petch 700, primary words white, key terms `--accent`. |
-| Body grid | Both | — | — | — | Orange @ 6%, 48px cells. Always-on body texture. |
+| Body grid | Both | — | — | — | Gray `#141414`, 48px cells. Always-on chassis texture. No orange — accent is reserved for intentional use. |
 | Radial glow orb | Public | — | — | — | `--accent-glow` blurred CSS radial. Homepage + about hero only. |
 
 ---
@@ -518,7 +549,7 @@ clip-path: polygon(
 
 ### Body grid
 
-Two stacked `linear-gradient` backgrounds on `body`:
+Two stacked `linear-gradient` backgrounds on `body`. `--grid` is `#141414` — near-blend gray, not orange:
 
 ```css
 body {
@@ -527,10 +558,11 @@ body {
     linear-gradient(var(--grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: 48px 48px;
+  background-position: 24px 24px;
 }
 ```
 
-No mask. The grid runs uniformly. The recessed `--structural` panels (`#000`) sit on top and naturally hide the grid where they cover the body — this is the desired effect.
+No mask. The grid runs uniformly. The recessed `--structural` panels (`#000`) sit on top and naturally hide the grid where they cover the body — this is the desired effect. If the grid reads as too subtle on a given display, increase `--grid` toward `#1a1a1a` before reaching for orange.
 
 ### Radial glow
 
