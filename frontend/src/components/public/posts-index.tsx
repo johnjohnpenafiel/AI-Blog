@@ -36,7 +36,7 @@ export function PostsIndex({ posts }: PostsIndexProps) {
   return (
     <section
       data-testid="posts-index"
-      className="mx-auto max-w-6xl px-6 py-10"
+      className="relative mx-auto max-w-6xl bg-[var(--bg)] px-6 py-10 before:absolute before:inset-x-0 before:-top-40 before:h-40 before:bg-gradient-to-b before:from-transparent before:to-[var(--bg)] before:content-['']"
     >
       <div
         className="flex flex-wrap gap-2"

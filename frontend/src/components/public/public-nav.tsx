@@ -4,9 +4,9 @@ export function PublicNav() {
   return (
     <nav
       data-testid="public-nav"
-      className="sticky top-0 z-40 border-b border-border-dim bg-bg/85 backdrop-blur-md"
+      className="absolute inset-x-0 top-0 z-40 bg-transparent"
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+      <div className="flex items-center justify-between px-6 py-5 sm:px-10 lg:px-16">
         <Link
           href="/"
           className="font-display text-[18px] font-bold tracking-[0.04em] text-fg"
