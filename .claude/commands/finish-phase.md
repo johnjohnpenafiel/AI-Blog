@@ -14,9 +14,21 @@ Finish the roadmap phase: $ARGUMENTS
 
 If empty, list the phases with per-feature status (Done / not Done) and STOP — ask which phase.
 
-Build an **ordered list of remaining features** in that phase — every `#### <feature-name>` whose heading does NOT end with `*Done*`. Preserve roadmap order. Capture each feature's **Goal** and **Done when** lines verbatim — those are the spec.
+Build an **ordered list of candidate features** in that phase — every `#### <feature-name>` whose heading does NOT end with `*Done*`. Preserve roadmap order. Capture each feature's **Goal** and **Done when** lines verbatim — those are the spec.
 
-If the list is empty: report "Phase already complete" and stop.
+**Then reality-check the list.** The `*Done*` annotation is hand-maintained and may be stale. For each candidate, before treating it as work-to-do, look for evidence the feature is already shipped:
+
+- Check `git log --oneline` for commit subjects that match the feature name or its scope.
+- Look at the codebase for the files / routes / endpoints that the "Done when" criteria implies. If a feature says "Done when `/dashboard/queue` renders pending posts," check whether that route already exists and renders that data.
+- Check `feature-plans/` for a matching plan with `status: done` (if the plan was kept around).
+
+Classify each candidate into one of:
+
+- **Already shipped** — evidence clearly satisfies "Done when". Skip it. Note in the phase report under a "Skipped (already shipped)" section.
+- **Partially shipped** — some "Done when" criteria are met but not all. Proceed, but the plan's Tasks section in step A should target only the gaps, not redo finished work. Note in the per-feature report what was found vs. what was added.
+- **Not started** — proceed normally.
+
+If the list collapses to empty after this pass: report "Phase already complete (reality-checked)" with the skipped list and stop.
 
 ## 1. Pre-flight (once, before the loop)
 
