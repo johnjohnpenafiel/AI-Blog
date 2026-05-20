@@ -23,13 +23,12 @@ export function PublicFooter() {
           >
             Blog
           </Link>
-          <span
-            aria-disabled="true"
-            className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase"
-            title="Coming soon"
+          <Link
+            href="/about"
+            className="font-mono text-[10px] tracking-[0.25em] text-fg uppercase transition-colors hover:text-accent"
           >
             About
-          </span>
+          </Link>
         </div>
       </div>
     </footer>
