@@ -1,0 +1,77 @@
+"use client";
+
+import Link from "next/link";
+
+import { ChamferedPanel } from "@/components/chamfered-panel";
+import { Tag } from "@/components/tag";
+import type { PublicPostListItem } from "@/lib/public-api";
+
+interface PostCardProps {
+  post: PublicPostListItem;
+}
+
+function formatPublishDate(iso: string): string {
+  try {
+    return new Date(iso)
+      .toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      })
+      .toUpperCase();
+  } catch {
+    return iso;
+  }
+}
+
+export function PostCard({ post }: PostCardProps) {
+  return (
+    <ChamferedPanel
+      tier="component"
+      size="card"
+      cut="single"
+      className="w-full"
+    >
+      <div className="relative">
+        {/* Left accent bar — runs the full card height below the chamfer */}
+        <span
+          aria-hidden
+          className="absolute top-4 bottom-0 left-0 w-[2px] bg-accent"
+        />
+        <Link
+          href={`/blog/${post.slug}`}
+          data-testid="post-card"
+          className="group block px-7 py-6 transition-colors hover:bg-[var(--surface-raised)]"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap gap-2">
+              {post.tags.slice(0, 2).map((tag) => (
+                <Tag key={tag} label={tag} />
+              ))}
+            </div>
+            <span className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
+              {formatPublishDate(post.published_at)}
+            </span>
+          </div>
+
+          <h3 className="mt-4 font-display text-[22px] leading-tight font-bold tracking-[0.02em] text-fg sm:text-[26px]">
+            {post.title}
+          </h3>
+
+          <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-muted">
+            {post.summary}
+          </p>
+
+          <div className="mt-5 flex items-center justify-between">
+            <span className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
+              {post.read_time_minutes} MIN READ
+            </span>
+            <span className="font-mono text-[10px] tracking-[0.25em] text-accent uppercase transition-colors group-hover:text-[var(--accent-dim)]">
+              Read →
+            </span>
+          </div>
+        </Link>
+      </div>
+    </ChamferedPanel>
+  );
+}
