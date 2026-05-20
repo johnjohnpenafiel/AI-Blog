@@ -24,6 +24,26 @@ export interface PublicPostListResponse {
   total: number;
 }
 
+export interface PublicPostSource {
+  title: string;
+  url: string;
+  publisher: string;
+  published_date: string | null;
+}
+
+export interface PublicPostDetail {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  meta_description: string;
+  content: string;
+  tags: string[];
+  published_at: string;
+  read_time_minutes: number;
+  sources: PublicPostSource[];
+}
+
 export async function listPublicPosts(opts?: {
   limit?: number;
   offset?: number;
@@ -48,4 +68,29 @@ export async function listPublicPosts(opts?: {
     throw new Error(`Public posts fetch failed: ${res.status}`);
   }
   return res.json();
+}
+
+export async function getPublicPost(slug: string): Promise<PublicPostDetail> {
+  const backendUrl = process.env.BACKEND_URL;
+  if (!backendUrl) {
+    throw new Error("BACKEND_URL is not configured");
+  }
+
+  const res = await fetch(`${backendUrl}/public/posts/${encodeURIComponent(slug)}`, {
+    cache: "no-store",
+  });
+  if (res.status === 404) {
+    return Promise.reject(new NotFoundError("post not found"));
+  }
+  if (!res.ok) {
+    throw new Error(`Public post fetch failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NotFoundError";
+  }
 }
