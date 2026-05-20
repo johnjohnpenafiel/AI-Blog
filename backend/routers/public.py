@@ -3,12 +3,12 @@
 Separate from `routers/posts.py` (admin) so the public surface can never
 accidentally leak draft, pending, accepted, or rejected content.
 """
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session, selectinload
 
 from database import get_db
 from models import Post
-from schemas.public import PublicPostListItem, PublicPostListResponse
+from schemas.public import PublicPostDetail, PublicPostListItem, PublicPostListResponse, PublicPostSource
 
 router = APIRouter(prefix="/public", tags=["public"])
 
@@ -56,4 +56,38 @@ def list_public_posts(
     return PublicPostListResponse(
         items=[_to_list_item(p) for p in posts],
         total=total,
+    )
+
+
+@router.get("/posts/{slug}", response_model=PublicPostDetail)
+def get_public_post(slug: str, db: Session = Depends(get_db)) -> PublicPostDetail:
+    post = (
+        db.query(Post)
+        .options(selectinload(Post.sources))
+        .filter(Post.status == "published", Post.slug == slug)
+        .one_or_none()
+    )
+    if post is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="post not found")
+
+    assert post.published_at is not None
+    return PublicPostDetail(
+        id=post.id,
+        slug=post.slug,
+        title=post.title,
+        summary=post.summary,
+        meta_description=post.meta_description,
+        content=post.content,
+        tags=list(post.tags),
+        published_at=post.published_at,
+        read_time_minutes=_read_time_minutes(post.content),
+        sources=[
+            PublicPostSource(
+                title=src.title,
+                url=src.url,
+                publisher=src.publisher,
+                published_date=src.published_date,
+            )
+            for src in post.sources
+        ],
     )
