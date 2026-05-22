@@ -9,29 +9,22 @@ interface ShareBarProps {
   slug: string;
 }
 
-function buildShareUrl(platform: "x" | "linkedin", postUrl: string, title: string): string {
-  const encoded = encodeURIComponent(postUrl);
+function openShare(platform: "x" | "linkedin", slug: string, title: string) {
+  const url = `${window.location.origin}/blog/${slug}`;
+  const encoded = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
-  if (platform === "x") {
-    return `https://x.com/intent/tweet?url=${encoded}&text=${encodedTitle}`;
-  }
-  return `https://www.linkedin.com/sharing/share-offsite/?url=${encoded}`;
+  const shareUrl =
+    platform === "x"
+      ? `https://x.com/intent/tweet?url=${encoded}&text=${encodedTitle}`
+      : `https://www.linkedin.com/sharing/share-offsite/?url=${encoded}`;
+  window.open(shareUrl, "_blank", "noopener,noreferrer");
 }
 
 export function ShareBar({ title, slug }: ShareBarProps) {
   const [copied, setCopied] = useState(false);
 
-  const postUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/blog/${slug}`
-      : `/blog/${slug}`;
-
   function handleCopy() {
-    const url =
-      typeof window !== "undefined"
-        ? `${window.location.origin}/blog/${slug}`
-        : `/blog/${slug}`;
-    navigator.clipboard.writeText(url).then(() => {
+    navigator.clipboard.writeText(`${window.location.origin}/blog/${slug}`).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -50,15 +43,13 @@ export function ShareBar({ title, slug }: ShareBarProps) {
           background="transparent"
           perimeterStroke="var(--accent)"
         >
-          <a
-            href={buildShareUrl("x", postUrl, title)}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => openShare("x", slug, title)}
             className="block px-5 py-2.5 font-mono text-[10px] tracking-[0.25em] text-accent uppercase transition-colors hover:text-[var(--accent-dim)]"
             aria-label="Share on X"
           >
             X
-          </a>
+          </button>
         </ChamferedPanel>
 
         <ChamferedPanel
@@ -68,15 +59,13 @@ export function ShareBar({ title, slug }: ShareBarProps) {
           background="transparent"
           perimeterStroke="var(--accent)"
         >
-          <a
-            href={buildShareUrl("linkedin", postUrl, title)}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => openShare("linkedin", slug, title)}
             className="block px-5 py-2.5 font-mono text-[10px] tracking-[0.25em] text-accent uppercase transition-colors hover:text-[var(--accent-dim)]"
             aria-label="Share on LinkedIn"
           >
             LinkedIn
-          </a>
+          </button>
         </ChamferedPanel>
 
         <ChamferedPanel
