@@ -33,17 +33,12 @@ export function Hero({ coverPost, allPosts }: HeroProps) {
       data-testid="public-hero"
       className="relative isolate overflow-hidden"
     >
-      {/* Background image — anchored right so figure stays visible.
-          Scaled up and shifted right so the figure sits closer to the edge. */}
+      {/* Background image — natural scale, anchored right so figure shifts left. */}
       <img
         src="/hero-bg.png"
         alt=""
         aria-hidden
-        className="absolute inset-0 -z-20 size-full object-cover object-right"
-        style={{
-          transform: "scale(1.12) translateX(7.5%)",
-          transformOrigin: "right center",
-        }}
+        className="absolute inset-0 -z-20 size-full object-cover object-[80%_center]"
       />
 
       {/* Vertical chrome — version + broadcast schedule, right edge */}
