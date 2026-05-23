@@ -120,3 +120,49 @@
 body {
   background-color: var(--bg);
 }
+
+/* Hero title word-stagger reveal — pairs with the background video's
+   ~3s visor scan. Each word fades + lifts in sequence after the scan
+   completes, like the figure is "outputting" the headline. */
+@keyframes hero-title-word-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Skeleton bars shown inside the title box while the figure is "scanning."
+   A diffuse highlight sweeps across each bar (background-position drift)
+   to read as live, working loading state — not just static placeholder. */
+@keyframes hero-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Fade-out for the skeleton container — runs at the tail of the 3s scan
+   so the skeleton hands off cleanly to the first word's fade-in.
+   Reused by the binary-decode overlay (same opacity→0 behavior). */
+@keyframes hero-skeleton-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* Fade-in for the real text that sits underneath each binary overlay —
+   resolves at the 3s mark when the figure's scan completes. */
+@keyframes hero-decode-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
