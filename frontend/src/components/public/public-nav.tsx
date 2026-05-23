@@ -9,22 +9,22 @@ export function PublicNav() {
       <div className="flex items-center justify-between px-6 py-5 sm:px-10 lg:px-16">
         <Link
           href="/"
-          className="font-display text-[18px] font-bold tracking-[0.04em] text-fg"
-          aria-label="DeLorean home"
+          className="font-display text-[18px] font-bold tracking-[0.04em] text-[#0a0a0a]"
+          aria-label="The Garage AI home"
         >
-          DE<span className="text-accent">LOR</span>EAN
+          THE GARAGE AI
         </Link>
 
         <div className="flex items-center gap-7">
           <Link
             href="/"
-            className="font-mono text-[10px] tracking-[0.25em] text-fg uppercase transition-colors hover:text-accent"
+            className="font-mono text-[10px] tracking-[0.25em] text-[#0a0a0a] uppercase transition-colors hover:text-accent"
           >
             Blog
           </Link>
           <span
             aria-disabled="true"
-            className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase"
+            className="font-mono text-[10px] tracking-[0.25em] text-[#777] uppercase"
             title="Coming soon"
           >
             About
