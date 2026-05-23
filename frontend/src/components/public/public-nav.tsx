@@ -22,13 +22,12 @@ export function PublicNav() {
           >
             Blog
           </Link>
-          <span
-            aria-disabled="true"
-            className="font-mono text-[10px] tracking-[0.25em] text-[#777] uppercase"
-            title="Coming soon"
+          <Link
+            href="/about"
+            className="font-mono text-[10px] tracking-[0.25em] text-[#0a0a0a] uppercase transition-colors hover:text-accent"
           >
             About
-          </span>
+          </Link>
         </div>
       </div>
     </nav>

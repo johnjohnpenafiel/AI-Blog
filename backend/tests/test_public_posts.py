@@ -189,3 +189,58 @@ def test_list_public_posts_respects_pagination(
     # so just assert our slice is a contiguous window of the seeded set.
     returned = [item["slug"] for item in body["items"] if item["slug"].startswith("page-")]
     assert returned == ["page-1", "page-2"]
+
+
+# ---------------------------------------------------------------------------
+# GET /public/posts/{slug}
+# ---------------------------------------------------------------------------
+
+
+def test_get_public_post_returns_detail(client: TestClient, db: Session) -> None:
+    _seed_post(
+        db,
+        slug="detail-post",
+        title="Detail Title",
+        published_at=datetime.now(timezone.utc),
+        content="word " * 300,
+    )
+
+    response = client.get("/public/posts/detail-post")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["slug"] == "detail-post"
+    assert body["title"] == "Detail Title"
+    assert "content" in body
+    assert "meta_description" in body
+    assert "sources" in body
+    assert isinstance(body["sources"], list)
+    assert body["read_time_minutes"] == 2  # 300 words ÷ 200 wpm
+
+
+def test_get_public_post_404_for_missing_slug(client: TestClient, db: Session) -> None:
+    response = client.get("/public/posts/does-not-exist")
+    assert response.status_code == 404
+
+
+def test_get_public_post_404_for_non_published(client: TestClient, db: Session) -> None:
+    _seed_post(db, slug="draft-slug", status="draft")
+    response = client.get("/public/posts/draft-slug")
+    assert response.status_code == 404
+
+
+def test_get_public_post_does_not_leak_admin_fields(
+    client: TestClient, db: Session
+) -> None:
+    _seed_post(
+        db,
+        slug="no-leak",
+        published_at=datetime.now(timezone.utc),
+    )
+
+    response = client.get("/public/posts/no-leak")
+    assert response.status_code == 200
+    body = response.json()
+    assert "status" not in body
+    assert "publishing_mode" not in body
+    assert "generation_attempt" not in body
+    assert "scheduled_at" not in body
