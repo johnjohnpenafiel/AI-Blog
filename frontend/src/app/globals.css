@@ -166,3 +166,19 @@ body {
     opacity: 1;
   }
 }
+
+/* Tight orange aura that breathes around the title panel — reinforces the
+   "active output" feel after the figure finishes its scan. Smaller blur
+   radius keeps the glow contained against the panel edge instead of
+   bleeding far into the page. */
+@keyframes hero-title-glow-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgba(255, 106, 0, 0.95))
+      drop-shadow(0 0 18px rgba(255, 106, 0, 0.55));
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(255, 106, 0, 1))
+      drop-shadow(0 0 28px rgba(255, 106, 0, 0.8));
+  }
+}

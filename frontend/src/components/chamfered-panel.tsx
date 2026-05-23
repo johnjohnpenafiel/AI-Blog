@@ -38,6 +38,11 @@ interface ChamferedPanelProps {
   className?: string;
   style?: CSSProperties;
   background?: string;
+  /**
+   * Applied to the same clipped layer as `background` so the frosted-glass
+   * blur respects the chamfer geometry. Use e.g. "blur(16px) saturate(1.2)".
+   */
+  backdropFilter?: string;
   perimeterStroke?: string;
   perimeterWidth?: number;
   chamferStroke?: string;
@@ -139,6 +144,7 @@ export function ChamferedPanel({
   className,
   style,
   background,
+  backdropFilter,
   perimeterStroke,
   perimeterWidth,
   chamferStroke,
@@ -190,6 +196,8 @@ export function ChamferedPanel({
           clipPath,
           WebkitClipPath: clipPath,
           background: fillBackground,
+          backdropFilter,
+          WebkitBackdropFilter: backdropFilter,
         }}
       />
       <div className="relative h-full w-full">{children}</div>

@@ -6,6 +6,7 @@ import { DecodingText } from "@/components/decoding-text";
 import { Tag } from "@/components/tag";
 import { getIssueLabel } from "@/lib/get-issue-label";
 import type { PublicPostListItem } from "@/lib/public-api";
+import { cn } from "@/lib/utils";
 
 interface HeroProps {
   coverPost: PublicPostListItem;
@@ -48,13 +49,6 @@ export function Hero({ coverPost, allPosts }: HeroProps) {
         className="absolute top-0 left-0 -z-20 hidden h-screen w-full object-cover object-[80%_center] lg:block"
       />
 
-      {/* Subtle tint above the video — knocks the bright whites down a notch
-          for better text contrast without obscuring the figure. Desktop only,
-          since mobile's flat background is already slightly muted. */}
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-10 hidden bg-black/[0.06] lg:block"
-      />
 
       {/* Vertical chrome — version + broadcast schedule, right edge */}
       <div
@@ -76,7 +70,7 @@ export function Hero({ coverPost, allPosts }: HeroProps) {
       {/* Content — constrained to the left half so it clears the figure. */}
       <div className="relative flex min-h-[640px] flex-col justify-start gap-6 px-6 pt-20 pb-12 sm:gap-8 sm:px-10 sm:pt-24 sm:pb-14 lg:min-h-screen lg:w-[55%] lg:gap-10 lg:px-16 lg:pt-28 lg:pb-16">
         <div className="flex items-center gap-3 font-mono text-[10px] tracking-[0.25em] uppercase">
-          <span className="text-accent">
+          <span className="text-black">
             <DecodingText>{"// COVER STORY"}</DecodingText>
           </span>
           <span className="hidden h-px w-10 bg-[#1a1a1a]/30 sm:block" />
@@ -88,10 +82,12 @@ export function Hero({ coverPost, allPosts }: HeroProps) {
         <ChamferedPanel
           tier="component"
           size="card"
-          background="#000"
+          background="rgba(150, 160, 175, 0.45)"
+          backdropFilter="blur(18px) saturate(1.3)"
+          perimeterStroke="rgba(255, 255, 255, 0.5)"
           className="max-w-[640px]"
         >
-          <h1 className="relative px-5 py-3 font-display text-[22px] leading-[1.1] font-bold tracking-[0.01em] text-white sm:text-[28px] md:text-[36px] lg:text-[40px] xl:text-[48px]">
+          <h1 className="relative px-5 py-3 font-display text-[22px] leading-[1.1] font-bold tracking-[0.01em] text-black sm:text-[28px] md:text-[36px] lg:text-[40px] xl:text-[48px]">
           {/* Skeleton + word stagger — desktop only. On mobile the figure
               isn't shown, so there's no "scanning" narrative to support. */}
           <span
@@ -105,7 +101,7 @@ export function Hero({ coverPost, allPosts }: HeroProps) {
                 style={{
                   width: `${w}%`,
                   backgroundImage:
-                    "linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.08) 100%)",
+                    "linear-gradient(90deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.22) 50%, rgba(0,0,0,0.08) 100%)",
                   backgroundSize: "200% 100%",
                   animationDelay: `${i * 200}ms`,
                 }}
@@ -113,17 +109,26 @@ export function Hero({ coverPost, allPosts }: HeroProps) {
             ))}
           </span>
 
-          {coverPost.title.split(" ").map((word, i, arr) => (
-            <Fragment key={i}>
-              <span
-                className="inline-block lg:motion-safe:opacity-0 lg:motion-safe:[animation:hero-title-word-in_0.45s_ease-out_forwards]"
-                style={{ animationDelay: `${3000 + i * 80}ms` }}
-              >
-                {word}
-              </span>
-              {i < arr.length - 1 ? " " : ""}
-            </Fragment>
-          ))}
+          {coverPost.title.split(" ").map((word, i, arr) => {
+            // Two-tone treatment per the design system: all-caps acronyms
+            // (AI, CRM, OT, etc.) take the accent color so the technical
+            // terms pop against the white-on-black body of the title.
+            const isAcronym = /^[A-Z]{2,}$/.test(word);
+            return (
+              <Fragment key={i}>
+                <span
+                  className={cn(
+                    "inline-block lg:motion-safe:opacity-0 lg:motion-safe:[animation:hero-title-word-in_0.45s_ease-out_forwards]",
+                    isAcronym && "text-accent",
+                  )}
+                  style={{ animationDelay: `${3000 + i * 80}ms` }}
+                >
+                  {word}
+                </span>
+                {i < arr.length - 1 ? " " : ""}
+              </Fragment>
+            );
+          })}
         </h1>
         </ChamferedPanel>
 
