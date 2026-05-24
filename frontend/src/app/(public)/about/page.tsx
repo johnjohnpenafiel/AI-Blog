@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
 
-import { ChamferedPanel } from "@/components/chamfered-panel";
-import { GlowOrb } from "@/components/public/glow-orb";
-
 export const metadata: Metadata = {
   title: "About — The Garage AI",
   description:
@@ -13,7 +10,7 @@ const sections = [
   {
     index: "01",
     label: "What We Cover",
-    body: `The Garage AI tracks the intersection of artificial intelligence and automotive operations — the software, services, and strategies reshaping how dealerships sell, service, and manage vehicles. We focus on what operators and executives actually need to know: voice AI changing the service drive, pricing and inventory tools built on machine learning, CRM modernization, and the quiet infrastructure shifts that precede the visible ones. No car enthusiasm, no consumer reviews. Just operational intelligence for the people running the business.`,
+    body: `The Garage AI tracks the intersection of artificial intelligence and automotive operations — the software, services, and strategies reshaping how dealerships sell, service, and manage vehicles. We focus on what operators and executives actually need to know: voice AI changing the service drive, pricing and inventory tools built on machine learning, CRM modernization, and the quiet infrastructure shifts that precede the visible ones. No car enthusiasm, no consumer reviews — just operational intelligence for the people running the business.`,
   },
   {
     index: "02",
@@ -25,62 +22,50 @@ const sections = [
 export default function AboutPage() {
   return (
     <>
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden">
-        <GlowOrb
-          size={1000}
-          className="-top-60 left-1/2 -translate-x-1/2 opacity-80"
-        />
-
-        <div className="relative mx-auto flex min-h-[100vh] max-w-5xl flex-col justify-center px-6 py-28">
-          <div className="h-px w-full bg-[var(--border-dim)]" />
-
-          <div className="mt-4 font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
-            <span className="text-accent">{"// ABOUT THE GARAGE AI"}</span>
+      {/* Hero — matches the public hero pattern (bg-bg, responsive padding,
+          cover-story-style label, font-display title, Inter body intro). */}
+      <section className="relative isolate min-h-[640px] overflow-hidden bg-bg px-6 pt-20 pb-12 sm:px-10 sm:pt-24 sm:pb-14 lg:px-16 lg:pt-28 lg:pb-16">
+        <div className="flex flex-col justify-start gap-8 sm:gap-10 lg:gap-12">
+          <div className="flex items-center gap-3 font-mono text-[11px] tracking-[0.25em] text-white uppercase">
+            <span>{"// ABOUT"}</span>
+            <span className="hidden h-px w-10 bg-white/20 sm:block" />
+            <span>The Garage AI</span>
           </div>
 
-          <h1 className="mt-8 font-display text-[48px] font-bold leading-[1.05] tracking-[0.01em] text-fg sm:text-[64px] md:text-[80px]">
-            The Pulse of{" "}
-            <span className="text-accent">AI and Technology</span>{" "}
-            Reshaping the Automotive Industry
+          <h1 className="max-w-[760px] font-display text-[30px] leading-[1.1] font-bold tracking-[0.01em] text-white sm:text-[38px] md:text-[46px] lg:text-[54px] xl:text-[64px]">
+            The pulse of <span className="text-accent">AI</span> and technology
+            reshaping the automotive industry.
           </h1>
 
-          <div className="mt-8 h-px w-full bg-[var(--border-dim)]" />
-
-          <p className="mt-6 max-w-2xl font-mono text-[11px] leading-relaxed tracking-[0.15em] text-muted uppercase">
+          <p className="max-w-none font-sans text-[17px] leading-[1.6] text-white lg:max-w-2xl">
             Automated twice-weekly dispatches on the software, services, and
-            strategies transforming how dealerships and automotive operators
-            do business.
+            strategies transforming how dealerships and automotive operators do
+            business.
           </p>
         </div>
       </section>
 
-      {/* Content sections */}
-      <div className="mx-auto max-w-5xl space-y-6 px-6 pb-24">
+      {/* Sections — same horizontal padding system as the index, simple
+          label + rule headers, Inter body paragraphs. */}
+      <section className="flex flex-col gap-16 px-6 py-12 sm:gap-20 sm:px-10 sm:py-14 lg:gap-24 lg:px-16 lg:py-16">
         {sections.map((section) => (
-          <ChamferedPanel
-            key={section.index}
-            tier="component"
-            size="card"
-            cut="single"
-          >
-            <div className="px-8 py-8">
-              <div className="mb-4 flex items-center gap-3">
-                <span className="font-mono text-[10px] tracking-[0.25em] text-accent">
-                  {`// ${section.index}`}
-                </span>
-                <span className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
-                  {section.label}
-                </span>
-                <span className="h-px flex-1 bg-[var(--border-dim)]" />
-              </div>
-              <p className="max-w-3xl text-[16px] leading-[1.75] text-fg/85">
-                {section.body}
-              </p>
+          <div key={section.index}>
+            <div className="flex items-center gap-4">
+              <span className="font-mono text-[10px] tracking-[0.25em] text-accent uppercase">
+                {`// ${section.index}`}
+              </span>
+              <span className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
+                {section.label}
+              </span>
+              <span className="h-px flex-1 bg-[var(--border-dim)]" />
             </div>
-          </ChamferedPanel>
+
+            <p className="mt-6 max-w-3xl font-sans text-[17px] leading-[1.7] text-fg">
+              {section.body}
+            </p>
+          </div>
         ))}
-      </div>
+      </section>
     </>
   );
 }
