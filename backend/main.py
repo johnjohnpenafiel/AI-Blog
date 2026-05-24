@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
         shutdown_scheduler()
 
 
-app = FastAPI(title="DeLorean Backend", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="The Garage AI Backend", version="0.1.0", lifespan=lifespan)
 
 app.include_router(auth.router)
 app.include_router(pipeline.router)

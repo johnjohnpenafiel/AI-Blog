@@ -8,7 +8,7 @@ import { listPublicPosts } from "@/lib/public-api";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "DeLorean — AI in the automotive industry",
+  title: "The Garage AI — AI in the automotive industry",
   description:
     "Twice-weekly dispatches on AI and operational technology reshaping the automotive industry.",
 };

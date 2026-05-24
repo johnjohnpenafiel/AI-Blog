@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   try {
     const post = await getPublicPost(slug);
     return {
-      title: `${post.title} — DeLorean`,
+      title: `${post.title} — The Garage AI`,
       description: post.meta_description,
       openGraph: {
         title: post.title,
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
       },
     };
   } catch {
-    return { title: "Post — DeLorean" };
+    return { title: "Post — The Garage AI" };
   }
 }
 

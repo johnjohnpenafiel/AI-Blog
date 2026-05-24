@@ -90,7 +90,7 @@
 
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains-mono);
-  --font-display: var(--font-chakra-petch);
+  --font-display: var(--font-fraunces);
 }
 
 /* Running pipeline status dot — slow, calm "breathing" pulse.

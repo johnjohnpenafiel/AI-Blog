@@ -36,10 +36,24 @@ export function PostsIndex({ posts }: PostsIndexProps) {
   return (
     <section
       data-testid="posts-index"
-      className="mx-auto max-w-6xl px-6 py-10"
+      className="px-6 py-12 sm:px-10 sm:py-14 lg:px-16 lg:py-16"
     >
+      <div className="flex items-center gap-4">
+        <span className="font-mono text-[10px] tracking-[0.25em] text-accent uppercase">
+          {"// THE INDEX"}
+        </span>
+        <span className="h-px flex-1 bg-[var(--border-dim)]" />
+        <span className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
+          {filtered.length} {filtered.length === 1 ? "TRANSMISSION" : "TRANSMISSIONS"}
+        </span>
+      </div>
+
+      <h2 className="mt-4 font-display text-[28px] font-bold tracking-[0.02em] text-fg sm:text-[34px]">
+        Latest dispatches
+      </h2>
+
       <div
-        className="flex flex-wrap gap-2"
+        className="mt-8 flex flex-wrap gap-2"
         role="group"
         aria-label="Filter posts by tag"
       >
@@ -57,20 +71,6 @@ export function PostsIndex({ posts }: PostsIndexProps) {
           />
         ))}
       </div>
-
-      <div className="mt-12 flex items-center gap-4">
-        <span className="font-mono text-[10px] tracking-[0.25em] text-accent uppercase">
-          {"// THE INDEX"}
-        </span>
-        <span className="h-px flex-1 bg-[var(--border-dim)]" />
-        <span className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
-          {filtered.length} {filtered.length === 1 ? "TRANSMISSION" : "TRANSMISSIONS"}
-        </span>
-      </div>
-
-      <h2 className="mt-4 font-display text-[28px] font-bold tracking-[0.02em] text-fg sm:text-[34px]">
-        Latest dispatches
-      </h2>
 
       <div className="mt-10 flex flex-col gap-6">
         {filtered.length === 0 ? (

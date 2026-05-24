@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Chakra_Petch, Inter, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "800", "900"],
+  weight: ["400", "500", "600", "800", "900"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -14,14 +14,14 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
-const chakraPetch = Chakra_Petch({
-  variable: "--font-chakra-petch",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
-  title: "DeLorean",
+  title: "The Garage AI",
   description: "AI and operational technology in the automotive industry.",
 };
 
@@ -33,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable} ${chakraPetch.variable} h-full antialiased`}
+      className={`${inter.variable} ${jetbrainsMono.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-bg bg-fixed font-sans text-fg">
         <Providers>{children}</Providers>

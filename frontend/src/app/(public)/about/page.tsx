@@ -4,26 +4,21 @@ import { ChamferedPanel } from "@/components/chamfered-panel";
 import { GlowOrb } from "@/components/public/glow-orb";
 
 export const metadata: Metadata = {
-  title: "About — DeLorean",
+  title: "About — The Garage AI",
   description:
-    "DeLorean is an automated twice-weekly blog covering AI and operational technology developments in the automotive industry.",
+    "The Garage AI is an automated twice-weekly blog covering AI and operational technology developments in the automotive industry.",
 };
 
 const sections = [
   {
     index: "01",
     label: "What We Cover",
-    body: `DeLorean tracks the intersection of artificial intelligence and automotive operations — the software, services, and strategies reshaping how dealerships sell, service, and manage vehicles. We focus on what operators and executives actually need to know: voice AI changing the service drive, pricing and inventory tools built on machine learning, CRM modernization, and the quiet infrastructure shifts that precede the visible ones. No car enthusiasm, no consumer reviews. Just operational intelligence for the people running the business.`,
+    body: `The Garage AI tracks the intersection of artificial intelligence and automotive operations — the software, services, and strategies reshaping how dealerships sell, service, and manage vehicles. We focus on what operators and executives actually need to know: voice AI changing the service drive, pricing and inventory tools built on machine learning, CRM modernization, and the quiet infrastructure shifts that precede the visible ones. No car enthusiasm, no consumer reviews. Just operational intelligence for the people running the business.`,
   },
   {
     index: "02",
     label: "How It Works",
     body: `Every Monday and Thursday at 8 AM, an automated pipeline queries Perplexity Sonar for recent automotive AI news, identifies the most relevant developments of the past week, and sends those sources to Claude — Anthropic's large language model — to synthesize into a 600–900 word post. The result is reviewed, accepted, and published. No human journalist in the loop; the editorial judgment is in the pipeline design. Sources are listed on every post because transparency about how the content is made is part of the editorial contract with readers.`,
-  },
-  {
-    index: "03",
-    label: "The Name",
-    body: `The DeLorean DMC-12 was a car built around a radical idea: stainless steel body panels, gull-wing doors, a rear-mounted engine. It was ahead of its time in ambition, if not always in execution. The name fits a publication about technology that is actively rewriting how an old industry operates — and the retrofuturist aesthetic of the design is a deliberate nod to what it feels like to sit at that intersection. Something classic, something accelerating toward something else.`,
   },
 ];
 
@@ -41,7 +36,7 @@ export default function AboutPage() {
           <div className="h-px w-full bg-[var(--border-dim)]" />
 
           <div className="mt-4 font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
-            <span className="text-accent">{"// ABOUT DELOREAN"}</span>
+            <span className="text-accent">{"// ABOUT THE GARAGE AI"}</span>
           </div>
 
           <h1 className="mt-8 font-display text-[48px] font-bold leading-[1.05] tracking-[0.01em] text-fg sm:text-[64px] md:text-[80px]">

@@ -9,11 +9,18 @@ interface TagProps {
   label: ReactNode;
   active?: boolean;
   /**
-   * `on-light` swaps to the darker accent (`--accent-dim`) and black text so
-   * the tag has enough contrast on a light background (e.g. the public hero).
-   * Default is tuned for the dark chassis.
+   * - `default`           — muted gray text, tuned for the dark chassis.
+   * - `on-light`          — black text, for use on light backgrounds.
+   * - `on-dark-prominent` — white text, for prominent placements on dark
+   *                         backgrounds (e.g. the public hero).
    */
-  variant?: "default" | "on-light";
+  variant?: "default" | "on-light" | "on-dark-prominent";
+  /**
+   * - `sm` (default) — compact chip used in post cards, filter rows, etc.
+   * - `md`           — slightly larger chip for prominent placements like
+   *                    the public hero.
+   */
+  size?: "sm" | "md";
   className?: string;
 }
 
@@ -21,11 +28,20 @@ export function Tag({
   label,
   active = false,
   variant = "default",
+  size = "sm",
   className,
 }: TagProps) {
-  const onLight = variant === "on-light";
   const perimeter = "var(--accent)";
-  const inactiveText = onLight ? "text-black" : "text-muted";
+  const inactiveText =
+    variant === "on-light"
+      ? "text-black"
+      : variant === "on-dark-prominent"
+        ? "text-white"
+        : "text-muted";
+  const sizeClasses =
+    size === "md"
+      ? "px-3 py-1.5 text-[11px]"
+      : "px-2 py-1 text-[9px]";
 
   return (
     <ChamferedPanel
@@ -38,7 +54,8 @@ export function Tag({
     >
       <span
         className={cn(
-          "block px-2 py-1 font-mono text-[9px] tracking-[0.2em] uppercase whitespace-nowrap",
+          "block font-mono tracking-[0.2em] uppercase whitespace-nowrap",
+          sizeClasses,
           active ? "text-accent" : inactiveText,
         )}
       >

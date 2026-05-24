@@ -46,7 +46,7 @@ export function LoginForm() {
       />
 
       <p className="mb-8 font-mono text-xs tracking-[0.2em] text-muted uppercase">
-        DeLorean / Admin
+        The Garage AI / Admin
       </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
