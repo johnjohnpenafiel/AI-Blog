@@ -438,3 +438,7 @@ These were considered and explicitly cut from the MVP filter feature. Sequence a
 - **Goal:** Redefine `publishing_mode = auto` so it only ever fills the *next scheduled Mon/Thu slot*, never publishes immediately on manual trigger. Extras generated in a single run get auto-scheduled into subsequent Mon/Thu slots instead of all going live at once. Pairs with `multi-cluster-pipeline` — together they turn a single rich run into a queue of dated future posts.
 - **Why:** Current `auto` mode publishes whatever it makes the instant it makes it. That's fine for the one-post-per-run cadence, but once we generate multiple posts per run we'd flood the blog with a burst then go silent. Decoupling "generate" from "publish" via the existing scheduled-publisher cron is the clean fix.
 - **Open questions:** what cadence-collision rule applies when a queue is full at the next scheduled run time? Skip? Stack deeper? Punted to that feature's plan.
+
+#### `news-fetcher-repetition-fix`
+- **Goal:** Stop the pipeline from producing near-identical posts across runs. Live verification on 2026-05-26 showed the same category (Voice AI) winning every run, with the same source articles surfacing day-over-day even though `search_recency_filter` is `"week"`.
+- **See:** `notes/news-fetcher-repetition-fix.md` for the full analysis — root cause, three implementation options (recent-tag exclusion, URL re-use filter, manual category schedule), recommended starting point, and the signals to revisit on.
