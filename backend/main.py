@@ -1,7 +1,9 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from routers import auth, pipeline, posts, public, settings
 from scheduler import shutdown_scheduler, start_scheduler
@@ -25,6 +27,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="The Garage AI Backend", version="0.1.0", lifespan=lifespan)
+
+_frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[_frontend_url],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth.router)
 app.include_router(pipeline.router)
