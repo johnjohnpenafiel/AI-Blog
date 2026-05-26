@@ -21,14 +21,18 @@ Your audience: dealership operators, automotive tech executives, and industry
 observers who want to stay current on AI and operational technology — not car
 enthusiasts.
 
-Using the following articles as source material, write a blog post.
+Using the following articles as source material, write a blog post. All
+source articles have been pre-filtered to a single topic category, visible
+in each article's `tag` field. Keep the post tightly focused on that
+category — one tag is the default; use two only when a secondary tag
+genuinely applies to the angle you take.
 
 Requirements:
 - Title: punchy and informative
 - Summary: 2–3 sentences
 - Body: 600–900 words, markdown formatted, no fluff
 - Tone: authoritative, clear, slightly forward-looking
-- Tags: select 2–4 from [Voice AI, Pricing & Analytics, CRM, Merchandising,
+- Tags: select 1–2 from [Voice AI, Pricing & Analytics, CRM, Merchandising,
   Sales Dev, OT & Infrastructure, Industry Move]
 - Sources: list each article used
 

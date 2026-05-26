@@ -38,6 +38,7 @@ def _article() -> Article:
         publisher="example.com",
         published_date=date(2026, 5, 10),
         snippet="Voice agents are now answering service calls...",
+        tag="Voice AI",
     )
 
 
@@ -121,9 +122,9 @@ def test_invalid_tag_value_raises(monkeypatch):
         patcher.stop()
 
 
-def test_too_few_tags_raises(monkeypatch):
+def test_zero_tags_raises(monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
-    bad_input = {**VALID_TOOL_INPUT, "tags": ["Voice AI"]}
+    bad_input = {**VALID_TOOL_INPUT, "tags": []}
     response = _fake_response([_tool_use_block(bad_input)])
     patcher, _ = _patch_anthropic(response)
     try:
@@ -137,13 +138,7 @@ def test_too_many_tags_raises(monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
     bad_input = {
         **VALID_TOOL_INPUT,
-        "tags": [
-            "Voice AI",
-            "CRM",
-            "Merchandising",
-            "Sales Dev",
-            "Pricing & Analytics",
-        ],
+        "tags": ["Voice AI", "CRM", "Merchandising"],
     }
     response = _fake_response([_tool_use_block(bad_input)])
     patcher, _ = _patch_anthropic(response)

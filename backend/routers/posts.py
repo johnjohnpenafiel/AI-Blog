@@ -126,6 +126,10 @@ def regenerate_post(
     post = _load_post_or_404(db, post_id)
     _require_pending_review(post)
 
+    # Reconstruct Articles from this post's persisted sources for the
+    # re-generation call. Use the post's primary tag so the regenerated
+    # post stays in the same category as the original.
+    primary_tag = post.tags[0] if post.tags else ""
     articles = [
         Article(
             title=src.title,
@@ -133,6 +137,7 @@ def regenerate_post(
             publisher=src.publisher,
             published_date=src.published_date,
             snippet="",
+            tag=primary_tag,
         )
         for src in post.sources
     ]

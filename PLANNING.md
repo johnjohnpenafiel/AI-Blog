@@ -194,19 +194,25 @@ Notes:
 
 ### Step 1 — News fetching (`backend/services/news_fetcher.py`)
 
-Send intent-based queries to Perplexity Sonar's `/search` endpoint in a single batched call (`query: string[]`, `search_recency_filter: "week"`):
+Send seven news-flavored queries to Perplexity Sonar's `/search` endpoint, **one HTTP call per query** (not batched) so each result's source query — and therefore its post tag — is known by attribution. Every request applies `search_recency_filter: "week"` and a `search_domain_filter` allowlist of ~18 curated automotive / tech / business news outlets (second-layer safety against vendor product pages).
 
-- `"AI tools being used in car dealerships past 2 weeks"`
-- `"AI voice agents for automotive sales and customer service"`
-- `"dealership CRM modernization AI"`
-- `"automotive merchandising inspection automation"`
-- `"tech companies entering automotive operations"`
+Each query maps 1:1 to one of the seven official post tags:
 
-Sonar returns pre-filtered, relevant results with source citations. No additional relevance filtering. Minimum threshold: 3 qualifying articles to proceed; below threshold the run is skipped and logged.
+| Tag | Query |
+|---|---|
+| Voice AI | `news: AI voice agents transforming automotive sales and customer service` |
+| CRM | `news: dealership CRM modernization trends 2026` |
+| Merchandising | `news reports: automated vehicle inspection tools at dealerships` |
+| Industry Move | `news: tech companies launching automotive retail products` |
+| Pricing & Analytics | `news: vehicle pricing intelligence and data analytics for car dealerships 2026` |
+| Sales Dev | `news: AI lead generation and BDC automation in automotive retail 2026` |
+| OT & Infrastructure | `news: dealership management systems and operational tech modernization 2026` |
+
+Articles inherit the tag of the query that surfaced them. Results are deduped by URL (first-seen wins) and grouped by tag into clusters. The **largest cluster wins**; ties are broken by preferring a tag different from the most recently published post (DB lookup against `posts` table). The ≥3 article threshold applies to the **winning cluster, not the total pool** — a run where no single category reaches 3 articles is skipped, keeping generated posts focused on one topic instead of forcing a mash-up. Only the winning cluster's articles are returned to the blog writer.
 
 ### Step 2 — Blog generation (`backend/services/blog_writer.py`)
 
-Send qualifying articles to Claude with the prompt below. Claude returns JSON with `title`, `slug`, `summary`, `meta_description`, `body` (Markdown), `tags` (2–4 of: Voice AI, Pricing & Analytics, CRM, Merchandising, Sales Dev, OT & Infrastructure, Industry Move), and `sources`.
+Send the winning cluster's articles to Claude with the prompt below. Claude returns JSON with `title`, `slug`, `summary`, `meta_description`, `body` (Markdown), `tags` (1–2 of: Voice AI, Pricing & Analytics, CRM, Merchandising, Sales Dev, OT & Infrastructure, Industry Move), and `sources`. Because the input is already pre-grouped into one category, posts come out focused on one (occasionally two) tag(s) instead of mixing three or four.
 
 #### Prompt
 
@@ -224,7 +230,7 @@ Requirements:
 - Summary: 2–3 sentences
 - Body: 600–900 words, markdown formatted, no fluff
 - Tone: authoritative, clear, slightly forward-looking
-- Tags: select 2–4 from [Voice AI, Pricing & Analytics, CRM, Merchandising,
+- Tags: select 1–2 from [Voice AI, Pricing & Analytics, CRM, Merchandising,
   Sales Dev, OT & Infrastructure, Industry Move]
 - Sources: list each article used
 
@@ -402,9 +408,8 @@ Each entry below is one `/start-feature <name>` plan. Features are sized to ship
 - **Goal:** Retry + backoff on Claude/Perplexity failures + structured error logs + graceful skip on permanent failure
 - **Done when:** Forced failure triggers retry; permanent failure logs and skips cleanly without partial DB state
 
-#### `news-fetcher-quality-filter`
-- **Goal:** Filter non-news content (vendor product pages, marketing landing pages) out of Sonar `/search` results inside `news_fetcher` itself, so the ≥3 threshold counts only real news. Approach TBD — options include: tighter Sonar query phrasing, `search_domain_filter` blocklist of known vendor domains, a small Claude classification call per result, or a rule-based heuristic on URL/snippet patterns.
-- **Why:** First smoke test (2026-05-15) of news-fetcher returned 10 articles, 3 of which were vendor product pages (e.g. `owini.ai`, `drivecentric.com`, `spyne.ai`) rather than news articles. Filtering downstream in `blog-writer` would entangle relevance with synthesis and would let marketing pages consume slots that real news could've filled — pushing borderline runs under the threshold for the wrong reason. Per PLANNING.md, news-fetcher's job is news aggregation; this is a fetch-layer correctness gap.
+#### `news-fetcher-quality-filter` *Done*
+- **Goal:** Filter non-news content (vendor product pages, marketing landing pages) out of Sonar `/search` results inside `news_fetcher` itself, so the ≥3 threshold counts only real news. Shipped with three layers: (1) `news:`-prefixed query phrasing, (2) `search_domain_filter` allowlist of ~18 curated news outlets, (3) per-tag query attribution + cluster-picking so the ≥3 threshold applies to a single category rather than the raw pool. Also narrowed blog-writer output from 2–4 tags to 1–2.
 - **Done when:** Across a representative sample of real Sonar runs, ≥80% of returned articles are news (not vendor/marketing); the threshold logic operates on filtered counts.
 
 #### `ui-polish`
@@ -418,3 +423,22 @@ Each entry below is one `/start-feature <name>` plan. Features are sized to ship
 #### `deploy`
 - **Goal:** Deploy to Railway or Render with persistent Postgres + DNS
 - **Done when:** Production URL serves the blog; admin login works; scheduler fires on schedule
+
+---
+
+### Post-MVP — Deferred from `news-fetcher-quality-filter`
+
+These were considered and explicitly cut from the MVP filter feature. Sequence after deploy.
+
+#### `multi-cluster-pipeline` (Option B)
+- **Goal:** Generate posts for ALL qualifying clusters in a single pipeline run, not just the winning one. Today the run picks one cluster and discards the rest of the fetched articles; this captures that wasted work as queued posts.
+- **Done when:** A pipeline run with N qualifying clusters produces N posts. Routing decision below.
+
+#### `auto-mode-fills-scheduled-slots`
+- **Goal:** Redefine `publishing_mode = auto` so it only ever fills the *next scheduled Mon/Thu slot*, never publishes immediately on manual trigger. Extras generated in a single run get auto-scheduled into subsequent Mon/Thu slots instead of all going live at once. Pairs with `multi-cluster-pipeline` — together they turn a single rich run into a queue of dated future posts.
+- **Why:** Current `auto` mode publishes whatever it makes the instant it makes it. That's fine for the one-post-per-run cadence, but once we generate multiple posts per run we'd flood the blog with a burst then go silent. Decoupling "generate" from "publish" via the existing scheduled-publisher cron is the clean fix.
+- **Open questions:** what cadence-collision rule applies when a queue is full at the next scheduled run time? Skip? Stack deeper? Punted to that feature's plan.
+
+#### `news-fetcher-repetition-fix`
+- **Goal:** Stop the pipeline from producing near-identical posts across runs. Live verification on 2026-05-26 showed the same category (Voice AI) winning every run, with the same source articles surfacing day-over-day even though `search_recency_filter` is `"week"`.
+- **See:** `notes/news-fetcher-repetition-fix.md` for the full analysis — root cause, three implementation options (recent-tag exclusion, URL re-use filter, manual category schedule), recommended starting point, and the signals to revisit on.

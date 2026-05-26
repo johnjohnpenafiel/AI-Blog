@@ -28,5 +28,5 @@ class GeneratedPost(BaseModel):
     summary: str = Field(min_length=1)
     meta_description: str = Field(min_length=1)
     body: str = Field(min_length=1)
-    tags: list[AllowedTag] = Field(min_length=2, max_length=4)
+    tags: list[AllowedTag] = Field(min_length=1, max_length=2)
     sources: list[GeneratedSource] = Field(min_length=1)
