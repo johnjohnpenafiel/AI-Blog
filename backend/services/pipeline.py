@@ -110,7 +110,7 @@ def run_pipeline(db: Session) -> PipelineResult:
     mode = settings.publishing_mode
     logger.info("pipeline run starting (publishing_mode=%s)", mode)
 
-    articles = fetch_qualifying_articles()
+    articles = fetch_qualifying_articles(db)
 
     if not articles:
         settings.last_run_at = datetime.now(timezone.utc)
