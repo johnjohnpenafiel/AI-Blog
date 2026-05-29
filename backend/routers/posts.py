@@ -1,7 +1,7 @@
 """Admin posts router — list, detail, accept, reject, regenerate.
 
-No auth enforced here (matches the existing /pipeline/* pattern). When auth
-is added, the same dependency should cover both surfaces.
+Guarded by `require_api_key` at the router level: every route requires the
+shared `Authorization: Bearer <secret>` header forwarded by the Next.js proxy.
 """
 import logging
 import uuid
@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, selectinload
 
 from database import get_db
+from dependencies import require_api_key
 from models import Post, Source
 from schemas.posts import (
     AcceptRequest,
@@ -26,7 +27,11 @@ from services.pipeline import overwrite_generated_post
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/posts", tags=["posts"])
+router = APIRouter(
+    prefix="/posts",
+    tags=["posts"],
+    dependencies=[Depends(require_api_key)],
+)
 
 
 def _load_post_or_404(db: Session, post_id: uuid.UUID) -> Post:

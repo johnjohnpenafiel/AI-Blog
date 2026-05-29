@@ -2,10 +2,15 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from database import get_db
+from dependencies import require_api_key
 from models import Setting
 from schemas.settings import SettingsOut, SettingsUpdate
 
-router = APIRouter(prefix="/settings", tags=["settings"])
+router = APIRouter(
+    prefix="/settings",
+    tags=["settings"],
+    dependencies=[Depends(require_api_key)],
+)
 
 
 def _load_settings(db: Session) -> Setting:

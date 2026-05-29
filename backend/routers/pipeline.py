@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from database import get_db
+from dependencies import require_api_key
 from models import Setting
 from schemas.pipeline import (
     PipelineRunSkipped,
@@ -16,7 +17,11 @@ from services.pipeline import (
     run_pipeline,
 )
 
-router = APIRouter(prefix="/pipeline", tags=["pipeline"])
+router = APIRouter(
+    prefix="/pipeline",
+    tags=["pipeline"],
+    dependencies=[Depends(require_api_key)],
+)
 
 # Bare module-level flag is intentional: single admin + cron, race window
 # is implausible. A threading.Lock wouldn't help under multi-worker either
