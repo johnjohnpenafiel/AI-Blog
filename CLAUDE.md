@@ -1,6 +1,8 @@
-# AI-Blog (DeLorean)
+# AI-Blog (The Garage AI)
 
-Automated twice-weekly blog on AI and operational technology in the automotive industry. The pipeline runs on a fixed Monday + Thursday cadence at 8 AM. Two surfaces: a public-facing blog (DeLorean) and a private admin dashboard for the single operator.
+Automated twice-weekly blog on AI and operational technology in the automotive industry. The pipeline runs on a fixed Monday + Thursday cadence at 8 AM. Two surfaces: a public-facing blog (The Garage AI) and a private admin dashboard for the single operator.
+
+> **Naming:** "The Garage AI" is the public brand used everywhere in code and user-facing surfaces. "DeLorean" is the internal codename, retained only in the design language (`Design/README.md`) and historical decision-log entries.
 
 # Bash commands
 
@@ -68,7 +70,7 @@ A "feature" is net-new user-facing functionality. Bugs, hotfixes, dependency upg
 
 # Gotchas
 
-- The single admin user is created via `backend/scripts/seed_admin.py`, not through any UI. There is no registration flow. Password resets go through `backend/scripts/reset_admin_password.py`.
+- The single admin user is created via `backend/scripts/seed_admin.py`, not through any UI. There is no registration flow. There is no password-reset script or UI yet — `seed_admin.py` is find-or-create and won't update an existing user's password (delete the `users` row and re-seed with a new `ADMIN_PASSWORD`, or update the row directly).
 - APScheduler must run inside the FastAPI process — if you split the backend across workers, only one worker should own the scheduler, or jobs will fire multiple times.
 - The pipeline (`POST /pipeline/run`) requires both `ANTHROPIC_API_KEY` and `PERPLEXITY_API_KEY` set in `.env`. A run with fewer than 3 qualifying articles from Perplexity skips the run entirely (logged, not retried).
 - `publishing_mode` is snapshotted onto the post at generation time — changing the global setting later does NOT retroactively change posts already in the queue.

@@ -1,14 +1,16 @@
-# DeLorean — UI Design Brief (v2.0)
+# The Garage AI — UI Design Brief (v2.0)
+
+> **Naming:** "The Garage AI" is the product's public brand (used everywhere in code and user-facing copy). "DeLorean" was the internal codename and lives on here only as the *retrofuturist design inspiration* — the DeLorean car / Back to the Future aesthetic that drives the visual language. Where this doc references "DeLorean" below, it means that aesthetic, not the product name.
 
 > **v2.0 — May 2026.** Major language overhaul: orange accent on inverted-depth chassis, Chakra Petch display type, chamfered geometry as the signature visual system, and a two-tier border hierarchy. Applies to **both surfaces** (public blog + admin dashboard).
 >
 > Companion file: `Desktop/delorean-design-language.html` is the visual spec sheet for the admin dashboard. This README is the dev-facing source of truth and extends the language across the public blog.
 
-## What Is DeLorean
+## What Is The Garage AI
 
-DeLorean is an automated twice-weekly blog covering AI and operational technology developments in the automotive industry. It has two surfaces:
+The Garage AI is an automated twice-weekly blog covering AI and operational technology developments in the automotive industry. It has two surfaces:
 
-- **Public Blog (DeLorean)** — where readers discover and read posts
+- **Public Blog (The Garage AI)** — where readers discover and read posts
 - **Admin Dashboard** — where a single operator manages the publishing pipeline
 
 This document defines the visual design direction and page-by-page UI structure for both surfaces. Use this as the source of truth when building or designing any UI component.
@@ -52,7 +54,7 @@ The reference feeling: a premium engineering publication crossed with a fighter-
 
 ### Depth Hierarchy (Inverted Layering)
 
-DeLorean **inverts conventional dark UI layering.** Most dark interfaces make cards *lighter* than the body to feel raised. Here, the major structural panels (sidebar, main shell) are **pure black — darker than the body** — so they read as **recessed cuts into the chassis** rather than panels stacked on top. The body itself carries a faint orange grid that gives texture to the chassis surface, making the pure-black recesses feel cleaner and more deliberate by contrast.
+The Garage AI **inverts conventional dark UI layering.** Most dark interfaces make cards *lighter* than the body to feel raised. Here, the major structural panels (sidebar, main shell) are **pure black — darker than the body** — so they read as **recessed cuts into the chassis** rather than panels stacked on top. The body itself carries a faint orange grid that gives texture to the chassis surface, making the pure-black recesses feel cleaner and more deliberate by contrast.
 
 Four layers, back-to-front:
 
@@ -80,7 +82,7 @@ The reading: **cards sit on top of the structural shell, which is recessed into 
 
 ### Chamfer Geometry — The Signature
 
-**Every shape in the UI uses chamfered (clipped) corners** — a 45° diagonal cut replacing what would otherwise be a right-angle corner. **No rounded corners (`border-radius`) anywhere.** The orange diagonal line on the cut edge is the signature visual element of DeLorean.
+**Every shape in the UI uses chamfered (clipped) corners** — a 45° diagonal cut replacing what would otherwise be a right-angle corner. **No rounded corners (`border-radius`) anywhere.** The orange diagonal line on the cut edge is the signature visual element of The Garage AI.
 
 **Cut sizes** scale with component hierarchy:
 
@@ -177,7 +179,7 @@ Keep values concise: `MON MAY 18`, `IN 2 DAYS`, `08:00`. Never fill a slot with 
 
 ---
 
-## Surface 1 — Public Blog (DeLorean)
+## Surface 1 — Public Blog (The Garage AI)
 
 ### Page: `/` — Homepage
 
@@ -277,7 +279,7 @@ Keep values concise: `MON MAY 18`, `IN 2 DAYS`, `08:00`. Never fill a slot with 
 
 ---
 
-### Page: `/about` — About DeLorean
+### Page: `/about` — About The Garage AI
 
 **Full atmospheric layout — the most design-forward page**
 

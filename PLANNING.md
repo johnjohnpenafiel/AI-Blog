@@ -1,10 +1,12 @@
-# AI-Blog (DeLorean) — Planning
+# AI-Blog (The Garage AI) — Planning
 
 > Long-form context about this project. CLAUDE.md `@`-imports this file, so every session has access to it. Update this file whenever you make an architectural decision.
 
 ## Project overview
 
-DeLorean is an automated twice-weekly blog covering AI and operational technology developments in the automotive industry. The system has two surfaces: a public-facing blog where readers discover and share posts, and a private admin dashboard where a single operator manages the publishing pipeline, reviews AI-generated content, and configures system behavior. Content is generated end-to-end by an automated pipeline that fetches news from Perplexity Sonar, drafts a post with Claude, and either publishes immediately or routes to a review queue based on the configured publishing mode.
+The Garage AI is an automated twice-weekly blog covering AI and operational technology developments in the automotive industry. The system has two surfaces: a public-facing blog where readers discover and share posts, and a private admin dashboard where a single operator manages the publishing pipeline, reviews AI-generated content, and configures system behavior. Content is generated end-to-end by an automated pipeline that fetches news from Perplexity Sonar, drafts a post with Claude, and either publishes immediately or routes to a review queue based on the configured publishing mode.
+
+> **Naming:** "The Garage AI" is the public brand used across all user-facing surfaces and the codebase. "DeLorean" is the internal codename and survives only in the design language (`Design/README.md`) and in historical decision-log entries.
 
 The audience is dealership operators, automotive tech executives, and industry observers — not car enthusiasts. Codebase intervention is reserved for bugs, updates, and new features only; the publishing loop runs without code changes.
 
@@ -31,8 +33,8 @@ The audience is dealership operators, automotive tech executives, and industry o
 
 ### Components
 
-- **Frontend** (`frontend/`): Next.js 16 (App Router) + React 19 + Tailwind CSS v4 + shadcn/ui. Source layout is `src/app/`. Two route groups: `(public)` for the DeLorean blog (homepage, post pages, about) and `dashboard/` for the admin UI (overview, queue, scheduled, published, settings). NextAuth handles credential-based login for the admin only.
-- **Backend** (`backend/`): Python + FastAPI. Routers: `posts.py`, `pipeline.py`, `settings.py`, plus auth endpoints. Services: `news_fetcher.py` (Perplexity), `blog_writer.py` (Claude), `publisher.py` (status routing + `publish_due_posts` bulk-publisher). `scheduler.py` runs APScheduler in-process for the twice-weekly (Mon + Thu) cron AND a 1-minute interval job (`scheduled-publisher`) that flips accepted posts whose `scheduled_at` has passed to `published`.
+- **Frontend** (`frontend/`): Next.js 16 (App Router) + React 19 + Tailwind CSS v4 + shadcn/ui. Source layout is `src/app/`. Two route groups: `(public)` for The Garage AI blog (homepage, post pages, about) and `dashboard/` for the admin UI (overview, queue, scheduled, published, settings). NextAuth handles credential-based login for the admin only.
+- **Backend** (`backend/`): Python + FastAPI. Routers: `auth.py`, `posts.py` (admin), `public.py` (public read-only), `pipeline.py`, `settings.py`. Services: `news_fetcher.py` (Perplexity), `blog_writer.py` (Claude), `pipeline.py` (`run_pipeline` orchestrator), `publisher.py` (status routing + `publish_due_posts` bulk-publisher). `scheduler.py` runs APScheduler in-process for the twice-weekly (Mon + Thu) cron AND a 1-minute interval job (`scheduled-publisher`) that flips accepted posts whose `scheduled_at` has passed to `published`.
 - **Database**: PostgreSQL. Schema managed by SQLAlchemy models + Alembic migrations.
 - **External services**:
   - Anthropic Claude API (`claude-sonnet-4-20250514`) — blog generation.
@@ -47,10 +49,10 @@ The audience is dealership operators, automotive tech executives, and industry o
 ├── frontend/                  # Next.js app
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── (public)/                  # Public blog — DeLorean
+│   │   │   ├── (public)/                  # Public blog — The Garage AI
 │   │   │   │   ├── page.tsx               # Homepage / post list
 │   │   │   │   ├── blog/[slug]/page.tsx   # Individual post page
-│   │   │   │   └── about/page.tsx         # About DeLorean
+│   │   │   │   └── about/page.tsx         # About The Garage AI
 │   │   │   ├── (auth)/login/
 │   │   │   ├── dashboard/
 │   │   │   │   ├── page.tsx               # Overview / stats
@@ -66,9 +68,9 @@ The audience is dealership operators, automotive tech executives, and industry o
 │
 ├── backend/                   # FastAPI app
 │   ├── main.py
-│   ├── routers/{posts.py, pipeline.py, settings.py}
-│   ├── services/{news_fetcher.py, blog_writer.py, publisher.py}
-│   ├── scripts/{seed_admin.py, reset_admin_password.py}
+│   ├── routers/{auth.py, posts.py, public.py, pipeline.py, settings.py}
+│   ├── services/{news_fetcher.py, blog_writer.py, pipeline.py, publisher.py}
+│   ├── scripts/seed_admin.py
 │   ├── models/                # SQLAlchemy models
 │   ├── schemas/               # Pydantic schemas
 │   ├── scheduler.py
@@ -177,6 +179,8 @@ Notes:
 | POST | `/posts/{id}/reject` | Reject post |
 | POST | `/posts/{id}/regenerate` | Regenerate with optional feedback |
 | POST | `/posts/{id}/publish` | Manually publish an accepted post |
+| POST | `/posts/{id}/reschedule` | Change an accepted post's `scheduled_at` |
+| POST | `/posts/{id}/unschedule` | Move an accepted post back to `pending_review` |
 
 ### Pipeline
 | Method | Path | Description |
@@ -268,7 +272,7 @@ Respond in JSON only:
 - Single admin, seeded via `backend/scripts/seed_admin.py`. Idempotent — safe to re-run.
 - Passwords: bcrypt via `passlib`. Plain text never persisted.
 - Session expiry: 2 hours (NextAuth setting). No "remember me," no SSO.
-- Password resets: via `backend/scripts/reset_admin_password.py`. No forgot-password UI.
+- Password resets: no dedicated script or forgot-password UI yet. `seed_admin.py` is find-or-create and will NOT update an existing user's password — to change it, update the `users` row directly (or delete it and re-run `seed_admin.py` with the new `ADMIN_PASSWORD`).
 
 ### Slugs & SEO
 - Slugs auto-generated from titles, URL-safe (e.g. `ai-voice-agents-transforming-dealerships`). Stored unique on the `posts` table.
@@ -386,7 +390,7 @@ Each entry below is one `/start-feature <name>` plan. Features are sized to ship
 
 ---
 
-### Phase 4 — Public blog (DeLorean)
+### Phase 4 — Public blog (The Garage AI)
 
 #### `public-shell-and-homepage`
 - **Goal:** Public nav + footer + homepage (hero, tag filter, posts grid, grid overlay, glow orb)
