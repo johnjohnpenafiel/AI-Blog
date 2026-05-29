@@ -42,7 +42,7 @@ The user is new to **FastAPI** and **Docker Compose** and is learning both while
 
 - Branch naming: `feature/<name>`, `bugfix/<name>`, `chore/<name>`.
 - Commit style: present-tense imperative (`add ...`, `fix ...`, `update ...`). One logical change per commit.
-- Never commit secrets. `.env` is git-ignored — values for `ANTHROPIC_API_KEY`, `PERPLEXITY_API_KEY`, `NEXTAUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL` live there only.
+- Never commit secrets. `.env` is git-ignored — values for `ANTHROPIC_API_KEY`, `PERPLEXITY_API_KEY`, `NEXTAUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL`, `BACKEND_API_SECRET` live there only (the frontend's copy of `BACKEND_API_SECRET` lives in the git-ignored `frontend/.env.local`).
 - Never use `--no-verify` on commits.
 - Before claiming a task complete: list what was asked vs. what was done; explicitly call out anything skipped.
 
@@ -75,4 +75,5 @@ A "feature" is net-new user-facing functionality. Bugs, hotfixes, dependency upg
 - The pipeline (`POST /pipeline/run`) requires both `ANTHROPIC_API_KEY` and `PERPLEXITY_API_KEY` set in `.env`. A run with fewer than 3 qualifying articles from Perplexity skips the run entirely (logged, not retried).
 - `publishing_mode` is snapshotted onto the post at generation time — changing the global setting later does NOT retroactively change posts already in the queue.
 - NextAuth session expiry is 2 hours; do not extend without confirming with the user.
+- Backend auth is a shared secret, not per-user. Protected routes (`/posts/*`, `/pipeline/*`, `/settings`) require `BACKEND_API_SECRET` via `Authorization: Bearer <secret>`, enforced by `require_api_key` (`backend/dependencies.py`); `/public/*`, `/auth/*`, and `/health` stay open. The secret must be set **identically** on both sides — backend (`.env` → Render) and frontend (`frontend/.env.local` → Vercel) — or the admin dashboard 401s/500s (the public blog is unaffected). The backend fails closed: a missing secret returns 500, never an open route. The Next.js `/api/*` proxy also checks the NextAuth session before forwarding. See the 2026-05-29 decision-log entry for why shared-secret over JWT verification.
 - Single dark theme. No images in UI. Don't add a light/dark toggle or photographic assets.
