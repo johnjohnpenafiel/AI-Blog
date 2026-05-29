@@ -1,25 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
+import { proxyToBackend } from "@/lib/proxy-backend";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   ctx: { params: Promise<{ id: string }> },
 ) {
-  const backendUrl = process.env.BACKEND_URL;
-  if (!backendUrl) {
-    return NextResponse.json(
-      { error: "BACKEND_URL is not configured" },
-      { status: 500 },
-    );
-  }
-
   const { id } = await ctx.params;
-  const res = await fetch(
-    `${backendUrl}/posts/${encodeURIComponent(id)}/reject`,
-    { method: "POST", cache: "no-store" },
-  );
-
-  const payload = await res.json().catch(() => ({}));
-  return NextResponse.json(payload, { status: res.status });
+  return proxyToBackend(req, `/posts/${encodeURIComponent(id)}/reject`, {
+    method: "POST",
+  });
 }

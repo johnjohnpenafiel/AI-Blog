@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from database import get_db
+from dependencies import require_api_key
 from main import app
 from models import Setting
 
@@ -24,6 +25,9 @@ def client(db: Session) -> Generator[TestClient, None, None]:
         yield db
 
     app.dependency_overrides[get_db] = override_get_db
+    # Bypass the API-key gate here; auth enforcement is covered by
+    # test_api_key_auth.py. These tests exercise settings behavior.
+    app.dependency_overrides[require_api_key] = lambda: None
     try:
         yield TestClient(app)
     finally:

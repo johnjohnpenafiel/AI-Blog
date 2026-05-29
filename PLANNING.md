@@ -158,7 +158,7 @@ Notes:
 
 ## API contracts
 
-> **Auth model:** the backend does NOT enforce auth on any endpoint — there is no auth dependency on the admin routes. Protection lives entirely at the Next.js layer: `frontend/src/proxy.ts` (the Next.js 16 middleware) guards `/dashboard/*` by checking the NextAuth JWT and redirecting unauthenticated requests to `/login`. The "admin" grouping below describes *intended* access, enforced at the frontend, not a backend guard.
+> **Auth model (three layers):** (1) `frontend/src/proxy.ts` (the Next.js 16 middleware) guards the `/dashboard/*` *pages* — unauthenticated requests redirect to `/login`. (2) Each `/api/*` proxy route to a protected endpoint verifies the NextAuth session via `getToken` (401 if logged out), then attaches the shared `BACKEND_API_SECRET` as `Authorization: Bearer <secret>` on the server-to-server call (`frontend/src/lib/proxy-backend.ts`). (3) The backend enforces that secret on the protected routers (`posts`, `pipeline`, `settings`) via the `require_api_key` dependency — a missing/incorrect header returns 401. `/public/*`, `/auth/*`, and `/health` are deliberately open. The secret lives only in server env (root `.env` / `frontend/.env.local`), never in the browser, and must match on both sides (and on Render + Vercel in prod).
 
 ### Auth
 | Method | Path | Description |
@@ -172,7 +172,7 @@ Notes:
 | GET | `/public/posts` | List published posts |
 | GET | `/public/posts/{slug}` | Get single published post by slug |
 
-### Posts (admin-only — enforced at the frontend proxy, see note above)
+### Posts (admin-only — `require_api_key` + proxy session check, see note above)
 | Method | Path | Description |
 |---|---|---|
 | GET | `/posts` | List all posts (filterable by status) |

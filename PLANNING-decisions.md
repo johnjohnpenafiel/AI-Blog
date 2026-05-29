@@ -6,6 +6,22 @@
 
 New entries at the top.
 
+### 2026-05-29 — Backend auth: shared-secret gate + proxy session check (not JWT verification)
+**Context**: A QA audit on 2026-05-29 found the backend enforced **no auth on any endpoint** — `require_api_key` did not exist, and the only auth check anywhere was `frontend/src/proxy.ts` guarding the `/dashboard/*` *pages*. The FastAPI service (public on Render) would execute any admin/pipeline/settings write from an unauthenticated request — e.g. `curl -X POST $BACKEND/pipeline/run` spends real Claude + Perplexity money. CORS does not mitigate this (it only constrains browser JS, not `curl`/server-side callers). The `backend-auth` feature closes the gap.
+**Decision**: Two enforcement points, one shared secret (`BACKEND_API_SECRET`):
+1. **Backend** — a `require_api_key` FastAPI dependency (`backend/dependencies.py`) applied at router level to `posts`, `pipeline`, and `settings` via `APIRouter(..., dependencies=[Depends(require_api_key)])`. It requires `Authorization: Bearer <BACKEND_API_SECRET>`, compares constant-time (`hmac.compare_digest`), returns 401 on missing/wrong, and 500 if the secret env var is unset (fail closed). `/public/*`, `/auth/*`, and `/health` stay open.
+2. **Frontend proxy** — a shared `proxyToBackend` helper (`frontend/src/lib/proxy-backend.ts`) used by every `/api/*` route that targets a protected endpoint. It verifies the NextAuth session via `getToken` (401 if logged out), then attaches the Bearer secret on the server-to-server fetch. The secret is server-env only (root `.env`, `frontend/.env.local`), never sent to the browser.
+**Rationale**:
+- **Shared secret over verifying the NextAuth JWT at the backend.** For a single-admin app the backend doesn't need per-user identity — it only needs to know the request came from our trusted frontend. A static shared secret is a few lines and no new deps. Verifying the NextAuth JWT would couple the Python backend to NextAuth's token format/signing and the `NEXTAUTH_SECRET`, for identity we don't use.
+- **Defense in depth.** The backend secret is the real trust boundary (stops direct `curl` against Render). The proxy session check stops the `/api/*` routes being an open relay for a logged-out browser. Either alone leaves a hole; both together close it.
+- **Router-level dependency** so the gate can't be forgotten on a new route added to a protected router — it applies to every path in the router by construction.
+- **Fail closed on missing secret** so a misconfigured deploy returns 500, never silently serves protected routes unauthenticated.
+**Tradeoffs**:
+- **One static secret, no rotation/expiry.** Rotating means updating Render + Vercel together. Acceptable at single-admin MVP scale; a rotation/KMS story is explicitly out of scope (see the feature plan).
+- **No rate limiting / brute-force protection** on the secret. A 32-byte random secret is infeasible to guess, but there's no lockout. Noted as possible future hardening.
+- **Prod rollout coupling.** The secret must be set identically on Render (backend) and Vercel (frontend) or every admin action 500s/401s. Flagged as a dependency that rides with the `deploy` work.
+- **No per-user audit trail.** The backend learns "trusted frontend," not "which admin." Fine for one operator; revisit if multi-user ever lands (it's currently out of scope project-wide).
+
 ### 2026-05-24 — News-fetcher quality filter: per-tag queries, domain allowlist, per-cluster threshold
 **Context**: First real smoke test of `news-fetcher` on 2026-05-15 returned 10 articles, 3 of which were vendor product pages (`owini.ai`, `drivecentric.com`, `spyne.ai`) rather than news. Generated posts were also blending 3–4 categories per post, diluting topical authority. The `news-fetcher-quality-filter` feature (Phase 5) covered both problems: surface only real news *and* keep posts focused on one topic.
 **Decision**: Three-layer rewrite of `backend/services/news_fetcher.py`:
