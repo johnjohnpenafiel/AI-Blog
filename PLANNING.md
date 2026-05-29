@@ -158,11 +158,13 @@ Notes:
 
 ## API contracts
 
+> **Auth model:** the backend does NOT enforce auth on any endpoint — there is no auth dependency on the admin routes. Protection lives entirely at the Next.js layer: `frontend/src/proxy.ts` (the Next.js 16 middleware) guards `/dashboard/*` by checking the NextAuth JWT and redirecting unauthenticated requests to `/login`. The "admin" grouping below describes *intended* access, enforced at the frontend, not a backend guard.
+
 ### Auth
 | Method | Path | Description |
 |---|---|---|
-| POST | `/auth/login` | Validate credentials, return session token |
-| POST | `/auth/logout` | Invalidate session |
+| POST | `/auth/login` | Validate email + password against the `users` row; returns `{id, email}` on success (no token — NextAuth mints/manages the JWT) |
+| POST | `/auth/logout` | No-op `{status: "ok"}`; NextAuth clears the session client-side |
 
 ### Public (no auth required)
 | Method | Path | Description |
@@ -170,7 +172,7 @@ Notes:
 | GET | `/public/posts` | List published posts |
 | GET | `/public/posts/{slug}` | Get single published post by slug |
 
-### Posts (admin auth required)
+### Posts (admin-only — enforced at the frontend proxy, see note above)
 | Method | Path | Description |
 |---|---|---|
 | GET | `/posts` | List all posts (filterable by status) |
@@ -192,7 +194,7 @@ Notes:
 | Method | Path | Description |
 |---|---|---|
 | GET | `/settings` | Get current settings |
-| PATCH | `/settings` | Update publishing mode, schedule |
+| PATCH | `/settings` | Update publishing mode (only field accepted — cadence is hardcoded, not editable) |
 
 ## Pipeline logic
 
@@ -333,7 +335,7 @@ Each entry below is one `/start-feature <name>` plan. Features are sized to ship
 - **Done when:** `alembic upgrade head` creates tables; seed script creates the admin user idempotently
 
 #### `frontend-skeleton` *Done*
-- **Goal:** Next.js 14 + Tailwind + shadcn/ui + design tokens wired in
+- **Goal:** Next.js 16 + Tailwind + shadcn/ui + design tokens wired in
 - **Done when:** `npm run dev` boots; color tokens render; layout shell exists
 
 #### `auth-login` *Done*
