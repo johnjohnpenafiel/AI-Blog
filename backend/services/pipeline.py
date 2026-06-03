@@ -41,11 +41,12 @@ def persist_generated_post(
     mode: str,
     attempt: int = 1,
     section: str | None = None,
+    format: str | None = None,
 ) -> Post:
     """Create a new Post + Source rows from a generated payload.
 
-    `section` is the winning section chosen during fetch (the article cluster
-    the run was built from). Does NOT commit — the caller owns the transaction.
+    `section` is the winning section chosen during fetch; `format` is the
+    post format the run was generated as. Does NOT commit — caller owns the txn.
     """
     post = Post(
         slug=generated.slug,
@@ -55,6 +56,7 @@ def persist_generated_post(
         meta_description=generated.meta_description,
         tags=list(generated.tags),
         section=section,
+        format=format,
         publishing_mode=mode,
         generation_attempt=attempt,
     )
@@ -108,10 +110,10 @@ def overwrite_generated_post(
         )
 
 
-def run_pipeline(db: Session) -> PipelineResult:
+def run_pipeline(db: Session, *, format: str = "Deep Dive") -> PipelineResult:
     settings = db.query(Setting).filter(Setting.id == 1).one()
     mode = settings.publishing_mode
-    logger.info("pipeline run starting (publishing_mode=%s)", mode)
+    logger.info("pipeline run starting (publishing_mode=%s, format=%s)", mode, format)
 
     articles = fetch_qualifying_articles(db)
 
@@ -121,11 +123,13 @@ def run_pipeline(db: Session) -> PipelineResult:
         logger.info("pipeline run skipped: below_threshold (article_count=0)")
         return PipelineSkipResult(reason="below_threshold", article_count=0)
 
-    generated = generate_post(articles)
+    generated = generate_post(articles, format=format)
 
     # All winning-cluster articles share one section; attribute the post to it.
     section = articles[0].section
-    post = persist_generated_post(db, generated, mode=mode, attempt=1, section=section)
+    post = persist_generated_post(
+        db, generated, mode=mode, attempt=1, section=section, format=format
+    )
 
     publisher.route_post(post, mode)
     settings.last_run_at = datetime.now(timezone.utc)

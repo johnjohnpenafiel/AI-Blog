@@ -7,6 +7,7 @@ from database import get_db
 from dependencies import require_api_key
 from models import Setting
 from schemas.pipeline import (
+    PipelineRunRequest,
     PipelineRunSkipped,
     PipelineRunSuccess,
     PipelineStatusResponse,
@@ -34,6 +35,7 @@ _state: dict[str, str] = {"value": "idle"}
     response_model=Union[PipelineRunSuccess, PipelineRunSkipped],
 )
 def trigger_pipeline_run(
+    body: PipelineRunRequest | None = None,
     db: Session = Depends(get_db),
 ) -> PipelineRunSuccess | PipelineRunSkipped:
     if _state["value"] == "running":
@@ -41,9 +43,10 @@ def trigger_pipeline_run(
             status_code=status.HTTP_409_CONFLICT,
             detail="pipeline already running",
         )
+    fmt = (body or PipelineRunRequest()).format
     _state["value"] = "running"
     try:
-        result = run_pipeline(db)
+        result = run_pipeline(db, format=fmt)
     finally:
         _state["value"] = "idle"
 

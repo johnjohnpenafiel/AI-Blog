@@ -222,6 +222,32 @@ def test_status_endpoint_shape(client: TestClient, db: Session) -> None:
     assert body["state"] == "idle"
 
 
+def test_run_sets_default_deep_dive_format(client: TestClient, db: Session) -> None:
+    _set_mode(db, "auto")
+    fetch_patch, gen_patch = _patch_services(_generated(slug="fmt-default"))
+    with fetch_patch, gen_patch:
+        response = client.post("/pipeline/run")
+    assert response.status_code == 200
+    post = db.query(Post).filter(Post.slug == "fmt-default").one()
+    assert post.format == "Deep Dive"
+
+
+def test_manual_format_override(client: TestClient, db: Session) -> None:
+    _set_mode(db, "auto")
+    fetch_patch, gen_patch = _patch_services(_generated(slug="brief-override"))
+    with fetch_patch, gen_patch as gen_mock:
+        response = client.post("/pipeline/run", json={"format": "Brief"})
+    assert response.status_code == 200
+    post = db.query(Post).filter(Post.slug == "brief-override").one()
+    assert post.format == "Brief"
+    assert gen_mock.call_args.kwargs["format"] == "Brief"
+
+
+def test_manual_format_invalid_returns_422(client: TestClient) -> None:
+    response = client.post("/pipeline/run", json={"format": "Tweet"})
+    assert response.status_code == 422
+
+
 def test_status_reflects_last_run_after_run(client: TestClient, db: Session) -> None:
     _set_mode(db, "auto")
     fetch_patch, gen_patch = _patch_services(_generated(slug="status-after-run"))

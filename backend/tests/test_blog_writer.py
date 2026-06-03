@@ -171,3 +171,47 @@ def test_invalid_slug_pattern_raises(monkeypatch):
             generate_post([_article()])
     finally:
         patcher.stop()
+
+
+# --- multi-format + POV --------------------------------------------------
+
+def _captured_prompt(mock_client) -> str:
+    return mock_client.messages.create.call_args.kwargs["messages"][0]["content"]
+
+
+def test_brief_prompt_carries_format_and_pov(monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    response = _fake_response([_tool_use_block(VALID_TOOL_INPUT)])
+    patcher, mock_client = _patch_anthropic(response)
+    try:
+        generate_post([_article()], format="Brief")
+    finally:
+        patcher.stop()
+
+    prompt = _captured_prompt(mock_client)
+    assert "Brief" in prompt
+    assert "400 words" in prompt
+    assert "Smart Brevity" in prompt
+    # Editorial POV baked in.
+    assert "operator" in prompt.lower()
+    assert "vendor hype" in prompt.lower()
+
+
+def test_deep_dive_prompt_carries_format(monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    response = _fake_response([_tool_use_block(VALID_TOOL_INPUT)])
+    patcher, mock_client = _patch_anthropic(response)
+    try:
+        generate_post([_article()], format="Deep Dive")
+    finally:
+        patcher.stop()
+
+    prompt = _captured_prompt(mock_client)
+    assert "900 words" in prompt
+    assert "Multi-source synthesis" in prompt
+
+
+def test_unsupported_format_raises(monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    with pytest.raises(BlogWriterError, match="unsupported format"):
+        generate_post([_article()], format="Tweet")

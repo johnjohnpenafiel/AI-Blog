@@ -21,7 +21,7 @@ from schemas.posts import (
     RegenerateRequest,
     RescheduleRequest,
 )
-from services.blog_writer import generate_post
+from services.blog_writer import FORMAT_SPECS, generate_post
 from services.news_fetcher import Article
 from services.pipeline import overwrite_generated_post
 
@@ -147,7 +147,9 @@ def regenerate_post(
         for src in post.sources
     ]
 
-    generated = generate_post(articles, feedback=body.feedback)
+    # Keep the original format when it's one we can regenerate; else default.
+    fmt = post.format if post.format in FORMAT_SPECS else "Deep Dive"
+    generated = generate_post(articles, format=fmt, feedback=body.feedback)
     overwrite_generated_post(db, post, generated)
     post.generation_attempt += 1
 

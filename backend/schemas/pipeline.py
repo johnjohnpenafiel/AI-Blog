@@ -5,6 +5,12 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 
+class PipelineRunRequest(BaseModel):
+    """Optional body for POST /pipeline/run. Manual runs default to Deep Dive."""
+
+    format: Literal["Brief", "Deep Dive"] = "Deep Dive"
+
+
 class PipelineRunSuccess(BaseModel):
     skipped: Literal[False] = False
     post_id: UUID

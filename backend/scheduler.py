@@ -30,6 +30,14 @@ _CRON_HOUR = 8
 _CRON_MINUTE = 0
 _FIRE_WEEKDAYS = {0, 3}  # Monday, Thursday
 
+# Each firing day generates a specific format. Friday → Roundup is added by
+# the roundup-generation feature. Unmapped days fall back to Deep Dive.
+WEEKDAY_FORMATS: dict[int, str] = {0: "Brief", 3: "Deep Dive"}
+
+
+def _format_for(weekday: int) -> str:
+    return WEEKDAY_FORMATS.get(weekday, "Deep Dive")
+
 scheduler: AsyncIOScheduler | None = None
 
 
@@ -60,11 +68,12 @@ def _persist_next_run_at(when: datetime) -> None:
 def _run_pipeline_job() -> None:
     """Cron entry point. Never propagates — keeps the scheduler thread alive."""
     started = time.monotonic()
-    logger.info("scheduled pipeline fire starting")
+    fmt = _format_for(datetime.now(timezone.utc).weekday())
+    logger.info("scheduled pipeline fire starting (format=%s)", fmt)
     try:
         db = SessionLocal()
         try:
-            result = run_pipeline(db)
+            result = run_pipeline(db, format=fmt)
         finally:
             db.close()
 
