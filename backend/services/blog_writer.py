@@ -22,9 +22,9 @@ observers who want to stay current on AI and operational technology — not car
 enthusiasts.
 
 Using the following articles as source material, write a blog post. All
-source articles have been pre-filtered to a single topic category, visible
-in each article's `tag` field. Keep the post tightly focused on that
-category — one tag is the default; use two only when a secondary tag
+source articles have been pre-filtered to a single dealership section,
+visible in each article's `section` field. Keep the post tightly focused on
+that section — one tag is the default; use two only when a secondary tag
 genuinely applies to the angle you take.
 
 Requirements:

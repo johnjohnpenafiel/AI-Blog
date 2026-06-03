@@ -132,9 +132,9 @@ def regenerate_post(
     _require_pending_review(post)
 
     # Reconstruct Articles from this post's persisted sources for the
-    # re-generation call. Use the post's primary tag so the regenerated
-    # post stays in the same category as the original.
-    primary_tag = post.tags[0] if post.tags else ""
+    # re-generation call. Carry the post's section so the regenerated post
+    # stays in the same category as the original.
+    section = post.section or ""
     articles = [
         Article(
             title=src.title,
@@ -142,7 +142,7 @@ def regenerate_post(
             publisher=src.publisher,
             published_date=src.published_date,
             snippet="",
-            tag=primary_tag,
+            section=section,
         )
         for src in post.sources
     ]

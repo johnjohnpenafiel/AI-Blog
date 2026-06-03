@@ -38,7 +38,7 @@ def _article() -> Article:
         publisher="example.com",
         published_date=date(2026, 5, 10),
         snippet="Voice agents are now answering service calls...",
-        tag="Voice AI",
+        section="Customer Experience",
     )
 
 
