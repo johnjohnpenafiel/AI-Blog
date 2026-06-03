@@ -4,9 +4,10 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Enum, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from database import Base
+from taxonomy import is_valid_format, is_valid_section, is_valid_story_type
 
 if TYPE_CHECKING:
     from models.source import Source
@@ -75,9 +76,32 @@ class Post(Base):
     meta_description: Mapped[str] = mapped_column(String, nullable=False)
     generation_attempt: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
+    # v2 taxonomy — single-value categorization. Plain text validated against
+    # the code-level vocabulary in `taxonomy.py` (not DB enums), so categories
+    # can graduate without a migration. Nullable: the pipeline starts setting
+    # these in Phase 2 (multi-format-generation); pre-v2 posts are backfilled.
+    section: Mapped[str | None] = mapped_column(String, nullable=True)
+    format: Mapped[str | None] = mapped_column(String, nullable=True)
+    story_type: Mapped[str | None] = mapped_column(String, nullable=True)
+
     sources: Mapped[list["Source"]] = relationship(
         "Source",
         back_populates="post",
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+
+    @validates("section", "format", "story_type")
+    def _validate_taxonomy(self, key: str, value: str | None) -> str | None:
+        """Reject out-of-vocabulary values on assignment. Fires on Python
+        assignment, not on DB load — so backfilled rows are never re-checked."""
+        if value is None:
+            return value
+        checker = {
+            "section": is_valid_section,
+            "format": is_valid_format,
+            "story_type": is_valid_story_type,
+        }[key]
+        if not checker(value):
+            raise ValueError(f"unknown {key}: {value!r}")
+        return value
