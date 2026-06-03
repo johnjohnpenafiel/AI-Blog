@@ -5,6 +5,13 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from taxonomy import (
+    is_valid_format,
+    is_valid_section,
+    is_valid_story_type,
+    is_valid_tag,
+)
+
 
 PostStatus = Literal[
     "draft",
@@ -39,6 +46,9 @@ class PostListItem(BaseModel):
     title: str
     summary: str
     tags: list[str]
+    section: str | None = None
+    format: str | None = None
+    story_type: str | None = None
     status: PostStatus
     created_at: datetime
     scheduled_at: datetime | None = None
@@ -58,6 +68,9 @@ class PostOut(BaseModel):
     meta_description: str
     content: str
     tags: list[str]
+    section: str | None = None
+    format: str | None = None
+    story_type: str | None = None
     status: PostStatus
     publishing_mode: PublishingMode
     scheduled_at: datetime | None
@@ -107,3 +120,45 @@ class RescheduleRequest(BaseModel):
 
 class RegenerateRequest(BaseModel):
     feedback: str | None = Field(default=None, max_length=2000)
+
+
+class PostTaxonomyIn(BaseModel):
+    """Write-path validation for the v2 taxonomy fields. Mirrors the model's
+    `@validates` guards at the API boundary, against the code-level vocabulary
+    in `taxonomy.py`. All optional — a partial assignment is allowed."""
+
+    section: str | None = None
+    format: str | None = None
+    story_type: str | None = None
+    tags: list[str] | None = None
+
+    @field_validator("section")
+    @classmethod
+    def _check_section(cls, value: str | None) -> str | None:
+        if value is not None and not is_valid_section(value):
+            raise ValueError(f"unknown section: {value!r}")
+        return value
+
+    @field_validator("format")
+    @classmethod
+    def _check_format(cls, value: str | None) -> str | None:
+        if value is not None and not is_valid_format(value):
+            raise ValueError(f"unknown format: {value!r}")
+        return value
+
+    @field_validator("story_type")
+    @classmethod
+    def _check_story_type(cls, value: str | None) -> str | None:
+        if value is not None and not is_valid_story_type(value):
+            raise ValueError(f"unknown story_type: {value!r}")
+        return value
+
+    @field_validator("tags")
+    @classmethod
+    def _check_tags(cls, value: list[str] | None) -> list[str] | None:
+        if value is None:
+            return value
+        unknown = [t for t in value if not is_valid_tag(t)]
+        if unknown:
+            raise ValueError(f"unknown tag(s): {unknown!r}")
+        return value
