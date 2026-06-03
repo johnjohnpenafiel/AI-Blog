@@ -51,7 +51,7 @@ def _articles() -> list[Article]:
             publisher="example.com",
             published_date=date(2026, 5, 10),
             snippet="snippet",
-            tag="Voice AI",
+            section="Customer Experience",
         )
         for i in range(3)
     ]

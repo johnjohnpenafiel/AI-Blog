@@ -40,10 +40,12 @@ def persist_generated_post(
     *,
     mode: str,
     attempt: int = 1,
+    section: str | None = None,
 ) -> Post:
     """Create a new Post + Source rows from a generated payload.
 
-    Does NOT commit — the caller owns the transaction.
+    `section` is the winning section chosen during fetch (the article cluster
+    the run was built from). Does NOT commit — the caller owns the transaction.
     """
     post = Post(
         slug=generated.slug,
@@ -52,6 +54,7 @@ def persist_generated_post(
         summary=generated.summary,
         meta_description=generated.meta_description,
         tags=list(generated.tags),
+        section=section,
         publishing_mode=mode,
         generation_attempt=attempt,
     )
@@ -120,7 +123,9 @@ def run_pipeline(db: Session) -> PipelineResult:
 
     generated = generate_post(articles)
 
-    post = persist_generated_post(db, generated, mode=mode, attempt=1)
+    # All winning-cluster articles share one section; attribute the post to it.
+    section = articles[0].section
+    post = persist_generated_post(db, generated, mode=mode, attempt=1, section=section)
 
     publisher.route_post(post, mode)
     settings.last_run_at = datetime.now(timezone.utc)
