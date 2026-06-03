@@ -7,17 +7,19 @@ updated `settings.last_run_at`, or none of it.
 """
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
 
 from models import Post, Setting, Source
 from schemas.blog_writer import GeneratedPost
 from services import publisher
-from services.blog_writer import generate_post
+from services.blog_writer import generate_post, generate_roundup
 from services.news_fetcher import fetch_qualifying_articles
 
 logger = logging.getLogger(__name__)
+
+ROUNDUP_LOOKBACK_DAYS = 7
 
 
 @dataclass
@@ -141,5 +143,61 @@ def run_pipeline(db: Session, *, format: str = "Deep Dive") -> PipelineResult:
         post.id,
         post.slug,
         post.status,
+    )
+    return PipelineSuccessResult(post=post)
+
+
+def run_roundup(db: Session) -> PipelineResult:
+    """Weekly Roundup: synthesize the week's published posts (not fresh news)
+    into one post. Skips cleanly if nothing was published in the window."""
+    settings = db.query(Setting).filter(Setting.id == 1).one()
+    mode = settings.publishing_mode
+    cutoff = datetime.now(timezone.utc) - timedelta(days=ROUNDUP_LOOKBACK_DAYS)
+
+    week_posts = (
+        db.query(Post)
+        .filter(
+            Post.status == "published",
+            Post.published_at >= cutoff,
+            Post.format.is_distinct_from("Roundup"),  # don't round up roundups
+        )
+        .order_by(Post.published_at)
+        .all()
+    )
+
+    if not week_posts:
+        settings.last_run_at = datetime.now(timezone.utc)
+        db.commit()
+        logger.info(
+            "roundup skipped: no posts published in last %d days",
+            ROUNDUP_LOOKBACK_DAYS,
+        )
+        return PipelineSkipResult(reason="no_posts_this_week", article_count=0)
+
+    payload = [
+        {
+            "title": p.title,
+            "summary": p.summary,
+            "section": p.section,
+            "slug": p.slug,
+        }
+        for p in week_posts
+    ]
+    generated = generate_roundup(payload)
+    post = persist_generated_post(
+        db, generated, mode=mode, attempt=1, section=None, format="Roundup"
+    )
+
+    publisher.route_post(post, mode)
+    settings.last_run_at = datetime.now(timezone.utc)
+
+    db.commit()
+    db.refresh(post)
+    logger.info(
+        "roundup complete: post_id=%s slug=%s status=%s (from %d posts)",
+        post.id,
+        post.slug,
+        post.status,
+        len(week_posts),
     )
     return PipelineSuccessResult(post=post)

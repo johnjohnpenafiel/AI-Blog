@@ -30,3 +30,15 @@ class GeneratedPost(BaseModel):
     body: str = Field(min_length=1)
     tags: list[AllowedTag] = Field(min_length=1, max_length=2)
     sources: list[GeneratedSource] = Field(min_length=1)
+
+
+class RoundupDraft(BaseModel):
+    """Claude's output for a weekly Roundup. No `sources` — the roundup's
+    sources are the week's own posts, derived programmatically from the input."""
+
+    title: str = Field(min_length=1)
+    slug: str = Field(min_length=1, pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+    summary: str = Field(min_length=1)
+    meta_description: str = Field(min_length=1)
+    body: str = Field(min_length=1)
+    tags: list[AllowedTag] = Field(min_length=1, max_length=2)
