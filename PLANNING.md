@@ -1,6 +1,15 @@
-# AI-Blog (The Garage AI) — Planning
+# AI-Blog (The Garage AI) — Planning (v2)
 
 > Long-form context about this project. CLAUDE.md `@`-imports this file, so every session has access to it. Update this file whenever you make an architectural decision.
+>
+> **This is the v2 planning doc.** The MVP shipped (public blog + admin dashboard + automated pipeline, deployed across Vercel / Render / Neon). v2 evolves that working system — a richer content taxonomy, multi-format generation, smarter news selection, and an editorial point of view — without re-litigating the parts that still hold.
+>
+> **Where the detail lives:**
+> - `notes/v2-master.md` — the five pillars + the editorial POV theme.
+> - `notes/v2-ideas.md` — the locked v2 decisions (taxonomy, formats, data model, sourcing, run model), each with its rationale.
+> - `notes/v2-integration-plan.md` — the build sequence those decisions map onto (mirrored in the Roadmap below).
+> - `PLANNING-decisions.md` — the dated decision log (read on demand).
+> - `archive/PLANNING-MVP.md` — the original MVP planning doc (full MVP roadmap + completion history). Archived, not `@`-imported; everything still in use is restated here. Referenced only if you need MVP-era detail.
 
 ## Project overview
 
@@ -9,6 +18,11 @@ The Garage AI is an automated twice-weekly blog covering AI and operational tech
 > **Naming:** "The Garage AI" is the public brand used across all user-facing surfaces and the codebase. "DeLorean" is the internal codename and survives only in the design language (`Design/README.md`) and in historical decision-log entries.
 
 The audience is dealership operators, automotive tech executives, and industry observers — not car enthusiasts. Codebase intervention is reserved for bugs, updates, and new features only; the publishing loop runs without code changes.
+
+### v2 direction (North Star + POV)
+
+- **North Star — "AI as the dealership operating system."** v2 stays inside the niche the project was commissioned for: AI used *in car dealerships*, told department by department. It does **not** expand into adjacent automotive beats (OEM/manufacturing, SDV/OTA, connected-vehicle data, EVs, autonomy).
+- **Editorial POV — operator-first, proof-over-hype.** Every post answers *"what does this actually mean for my store — will it make money, save time, retain customers — and does it actually work, or is it vendor noise?"* This is a cross-cutting theme that threads through both content selection and the generation voice. See `notes/v2-master.md`.
 
 ## Architecture
 
@@ -76,6 +90,8 @@ The audience is dealership operators, automotive tech executives, and industry o
 │   ├── scheduler.py
 │   └── database.py
 │
+├── notes/                     # Planning / research scratch (v2 thinking)
+├── archive/                   # Archived docs (PLANNING-MVP.md)
 ├── docker-compose.yml
 └── .env
 ```
@@ -86,14 +102,14 @@ The audience is dealership operators, automotive tech executives, and industry o
 - **Python + FastAPI**: The pipeline does heavy lifting against two LLM/AI APIs — Python's ecosystem (Anthropic SDK, `passlib`, APScheduler) is the path of least resistance. FastAPI gives us typed routers and Pydantic validation cheaply.
 - **PostgreSQL 17**: Standard, well-supported on Railway/Render. Postgres array column type fits the `tags VARCHAR[]` field without a join table. Pinned to `postgres:17-alpine` in local Docker — matches the developer's host Homebrew client (17.7), so client/server versions stay aligned. The `db` service exposes host port **5433** (not 5432) to avoid a bind conflict with the host's local Postgres install.
 - **SQLAlchemy + Alembic**: Mature combo; Alembic gives us migration history, which matters because schema changes flow through the architecture-change gate (see CLAUDE.md).
-- **APScheduler in-process**: Simple deployment — no separate worker process for the twice-weekly cron. Tradeoff: a horizontally scaled backend would need to designate one scheduler-owning worker. Not a concern at MVP scale (single instance).
+- **APScheduler in-process**: Simple deployment — no separate worker process for the cron. Tradeoff: a horizontally scaled backend would need to designate one scheduler-owning worker. Not a concern at current scale (single instance).
 - **NextAuth credentials provider**: Single admin, no SSO, no third-party identity. Credentials provider is the lowest-friction option. 2-hour session TTL chosen to balance convenience against the risk of an unattended laptop with the admin dashboard open.
 - **Anthropic Claude (`claude-sonnet-4-20250514`)**: Sonnet hits the cost/quality balance for 600–900-word posts. Pinned to a specific snapshot ID so generation behavior doesn't drift mid-cycle.
-- **Perplexity Sonar (`/search` endpoint)**: Replaces a build-our-own news fetcher + relevance filter. Sonar's hybrid semantic + LLM-ranked retrieval understands intent and returns pre-filtered results with source citations, removing a whole layer of curation logic from our codebase. We target the dedicated `/search` endpoint (not `/chat/completions`) — it returns raw retrieved articles without the LLM synthesis step we'd otherwise discard, and accepts batched queries so the 5 intent queries fit in one HTTP call. See the 2026-05-13 decision-log entry for the full rationale.
+- **Perplexity Sonar (`/search` endpoint)**: Replaces a build-our-own news fetcher + relevance filter. Sonar's hybrid semantic + LLM-ranked retrieval understands intent and returns pre-filtered results with source citations, removing a whole layer of curation logic from our codebase. We target the dedicated `/search` endpoint (not `/chat/completions`) — it returns raw retrieved articles without the LLM synthesis step we'd otherwise discard. See the 2026-05-13 decision-log entry for the full rationale.
 
 ## Hosting
 
-Production deployment splits across three vendors, each picked for what it does best. Total cost ≈ **$8–10/mo** at MVP scale.
+Production deployment splits across three vendors, each picked for what it does best. Total cost ≈ **$8–10/mo** at current scale.
 
 | Layer | Service | Tier | Cost |
 |---|---|---|---|
@@ -104,12 +120,14 @@ Production deployment splits across three vendors, each picked for what it does 
 | News fetching | Perplexity Sonar | Pay-per-use | ~$0.50–1.50/mo |
 
 Notes:
-- Render Starter is required (not Free) because APScheduler runs in-process and must stay resident to fire the Mon/Thu cron — Render's free tier spins down after 15 min of idle.
+- Render Starter is required (not Free) because APScheduler runs in-process and must stay resident to fire the cron — Render's free tier spins down after 15 min of idle.
 - Pin Render and Neon to the same US region to keep backend↔DB latency in the single-digit-ms range.
 - Neon's free tier autosuspends on inactivity; first query after idle has a small wake-up cost (~500 ms–2 s). Invisible at this traffic level.
 - The choice of vendor for each layer is independent of the architecture — swapping any one (e.g. Render → Fly.io for backend, Neon → Supabase for DB) is a deployment-config change, not a code change.
 
 ## Data model
+
+> **Current (as-built) schema.** v2 **Phase 1** (`taxonomy-data-model`) adds per-post categorization fields to `posts` (`section`, `format`, `story_type` + a richer `tags`) — see the Roadmap. That change reflects here only once built.
 
 ### `users`
 | Column | Type | Notes |
@@ -152,7 +170,7 @@ Notes:
 |---|---|---|
 | id | INT | PK (single row) |
 | publishing_mode | ENUM | `auto` or `approve_only` |
-| schedule_frequency | VARCHAR | `twice_weekly` (cadence days are hardcoded Mon + Thu in the scheduler — not stored here) |
+| schedule_frequency | VARCHAR | `twice_weekly` (cadence days are hardcoded in the scheduler — not stored here) |
 | last_run_at | TIMESTAMP | |
 | next_run_at | TIMESTAMP | |
 
@@ -198,62 +216,17 @@ Notes:
 
 ## Pipeline logic
 
+> **Current (as-built) behavior.** v2 reshapes this substantially — open-canvas sourcing + an AI promo classifier, importance-based topic selection with anti-repetition, and three distinct formats each on their own scheduled run. Those changes are sequenced in the Roadmap (Phases 1–2) and described in `notes/v2-ideas.md`; they land here as they ship.
+
 ### Step 1 — News fetching (`backend/services/news_fetcher.py`)
 
 Send seven news-flavored queries to Perplexity Sonar's `/search` endpoint, **one HTTP call per query** (not batched) so each result's source query — and therefore its post tag — is known by attribution. Every request applies `search_recency_filter: "week"` and a `search_domain_filter` allowlist of ~18 curated automotive / tech / business news outlets (second-layer safety against vendor product pages).
 
-Each query maps 1:1 to one of the seven official post tags:
-
-| Tag | Query |
-|---|---|
-| Voice AI | `news: AI voice agents transforming automotive sales and customer service` |
-| CRM | `news: dealership CRM modernization trends 2026` |
-| Merchandising | `news reports: automated vehicle inspection tools at dealerships` |
-| Industry Move | `news: tech companies launching automotive retail products` |
-| Pricing & Analytics | `news: vehicle pricing intelligence and data analytics for car dealerships 2026` |
-| Sales Dev | `news: AI lead generation and BDC automation in automotive retail 2026` |
-| OT & Infrastructure | `news: dealership management systems and operational tech modernization 2026` |
-
-Articles inherit the tag of the query that surfaced them. Results are deduped by URL (first-seen wins) and grouped by tag into clusters. The **largest cluster wins**; ties are broken by preferring a tag different from the most recently published post (DB lookup against `posts` table). The ≥3 article threshold applies to the **winning cluster, not the total pool** — a run where no single category reaches 3 articles is skipped, keeping generated posts focused on one topic instead of forcing a mash-up. Only the winning cluster's articles are returned to the blog writer.
+Each query maps 1:1 to one of the seven current post tags (Voice AI, CRM, Merchandising, Industry Move, Pricing & Analytics, Sales Dev, OT & Infrastructure). Articles inherit the tag of the query that surfaced them. Results are deduped by URL (first-seen wins) and grouped by tag into clusters. The **largest cluster wins**; ties are broken by preferring a tag different from the most recently published post. The ≥3-article threshold applies to the **winning cluster, not the total pool** — a run where no single category reaches 3 articles is skipped. Only the winning cluster's articles are returned to the blog writer.
 
 ### Step 2 — Blog generation (`backend/services/blog_writer.py`)
 
-Send the winning cluster's articles to Claude with the prompt below. Claude returns JSON with `title`, `slug`, `summary`, `meta_description`, `body` (Markdown), `tags` (1–2 of: Voice AI, Pricing & Analytics, CRM, Merchandising, Sales Dev, OT & Infrastructure, Industry Move), and `sources`. Because the input is already pre-grouped into one category, posts come out focused on one (occasionally two) tag(s) instead of mixing three or four.
-
-#### Prompt
-
-```
-You are a professional tech journalist writing for an automotive industry blog.
-
-Your audience: dealership operators, automotive tech executives, and industry
-observers who want to stay current on AI and operational technology — not car
-enthusiasts.
-
-Using the following articles as source material, write a blog post.
-
-Requirements:
-- Title: punchy and informative
-- Summary: 2–3 sentences
-- Body: 600–900 words, markdown formatted, no fluff
-- Tone: authoritative, clear, slightly forward-looking
-- Tags: select 1–2 from [Voice AI, Pricing & Analytics, CRM, Merchandising,
-  Sales Dev, OT & Infrastructure, Industry Move]
-- Sources: list each article used
-
-Articles:
-{articles_json}
-
-Respond in JSON only:
-{
-  "title": "",
-  "slug": "",
-  "summary": "",
-  "meta_description": "",
-  "body": "",
-  "tags": [],
-  "sources": [{"title": "", "url": "", "publisher": "", "published_date": ""}]
-}
-```
+Send the winning cluster's articles to Claude. Claude returns JSON with `title`, `slug`, `summary`, `meta_description`, `body` (Markdown), `tags` (1–2 of the seven), and `sources`. Current voice guidance: *authoritative, clear, slightly forward-looking* (v2 replaces this with the operator-first / proof-over-hype POV). Body is 600–900 words. The full current prompt lives in `archive/PLANNING-MVP.md` and in `blog_writer.py`.
 
 ### Step 3 — Routing (`backend/services/publisher.py`)
 
@@ -277,7 +250,7 @@ Respond in JSON only:
 - Password resets: no dedicated script or forgot-password UI yet. `seed_admin.py` is find-or-create and will NOT update an existing user's password — to change it, update the `users` row directly (or delete it and re-run `seed_admin.py` with the new `ADMIN_PASSWORD`).
 
 ### Slugs & SEO
-- Slugs auto-generated from titles, URL-safe (e.g. `ai-voice-agents-transforming-dealerships`). Stored unique on the `posts` table.
+- Slugs auto-generated from titles, URL-safe. Stored unique on the `posts` table.
 - Each post has an auto-generated `meta_description` (1 sentence, SEO).
 - Open Graph tags rendered per post.
 
@@ -288,8 +261,8 @@ Respond in JSON only:
 | **Approve Only** | Post is generated and placed in the review queue. Admin must accept before it publishes. Once accepted, admin can publish instantly or schedule for a future date/time. |
 
 ### Scheduling
-- APScheduler twice-weekly cron — fires every Monday and every Thursday at 8:00 AM.
-- Both the days (Mon + Thu) and the frequency are fixed in code. Neither is exposed in the Settings UI.
+- APScheduler cron in-process — currently every Monday and Thursday at 8:00 AM, both days hardcoded. **v2 (Phase 2) extends this to Mon / Thu / Fri with each day tied to a specific format** (see Roadmap).
+- Cadence is fixed in code, not exposed in the Settings UI.
 - Manual trigger always available from the dashboard.
 
 ## Constraints and non-negotiables
@@ -297,154 +270,84 @@ Respond in JSON only:
 - **Single dark theme.** No light/dark toggle. Color tokens defined in `Design/README.md`.
 - **No images in the UI.** Typography and color carry the design across both surfaces.
 - **Single admin user.** No registration flow, no multi-user roles.
-- **Twice-weekly cadence is fixed.** The pipeline fires every Monday and Thursday at 8 AM. Neither the days nor the frequency are exposed in the Settings UI.
-- **Source transparency.** Every post must list its sources (title, publisher, link, date) — this is part of the editorial contract with the audience.
-- **Secrets stay in `.env`.** `ANTHROPIC_API_KEY`, `PERPLEXITY_API_KEY`, `NEXTAUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL` never committed.
+- **Stay in the niche.** "AI as the dealership operating system" — no expansion into adjacent automotive beats.
+- **Source transparency.** Every post must list its sources (title, publisher, link, date) — part of the editorial contract with the audience.
+- **Secrets stay in `.env`.** `ANTHROPIC_API_KEY`, `PERPLEXITY_API_KEY`, `NEXTAUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL`, `BACKEND_API_SECRET` never committed.
 
 ## Decision log
 
-The full decision log lives in `PLANNING-decisions.md` (not `@`-imported, to keep this file under the auto-load size threshold). Read it on demand when you need the *why* behind a past architectural or product choice. New entries go at the top of that file.
+The full decision log lives in `PLANNING-decisions.md` (not `@`-imported, to keep this file under the auto-load size threshold). Read it on demand when you need the *why* behind a past architectural or product choice. New entries go at the top of that file. (The MVP-era roadmap and feature history live in `archive/PLANNING-MVP.md`.)
 
 ---
 
-## Out of scope
+## Roadmap (v2 development phases)
 
-Explicitly NOT in MVP. These were considered and deferred — do not infer them from the architecture.
+Each feature below becomes a `/start-feature <name>` plan, sized to ship in 1–3 sessions and one PR. Sequence top-to-bottom within a phase; the 2-plan concurrency cap allows parallelism on independent features. Detailed rationale for every decision referenced here is in `notes/v2-ideas.md`; the full sequence reasoning is in `notes/v2-integration-plan.md`.
 
-- **Manual article submission** — no UI to paste text or submit a URL for ingestion. The pipeline is fully automated from Perplexity → Claude → publish.
-- **Email digest / subscriber notifications** — no newsletter, no email list.
-- **Multi-variant post generation** — Claude returns one post per run, not several to choose from.
-- **Post analytics / read metrics** — no view counts, no engagement tracking.
-- **Generation audit log** — no detailed log of which articles fed which post beyond the `sources` table.
-- **Multi-user / role-based access** — single admin only. No editor role, no contributor role.
-- **Light theme / theme toggle** — dark only.
-- **Photographic or illustrative imagery** — typography and color carry the design.
+This roadmap covers **Pillar 1 (Content) + Pillar 2 (AI Generation)** — the content engine. **Pillar 3 (Design)** runs in a separate session, in parallel. **Pillars 4–5 (Distribution, Analytics)** come after the engine exists. The editorial POV (operator-first, proof-over-hype) threads through every phase.
 
-## Roadmap (development phases)
+> 🔒 = trips the architecture-change gate (STOP + confirm + update `PLANNING.md` and `PLANNING-decisions.md` in the same commit).
 
-Each entry below is one `/start-feature <name>` plan. Features are sized to ship in 1–3 sessions and one PR. Sequence top-to-bottom within a phase; the 2-plan concurrency cap allows occasional parallelism on independent features (e.g. `backend-skeleton` and `frontend-skeleton`).
+### Phase 1 — Foundation
 
-### Phase 1 — Foundation - **COMPLETED**
+#### `taxonomy-data-model` 🔒
+- **Goal:** posts carry real categorization — `section`, `format`, `story_type` (single values) + `tags[]` (many) — backed by a canonical vocabulary kept in code (plain text, app-validated, **not** DB enums, so categories graduate without a migration).
+- **Done when:** a post saves with all four labels; an invalid value is rejected by the app; the migration applies cleanly; existing posts are backfilled to a default section; the legacy "Industry Move" tag is relocated to `story_type`; adding a new category is a one-line code change.
 
-#### `backend-skeleton` *Done*
-- **Goal:** FastAPI app + Docker Compose + Postgres running locally
-- **Done when:** `docker compose up` boots; `GET /health` returns 200
+### Phase 2 — Content Engine
 
-#### `database-foundation` *Done*
-- **Goal:** SQLAlchemy models for all 4 tables + Alembic initial migration + `seed_admin.py`
-- **Done when:** `alembic upgrade head` creates tables; seed script creates the admin user idempotently
+Once Phase 1 lands, `news-sourcing-v2` and `multi-format-generation` can run as the parallel pair; `roundup-generation` follows them.
 
-#### `frontend-skeleton` *Done*
-- **Goal:** Next.js 16 + Tailwind + shadcn/ui + design tokens wired in
-- **Done when:** `npm run dev` boots; color tokens render; layout shell exists
+#### `news-sourcing-v2` 🔒
+- **Goal:** replace the domain allowlist with an open canvas + AI promo-classifier, and select topics by *operator-relevance* rather than article count.
+- **Includes:** drop the 18-domain allowlist; keep `news:` phrasing + recency filter; small blocklist for obvious offenders; a cheap (Haiku) promo-vs-news classifier; importance ranking (distinct-outlet breadth, spike-vs-baseline, funding/M&A weight, judged through the POV); anti-repetition (no back-to-back section, drop already-cited article URLs). Folds in the old `news-fetcher-repetition-fix`.
+- **Done when:** topic selection is by importance not raw count; repeats are suppressed; promotional content is filtered by what the article *is*, not its domain; the ≥3-article threshold operates on classified results.
+- **Note:** revisits the shipped `news-fetcher-quality-filter` — capture that in the decision log.
 
-#### `auth-login` *Done*
-- **Goal:** `/auth/login` + `/auth/logout` + NextAuth wiring + login page
-- **Done when:** Sign in as the seeded admin and reach `/dashboard`; 2-hour session enforced
+#### `multi-format-generation` 🔒
+- **Goal:** produce the right *kind* of post, in our voice, on the right day — **Brief** (Mon) + **Deep Dive** (Thu).
+- **Includes:** format-aware generation using each format's building-blocks skeleton (`notes/v2-ideas.md`); the POV baked into the prompt (replaces the current tone line); the scheduler change tying each run to a specific format.
+- **Done when:** a Monday run produces a Brief in the Brief shape and a Thursday run a Deep Dive in the Deep Dive shape; both carry the POV voice and correct labels.
 
-#### `ci-pipeline` *Done*
-- **Goal:** GitHub Actions workflow at `.github/workflows/ci.yml` that runs backend (`pytest` against a Postgres service container, after `alembic upgrade head`) and frontend (`lint` + `typecheck` + `test` + `build`) on every PR and on pushes to `main`. Branch protection on `main` requires this check to pass before merging.
-- **Done when:** A PR with a deliberately broken test shows a red ✗ and is blocked from merging; a clean PR shows green and merges normally.
+#### `roundup-generation`
+- **Goal:** the **Friday Roundup** that summarizes the week's *own* published posts (the safety net for important stories that didn't win an earlier slot).
+- **Includes:** a distinct input path (reads the week's published posts from the DB, not Perplexity); the Roundup skeleton (week-range → through-line → "The Big Story" → "Also This Week" → "Worth Watching"); the Friday run wired to it.
+- **Done when:** Friday produces a Roundup linking the week's Brief + Deep Dive and surfacing notable runners-up.
 
----
+### Phase 3 — Quality & Voice
 
-### Phase 2 — Pipeline **COMPLETED**
+#### `generation-evals`
+- **Goal:** confidence the auto-produced posts are actually good before they publish unattended.
+- **Includes:** checks for POV adherence, format-skeleton adherence, source grounding (no invented facts), and promo-classifier accuracy. Decide manual-rubric vs. automated AI-judge in this feature. (Prompt evals live here, under Generation.)
+- **Done when:** each new post is scored against the rubric before it's trusted to publish.
 
-#### `news-fetcher` *Done*
-- **Goal:** Perplexity Sonar service running the 5 intent queries with ≥3-article threshold
-- **Done when:** `fetch_qualifying_articles()` returns articles or logs a skip; mocked tests cover both paths
+#### `weekly-volume-testing` *(runs alongside Phases 1–3)*
+- **Goal:** productionize the `notes/_volume_probe.py` probe into a recurring per-section measurement, logging qualifying-article counts over time.
+- **Done when:** there's a repeatable job + a record of results that informs which borderline sections (Fixed Ops, CRM & Marketing) graduate tag → section. Informs the taxonomy continuously; never blocks the build.
 
-#### `blog-writer` *Done*
-- **Goal:** Claude service that returns the structured post JSON (title/slug/summary/body/tags/sources)
-- **Done when:** `generate_post(articles)` returns valid schema; malformed responses fail loud
+### Phase 4 — Distribution & Audience (Pillar 4)
 
-#### `pipeline-orchestrator` *Done*
-- **Goal:** End-to-end fetch → generate → route + `POST /pipeline/run` + `GET /pipeline/status`
-- **Done when:** Manual trigger creates a `posts` row at the correct status per `publishing_mode`
+> After the content engine is producing. Owns the goals nothing else does: *bring readers organically* and *get them to subscribe*.
 
-#### `scheduler-cron` *Done*
-- **Goal:** APScheduler twice-weekly cron in-process — Mon + Thu at 8 AM, both days hardcoded
-- **Done when:** Scheduler boots with FastAPI; both Mon and Thu fire the pipeline at 8 AM; no settings field is consulted for cadence
+- **SEO as a discipline** — keyword targeting, internal linking through Concept hubs, sitemaps / OG hardening.
+- **GEO / answer-engine visibility** — getting the site cited by AI search.
+- **Subscriber relationship** — newsletter / digest / return-reader loop. *(Was MVP out-of-scope; a deliberate v2 decision to bring it in — confirm before building.)*
 
----
+### Phase 5 — Analytics & Polish (Pillar 5)
 
-### Phase 3 — Admin UI
+> Measurement only — what the data says after the fact.
 
-#### `dashboard-shell`
-- **Goal:** Persistent sidebar + main shell + design-token v2.0 overhaul + Chakra Petch font + body grid + auth `proxy.ts` + placeholder pages + `ChamferedPanel` primitive + bottom pipeline status dot.
-- **Done when:** Sidebar renders on every `/dashboard/*` route; unauthenticated `/dashboard` redirects to `/login`; status dot reflects `GET /pipeline/status`; tokens + chamfer geometry match `Design/README.md` v2.0.
-
-#### `review-queue`
-- **Goal:** Pending-review list + review panel with Accept (publish-now or schedule), Reject, Regenerate with feedback. Builds `GET /posts` (status filter + `total`); wires sidebar QUEUE badge live.
-- **Done when:** All three actions hit backend endpoints and update post status; QUEUE badge reflects DB.
-
-#### `scheduled-and-published`
-- **Goal:** `/dashboard/scheduled` (edit-schedule, publish-now, back-to-queue) + `/dashboard/published` (read-only with view-post link). Reuses `GET /posts`.
-- **Done when:** Per-row actions work; published list links to `/blog/[slug]`.
-
-#### `settings-page`
-- **Goal:** Publishing mode toggle + manual trigger + session/logout. Schedule is shown read-only ("Mon + Thu at 8 AM") since cadence is hardcoded. Builds `GET /settings` + `PATCH /settings`.
-- **Done when:** `PATCH /settings` persists publishing mode; trigger fires the pipeline; logout ends session.
-
-#### `dashboard-overview`
-- **Goal:** 4 Tier 2 stat cards (Posts Published, Pending Review — orange-activated when >0, Last Run, Next Run) + Trigger Pipeline + conditional Go To Queue. Composes endpoints built by earlier phase-3 features.
-- **Done when:** All 4 cards display values pulled from the backend; trigger fires a run and status dot flips to RUNNING; live-ish refresh while running.
+- Content performance (volume, keywords, SEO ranking), visitor / traffic / engagement metrics.
 
 ---
 
-### Phase 4 — Public blog (The Garage AI)
+## Deferred / out of scope (v2)
 
-#### `public-shell-and-homepage`
-- **Goal:** Public nav + footer + homepage (hero, tag filter, posts grid, grid overlay, glow orb)
-- **Done when:** `/` renders with the latest post in the hero; tag filter narrows the grid client-side; design tokens applied throughout
+Considered and intentionally not in the current plan — do not infer them from the architecture.
 
-#### `post-page`
-- **Goal:** `/blog/[slug]` with header, markdown body, share bar (X/LinkedIn/Copy), sources, plus per-post meta + OG tags
-- **Done when:** Any published slug renders fully; share buttons + copy-link confirmation work; OG tags visible in page source
-
-#### `about-page`
-- **Goal:** `/about` with atmospheric hero + content sections per `Design/README.md`
-- **Done when:** Page renders; nav and footer links resolve
-
----
-
-### Phase 5 — Polish & deploy
-
-#### `pipeline-resilience`
-- **Goal:** Retry + backoff on Claude/Perplexity failures + structured error logs + graceful skip on permanent failure
-- **Done when:** Forced failure triggers retry; permanent failure logs and skips cleanly without partial DB state
-
-#### `news-fetcher-quality-filter` *Done*
-- **Goal:** Filter non-news content (vendor product pages, marketing landing pages) out of Sonar `/search` results inside `news_fetcher` itself, so the ≥3 threshold counts only real news. Shipped with three layers: (1) `news:`-prefixed query phrasing, (2) `search_domain_filter` allowlist of ~18 curated news outlets, (3) per-tag query attribution + cluster-picking so the ≥3 threshold applies to a single category rather than the raw pool. Also narrowed blog-writer output from 2–4 tags to 1–2.
-- **Done when:** Across a representative sample of real Sonar runs, ≥80% of returned articles are news (not vendor/marketing); the threshold logic operates on filtered counts.
-
-#### `ui-polish`
-- **Goal:** Loading skeletons + empty states across both surfaces
-- **Done when:** Every async list shows a skeleton while loading and an empty-state when no data
-
-#### `production-config`
-- **Goal:** Production env handling + Docker profiles + healthchecks + build hardening
-- **Done when:** App boots from production `.env`; healthchecks pass; no dev-mode warnings
-
-#### `deploy`
-- **Goal:** Deploy to Railway or Render with persistent Postgres + DNS
-- **Done when:** Production URL serves the blog; admin login works; scheduler fires on schedule
-
----
-
-### Post-MVP — Deferred from `news-fetcher-quality-filter`
-
-These were considered and explicitly cut from the MVP filter feature. Sequence after deploy.
-
-#### `multi-cluster-pipeline` (Option B)
-- **Goal:** Generate posts for ALL qualifying clusters in a single pipeline run, not just the winning one. Today the run picks one cluster and discards the rest of the fetched articles; this captures that wasted work as queued posts.
-- **Done when:** A pipeline run with N qualifying clusters produces N posts. Routing decision below.
-
-#### `auto-mode-fills-scheduled-slots`
-- **Goal:** Redefine `publishing_mode = auto` so it only ever fills the *next scheduled Mon/Thu slot*, never publishes immediately on manual trigger. Extras generated in a single run get auto-scheduled into subsequent Mon/Thu slots instead of all going live at once. Pairs with `multi-cluster-pipeline` — together they turn a single rich run into a queue of dated future posts.
-- **Why:** Current `auto` mode publishes whatever it makes the instant it makes it. That's fine for the one-post-per-run cadence, but once we generate multiple posts per run we'd flood the blog with a burst then go silent. Decoupling "generate" from "publish" via the existing scheduled-publisher cron is the clean fix.
-- **Open questions:** what cadence-collision rule applies when a queue is full at the next scheduled run time? Skip? Stack deeper? Punted to that feature's plan.
-
-#### `news-fetcher-repetition-fix`
-- **Goal:** Stop the pipeline from producing near-identical posts across runs. Live verification on 2026-05-26 showed the same category (Voice AI) winning every run, with the same source articles surfacing day-over-day even though `search_recency_filter` is `"week"`.
-- **See:** `notes/news-fetcher-repetition-fix.md` for the full analysis — root cause, three implementation options (recent-tag exclusion, URL re-use filter, manual category schedule), recommended starting point, and the signals to revisit on.
+- **Explainer format** — deferred from the first format build (Brief + Deep Dive + Roundup ship first).
+- **Multi-cluster pipeline** — one post per run stays; don't widen scope mid-build. (Old `multi-cluster-pipeline` + `auto-mode-fills-scheduled-slots` ideas live in `archive/PLANNING-MVP.md`.)
+- **Story-Type / Company / Concept as browse indexes** — story-type is *stored* in Phase 1 but only promoted to a navigation filter later; Company and Concept stay parked.
+- **Manual article submission** — the pipeline stays fully automated (Perplexity → Claude → publish).
+- **Multi-user / role-based access** — single admin only.
+- **Light theme / theme toggle; photographic or illustrative imagery** — dark, typographic, image-free by design.

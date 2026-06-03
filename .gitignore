@@ -70,3 +70,6 @@ htmlcov/
 
 # Smoke / scratch scripts (local-only, not for CI or prod)
 backend/scripts/smoke_*.py
+
+# Local planning / research scratch (local-only, not tracked)
+notes/
