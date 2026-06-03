@@ -5,7 +5,7 @@ import os
 import anthropic
 from pydantic import ValidationError
 
-from schemas.blog_writer import GeneratedPost
+from schemas.blog_writer import GeneratedPost, GeneratedSource, RoundupDraft
 from services.news_fetcher import Article
 
 
@@ -118,12 +118,12 @@ def _render_prompt(
     )
 
 
-def _extract_tool_input(response) -> dict:
+def _extract_tool_input(response, tool_name: str = TOOL_NAME) -> dict:
     for block in response.content:
-        if getattr(block, "type", None) == "tool_use" and block.name == TOOL_NAME:
+        if getattr(block, "type", None) == "tool_use" and block.name == tool_name:
             return block.input
     raise BlogWriterError(
-        f"Claude did not call {TOOL_NAME}; stop_reason={getattr(response, 'stop_reason', None)!r}"
+        f"Claude did not call {tool_name}; stop_reason={getattr(response, 'stop_reason', None)!r}"
     )
 
 
@@ -169,3 +169,88 @@ def generate_post(
 
     logger.info("Claude returned valid post: slug=%s, tags=%s", post.slug, post.tags)
     return post
+
+
+ROUNDUP_TOOL_NAME = "submit_roundup"
+
+ROUNDUP_PROMPT_TEMPLATE = """You are the editor of a blog covering AI and \
+operational technology in car dealerships, writing the weekly roundup.
+
+Your audience: dealership operators and automotive-tech executives.
+
+{pov_block}
+
+Below are the posts published this week. Write a Roundup (~500–600 words, \
+markdown) that ties them together. Structure:
+- A short through-line intro framing the week.
+- **The Big Story** — the single most important item, and why it matters to a store.
+- **Also This Week** — tight bullets for the rest, each tagged with its section.
+- **Worth Watching** — a forward-looking line or two.
+
+Requirements:
+- Title: punchy, evokes a week-in-review.
+- Summary: 2–3 sentences.
+- Tags: select 1–2 from [Voice AI, Pricing & Analytics, CRM, Merchandising,
+  Sales Dev, OT & Infrastructure, Industry Move].
+
+This week's posts:
+{posts_json}
+
+Call the submit_roundup tool with your finished roundup."""
+
+
+def _build_roundup_tool_schema() -> dict:
+    return {
+        "name": ROUNDUP_TOOL_NAME,
+        "description": "Submit the finished weekly roundup.",
+        "input_schema": RoundupDraft.model_json_schema(),
+    }
+
+
+SUBMIT_ROUNDUP_TOOL = _build_roundup_tool_schema()
+
+
+def generate_roundup(posts: list[dict]) -> GeneratedPost:
+    """Generate the weekly Roundup from the week's published posts.
+
+    `posts` is a list of dicts with keys title, summary, section, slug. The
+    roundup's sources are derived from those posts (links to /blog/{slug}) —
+    Claude only writes the prose.
+    """
+    if not posts:
+        raise BlogWriterError("generate_roundup called with no posts")
+
+    api_key = os.environ["ANTHROPIC_API_KEY"]
+    client = anthropic.Anthropic(api_key=api_key)
+
+    prompt = ROUNDUP_PROMPT_TEMPLATE.format(
+        pov_block=POV_BLOCK, posts_json=json.dumps(posts, indent=2)
+    )
+    logger.info("calling Claude (%s) for weekly roundup of %d posts", MODEL, len(posts))
+
+    response = client.messages.create(
+        model=MODEL,
+        max_tokens=MAX_TOKENS,
+        tools=[SUBMIT_ROUNDUP_TOOL],
+        tool_choice={"type": "tool", "name": ROUNDUP_TOOL_NAME},
+        messages=[{"role": "user", "content": prompt}],
+    )
+
+    tool_input = _extract_tool_input(response, ROUNDUP_TOOL_NAME)
+    try:
+        draft = RoundupDraft.model_validate(tool_input)
+    except ValidationError as exc:
+        raise BlogWriterError(
+            f"Claude roundup failed RoundupDraft validation: {exc}"
+        ) from exc
+
+    sources = [
+        GeneratedSource(
+            title=p["title"],
+            url=f"/blog/{p['slug']}",
+            publisher="The Garage AI",
+        )
+        for p in posts
+    ]
+    logger.info("Claude returned valid roundup: slug=%s", draft.slug)
+    return GeneratedPost(**draft.model_dump(), sources=sources)

@@ -23,16 +23,17 @@ def _session_factory_bound_to(db: SASession):
 
 def test_run_pipeline_job_persists_next_run_at(db: SASession) -> None:
     factory = _session_factory_bound_to(db)
-    with patch.object(scheduler_module, "run_pipeline", return_value=None), patch.object(
-        scheduler_module, "SessionLocal", side_effect=factory
-    ):
+    # Pin format so the job takes the run_pipeline branch regardless of weekday.
+    with patch.object(scheduler_module, "_format_for", return_value="Deep Dive"), patch.object(
+        scheduler_module, "run_pipeline", return_value=None
+    ), patch.object(scheduler_module, "SessionLocal", side_effect=factory):
         scheduler_module._run_pipeline_job()
 
     db.expire_all()
     setting = db.query(Setting).filter(Setting.id == 1).one()
     assert setting.next_run_at is not None
     assert setting.next_run_at.tzinfo is not None
-    assert setting.next_run_at.weekday() in {0, 3}
+    assert setting.next_run_at.weekday() in {0, 3, 4}
     assert setting.next_run_at.hour == 8
     assert setting.next_run_at.minute == 0
 
@@ -47,9 +48,11 @@ def test_run_pipeline_job_swallows_pipeline_errors(
         raise RuntimeError("pipeline blew up")
 
     with caplog.at_level(logging.ERROR, logger="scheduler"):
-        with patch.object(scheduler_module, "run_pipeline", side_effect=_boom), patch.object(
-            scheduler_module, "SessionLocal", side_effect=factory
-        ):
+        with patch.object(
+            scheduler_module, "_format_for", return_value="Deep Dive"
+        ), patch.object(
+            scheduler_module, "run_pipeline", side_effect=_boom
+        ), patch.object(scheduler_module, "SessionLocal", side_effect=factory):
             # Must not raise.
             scheduler_module._run_pipeline_job()
 
@@ -66,20 +69,40 @@ def test_run_pipeline_job_swallows_pipeline_errors(
 def test_weekday_format_mapping() -> None:
     assert scheduler_module._format_for(0) == "Brief"  # Monday
     assert scheduler_module._format_for(3) == "Deep Dive"  # Thursday
-    # Unmapped days fall back to Deep Dive (Friday/Roundup lands in feature 3).
-    assert scheduler_module._format_for(4) == "Deep Dive"
+    assert scheduler_module._format_for(4) == "Roundup"  # Friday
+    # Unmapped days fall back to Deep Dive.
+    assert scheduler_module._format_for(1) == "Deep Dive"
 
 
 def test_run_pipeline_job_passes_a_format(db: SASession) -> None:
     factory = _session_factory_bound_to(db)
     with patch.object(
+        scheduler_module, "_format_for", return_value="Deep Dive"
+    ), patch.object(
         scheduler_module, "run_pipeline", return_value=None
     ) as mock_run, patch.object(
         scheduler_module, "SessionLocal", side_effect=factory
     ):
         scheduler_module._run_pipeline_job()
 
-    assert mock_run.call_args.kwargs.get("format") in {"Brief", "Deep Dive"}
+    assert mock_run.call_args.kwargs.get("format") == "Deep Dive"
+
+
+def test_run_pipeline_job_roundup_branch_calls_run_roundup(db: SASession) -> None:
+    factory = _session_factory_bound_to(db)
+    with patch.object(
+        scheduler_module, "_format_for", return_value="Roundup"
+    ), patch.object(
+        scheduler_module, "run_roundup", return_value=None
+    ) as mock_roundup, patch.object(
+        scheduler_module, "run_pipeline"
+    ) as mock_pipeline, patch.object(
+        scheduler_module, "SessionLocal", side_effect=factory
+    ):
+        scheduler_module._run_pipeline_job()
+
+    assert mock_roundup.call_count == 1
+    assert mock_pipeline.call_count == 0
 
 
 def test_publish_scheduled_job_calls_service(db: SASession) -> None:

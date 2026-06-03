@@ -20,19 +20,19 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 from database import SessionLocal
 from models import Setting
-from services.pipeline import run_pipeline
+from services.pipeline import run_pipeline, run_roundup
 from services.publisher import publish_due_posts
 
 logger = logging.getLogger(__name__)
 
-_CRON_DAYS_OF_WEEK = "mon,thu"
+_CRON_DAYS_OF_WEEK = "mon,thu,fri"
 _CRON_HOUR = 8
 _CRON_MINUTE = 0
-_FIRE_WEEKDAYS = {0, 3}  # Monday, Thursday
+_FIRE_WEEKDAYS = {0, 3, 4}  # Monday, Thursday, Friday
 
-# Each firing day generates a specific format. Friday → Roundup is added by
-# the roundup-generation feature. Unmapped days fall back to Deep Dive.
-WEEKDAY_FORMATS: dict[int, str] = {0: "Brief", 3: "Deep Dive"}
+# Each firing day generates a specific format. Friday's Roundup reads the
+# week's own posts (run_roundup), not fresh news. Unmapped days → Deep Dive.
+WEEKDAY_FORMATS: dict[int, str] = {0: "Brief", 3: "Deep Dive", 4: "Roundup"}
 
 
 def _format_for(weekday: int) -> str:
@@ -73,7 +73,11 @@ def _run_pipeline_job() -> None:
     try:
         db = SessionLocal()
         try:
-            result = run_pipeline(db, format=fmt)
+            # Roundup reads the week's posts; other formats fetch fresh news.
+            if fmt == "Roundup":
+                result = run_roundup(db)
+            else:
+                result = run_pipeline(db, format=fmt)
         finally:
             db.close()
 
