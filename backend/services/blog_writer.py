@@ -15,23 +15,57 @@ MODEL = "claude-sonnet-4-20250514"
 MAX_TOKENS = 4096
 TOOL_NAME = "submit_post"
 
+# Editorial point of view — threads through every post (PLANNING.md → v2 POV).
+POV_BLOCK = """Editorial point of view — operator-first, proof-over-hype:
+Write for a dealership operator. Make clear what this development means for
+THEIR store — will it make money, save time, or retain customers? Be honest
+about whether it actually works versus vendor hype: privilege evidence, real
+deployments, and results over announcements and marketing claims."""
+
+# Per-format structure + length. Each format's skeleton doubles as the
+# generation spec (see notes/v2-ideas.md Format index). Only the formats we
+# generate from fresh news live here; the Roundup uses a different input path.
+FORMAT_SPECS: dict[str, dict[str, str]] = {
+    "Brief": {
+        "length": "200–400 words",
+        "structure": (
+            "Smart Brevity. Open with a one-sentence 'what's new' lead, then a "
+            "bold **Why it matters** line, then 2–4 tight bullets. Scannable — "
+            "no long paragraphs."
+        ),
+    },
+    "Deep Dive": {
+        "length": "600–900 words",
+        "structure": (
+            "Multi-source synthesis. Punchy title, a 2–3 sentence summary, then "
+            "clear sub-sections with bold sub-heads. Authoritative and slightly "
+            "forward-looking."
+        ),
+    },
+}
+
 PROMPT_TEMPLATE = """You are a professional tech journalist writing for an automotive industry blog.
 
 Your audience: dealership operators, automotive tech executives, and industry
 observers who want to stay current on AI and operational technology — not car
 enthusiasts.
 
-Using the following articles as source material, write a blog post. All
+{pov_block}
+
+Using the following articles as source material, write a **{format}**. All
 source articles have been pre-filtered to a single dealership section,
 visible in each article's `section` field. Keep the post tightly focused on
 that section — one tag is the default; use two only when a secondary tag
 genuinely applies to the angle you take.
 
+Format — {format}:
+- Length: {length}
+- Structure: {structure}
+
 Requirements:
 - Title: punchy and informative
 - Summary: 2–3 sentences
-- Body: 600–900 words, markdown formatted, no fluff
-- Tone: authoritative, clear, slightly forward-looking
+- Body: markdown formatted, no fluff, matching the format above
 - Tags: select 1–2 from [Voice AI, Pricing & Analytics, CRM, Merchandising,
   Sales Dev, OT & Infrastructure, Industry Move]
 - Sources: list each article used
@@ -63,7 +97,10 @@ class BlogWriterError(Exception):
     """Raised when Claude's response cannot be turned into a valid GeneratedPost."""
 
 
-def _render_prompt(articles: list[Article], feedback: str | None = None) -> str:
+def _render_prompt(
+    articles: list[Article], fmt: str, feedback: str | None = None
+) -> str:
+    spec = FORMAT_SPECS[fmt]
     articles_payload = [a.model_dump(mode="json") for a in articles]
     articles_json = json.dumps(articles_payload, indent=2)
     feedback_block = (
@@ -72,7 +109,12 @@ def _render_prompt(articles: list[Article], feedback: str | None = None) -> str:
         else ""
     )
     return PROMPT_TEMPLATE.format(
-        articles_json=articles_json, feedback_block=feedback_block
+        pov_block=POV_BLOCK,
+        format=fmt,
+        length=spec["length"],
+        structure=spec["structure"],
+        articles_json=articles_json,
+        feedback_block=feedback_block,
     )
 
 
@@ -86,15 +128,24 @@ def _extract_tool_input(response) -> dict:
 
 
 def generate_post(
-    articles: list[Article], feedback: str | None = None
+    articles: list[Article],
+    *,
+    format: str = "Deep Dive",
+    feedback: str | None = None,
 ) -> GeneratedPost:
+    if format not in FORMAT_SPECS:
+        raise BlogWriterError(
+            f"unsupported format {format!r}; expected one of {sorted(FORMAT_SPECS)}"
+        )
+
     api_key = os.environ["ANTHROPIC_API_KEY"]
     client = anthropic.Anthropic(api_key=api_key)
 
-    prompt = _render_prompt(articles, feedback=feedback)
+    prompt = _render_prompt(articles, format, feedback=feedback)
     logger.info(
-        "calling Claude (%s) with %d articles, feedback=%s",
+        "calling Claude (%s) format=%s with %d articles, feedback=%s",
         MODEL,
+        format,
         len(articles),
         bool(feedback and feedback.strip()),
     )

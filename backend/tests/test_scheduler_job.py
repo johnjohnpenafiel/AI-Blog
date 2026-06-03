@@ -63,6 +63,25 @@ def test_run_pipeline_job_swallows_pipeline_errors(
     assert after == before
 
 
+def test_weekday_format_mapping() -> None:
+    assert scheduler_module._format_for(0) == "Brief"  # Monday
+    assert scheduler_module._format_for(3) == "Deep Dive"  # Thursday
+    # Unmapped days fall back to Deep Dive (Friday/Roundup lands in feature 3).
+    assert scheduler_module._format_for(4) == "Deep Dive"
+
+
+def test_run_pipeline_job_passes_a_format(db: SASession) -> None:
+    factory = _session_factory_bound_to(db)
+    with patch.object(
+        scheduler_module, "run_pipeline", return_value=None
+    ) as mock_run, patch.object(
+        scheduler_module, "SessionLocal", side_effect=factory
+    ):
+        scheduler_module._run_pipeline_job()
+
+    assert mock_run.call_args.kwargs.get("format") in {"Brief", "Deep Dive"}
+
+
 def test_publish_scheduled_job_calls_service(db: SASession) -> None:
     """The interval-job wrapper opens a session, calls publish_due_posts."""
     factory = _session_factory_bound_to(db)
