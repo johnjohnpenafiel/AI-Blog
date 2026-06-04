@@ -7,10 +7,14 @@ Needs ANTHROPIC_API_KEY. This is an operator QA tool, not part of the
 automated pipeline — it surfaces weak posts for a human to review.
 """
 import sys
+from pathlib import Path
 
-from database import SessionLocal
-from models import Post
-from services.evals import evaluate_post
+# Allow `python scripts/eval_recent_posts.py` from /app (no PYTHONPATH=.)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from database import SessionLocal  # noqa: E402
+from models import Post  # noqa: E402
+from services.evals import evaluate_post  # noqa: E402
 
 
 def main(limit: int = 5) -> None:

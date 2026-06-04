@@ -4,20 +4,26 @@ Usage:
     docker compose run --rm backend python scripts/volume_probe.py
 
 Appends one timestamped JSON record per run to
-`reports/volume-probe-results.jsonl` (created if absent) and prints a table.
-Cron this weekly (externally) to build the time series that decides which
+`backend/reports/volume-probe-results.jsonl` (created if absent) and prints a
+table. Cron this weekly (externally) to build the time series that decides which
 sections graduate tag → section. Needs PERPLEXITY_API_KEY + ANTHROPIC_API_KEY.
 """
 import json
 import os
+import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
-from database import SessionLocal
-from services.volume_probe import measure_section_supply
+# Allow `python scripts/volume_probe.py` from /app (no PYTHONPATH=.)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-# backend/scripts/ -> repo root is two levels up; reports/ lives at repo root.
+from database import SessionLocal  # noqa: E402
+from services.volume_probe import measure_section_supply  # noqa: E402
+
+# Write into backend/reports/ — the only path mounted into the container
+# (docker-compose mounts ./backend:/app), so the record persists to the host.
 RESULTS_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "reports",
     "volume-probe-results.jsonl",
 )

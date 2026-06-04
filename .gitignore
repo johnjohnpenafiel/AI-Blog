@@ -37,6 +37,9 @@ pip-delete-this-directory.txt
 *.sqlite3
 *.db
 
+# Volume-probe runtime output (generated data, not source)
+backend/reports/
+
 # Logs
 *.log
 logs/
