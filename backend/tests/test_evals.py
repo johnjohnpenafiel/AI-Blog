@@ -65,6 +65,55 @@ def test_missing_tool_call_raises(monkeypatch):
             evaluate_post(_post())
 
 
+def test_source_excerpt_is_passed_to_judge(monkeypatch):
+    """The judge must see the source text it's asked to verify claims against."""
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
+    post = _post()
+    post["sources"] = [
+        {
+            "title": "CarGurus Q1",
+            "url": "https://marketbeat.com/a",
+            "publisher": "marketbeat.com",
+            "excerpt": "CarGurus collects about half a billion data points per day.",
+        }
+    ]
+    response = _tool_response(
+        {
+            "pov_adherence": 2,
+            "format_adherence": 2,
+            "source_grounding": 2,
+            "passed": True,
+            "notes": "clean",
+        }
+    )
+    client = _client(response)
+    with patch("services.evals.anthropic.Anthropic", return_value=client):
+        evaluate_post(post)
+
+    sent_prompt = client.messages.create.call_args.kwargs["messages"][0]["content"]
+    assert "half a billion data points per day" in sent_prompt
+    assert "EXCERPT:" in sent_prompt
+
+
+def test_missing_excerpt_renders_placeholder(monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
+    response = _tool_response(
+        {
+            "pov_adherence": 1,
+            "format_adherence": 1,
+            "source_grounding": 1,
+            "passed": True,
+            "notes": "",
+        }
+    )
+    client = _client(response)
+    with patch("services.evals.anthropic.Anthropic", return_value=client):
+        evaluate_post(_post())  # _post() sources carry no excerpt
+
+    sent_prompt = client.messages.create.call_args.kwargs["messages"][0]["content"]
+    assert "(no excerpt available)" in sent_prompt
+
+
 def test_out_of_range_score_raises(monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "k")
     response = _tool_response(

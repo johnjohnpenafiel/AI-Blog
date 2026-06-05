@@ -32,8 +32,13 @@ axes, each 0–2:
 - format_adherence: does it match its declared format ({format})? Judge length
   and structure. (A Brief is ~200–400w and scannable; a Deep Dive is 600–900w
   with sub-sections; a Roundup is a week-in-review.)
-- source_grounding: are the claims supported by the listed sources, with no
-  invented facts, names, or numbers?
+- source_grounding: are the post's specific claims (numbers, percentages, dollar
+  figures, names, quotes) actually supported by the SOURCE EXCERPTS below? Check
+  each notable figure against the excerpt text. A claim found in an excerpt is
+  grounded; a specific claim found in NO excerpt is ungrounded (invented or
+  unverifiable). Only judge against excerpts that are present — if a source shows
+  "(no excerpt available)", you cannot confirm or deny claims from it, so do not
+  treat its absence as proof of invention.
 
 Set passed=true only if pov_adherence and source_grounding are both >= 1 and no
 axis is 0. Give a one-or-two-sentence `notes` explaining the main deduction, or
@@ -41,7 +46,7 @@ axis is 0. Give a one-or-two-sentence `notes` explaining the main deduction, or
 
 FORMAT: {format}
 SECTION: {section}
-SOURCES:
+SOURCES (with the excerpt each claim must be checked against):
 {sources_block}
 
 POST TITLE: {title}
@@ -67,13 +72,20 @@ def _build_tool_schema() -> dict:
 SUBMIT_EVAL_TOOL = _build_tool_schema()
 
 
+def _render_source(s: dict) -> str:
+    header = f"- {s.get('title', '')} ({s.get('publisher', '')}) {s.get('url', '')}"
+    # The excerpt is the text the post was actually generated from — without it
+    # the judge can only guess whether a number was invented (see the 2026-06-05
+    # finding that a source-blind eval scores every specific claim as ungrounded).
+    excerpt = (s.get("excerpt") or s.get("text") or "").strip()
+    body = excerpt if excerpt else "(no excerpt available)"
+    return f"{header}\n  EXCERPT: {body}"
+
+
 def _render_prompt(post: dict) -> str:
     sources = post.get("sources") or []
     if sources:
-        sources_block = "\n".join(
-            f"- {s.get('title', '')} ({s.get('publisher', '')}) {s.get('url', '')}"
-            for s in sources
-        )
+        sources_block = "\n".join(_render_source(s) for s in sources)
     else:
         sources_block = "(none listed)"
     return PROMPT_TEMPLATE.format(
