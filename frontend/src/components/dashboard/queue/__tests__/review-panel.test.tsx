@@ -20,6 +20,12 @@ const DETAIL: PostDetail = {
   created_at: "2026-05-15T08:00:00Z",
   updated_at: "2026-05-15T08:00:00Z",
   generation_attempt: 1,
+  eval_pov: 2,
+  eval_format: 2,
+  eval_grounding: 1,
+  eval_passed: true,
+  eval_notes: "minor grounding gap",
+  eval_at: "2026-05-15T08:00:00Z",
   sources: [
     {
       id: "src-1",

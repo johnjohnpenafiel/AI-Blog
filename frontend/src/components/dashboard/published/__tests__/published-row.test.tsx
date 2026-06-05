@@ -15,6 +15,10 @@ const POST: PostListItem = {
   scheduled_at: null,
   published_at: "2026-05-04T08:00:00Z",
   generation_attempt: 1,
+  eval_pov: 2,
+  eval_format: 1,
+  eval_grounding: 2,
+  eval_passed: true,
 };
 
 beforeEach(() => {

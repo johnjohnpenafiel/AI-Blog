@@ -1,6 +1,7 @@
 "use client";
 
 import { ChamferedPanel } from "@/components/chamfered-panel";
+import { EvalBadge } from "@/components/eval-badge";
 import { Tag } from "@/components/tag";
 import type { PostListItem } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
@@ -14,6 +15,7 @@ export function PublishedRow({ post }: PublishedRowProps) {
     <ChamferedPanel tier="component" size="card" className="w-full">
       <div className="px-5 py-5" data-testid="published-row">
         <div className="flex items-center justify-end gap-3">
+          <EvalBadge post={post} />
           <span className="flex items-center gap-2 font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
             <span
               aria-hidden="true"

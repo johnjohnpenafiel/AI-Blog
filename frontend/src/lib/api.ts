@@ -40,6 +40,11 @@ export interface PostListItem {
   scheduled_at: string | null;
   published_at: string | null;
   generation_attempt: number;
+  // Generation-eval scores (0–2 each; null = not scored).
+  eval_pov: number | null;
+  eval_format: number | null;
+  eval_grounding: number | null;
+  eval_passed: boolean | null;
 }
 
 export interface PostDetail extends PostListItem {
@@ -48,6 +53,8 @@ export interface PostDetail extends PostListItem {
   publishing_mode: PublishingMode;
   updated_at: string;
   sources: PostSource[];
+  eval_notes: string | null;
+  eval_at: string | null;
 }
 
 export interface PostListResponse {

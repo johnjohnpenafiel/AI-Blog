@@ -18,6 +18,10 @@ const POST: PostListItem = {
   scheduled_at: FUTURE_ISO,
   published_at: null,
   generation_attempt: 1,
+  eval_pov: 2,
+  eval_format: 2,
+  eval_grounding: 2,
+  eval_passed: true,
 };
 
 const DETAIL_OK: PostDetail = {
@@ -27,6 +31,8 @@ const DETAIL_OK: PostDetail = {
   publishing_mode: "approve_only",
   updated_at: "2026-05-10T08:00:00Z",
   sources: [],
+  eval_notes: "clean",
+  eval_at: "2026-05-10T08:00:00Z",
 };
 
 beforeEach(() => {

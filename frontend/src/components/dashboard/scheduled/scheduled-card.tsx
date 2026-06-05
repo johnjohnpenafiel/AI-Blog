@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { ChamferedPanel } from "@/components/chamfered-panel";
+import { EvalBadge } from "@/components/eval-badge";
 import { Tag } from "@/components/tag";
 import {
   publishPost,
@@ -70,11 +71,14 @@ export function ScheduledCard({ post, onMutated }: ScheduledCardProps) {
               <Tag key={tag} label={tag} />
             ))}
           </div>
-          <span className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
-            {post.scheduled_at
-              ? `Scheduled ${formatDateTime(post.scheduled_at)}`
-              : "Scheduled"}
-          </span>
+          <div className="flex items-center gap-2">
+            <EvalBadge post={post} />
+            <span className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
+              {post.scheduled_at
+                ? `Scheduled ${formatDateTime(post.scheduled_at)}`
+                : "Scheduled"}
+            </span>
+          </div>
         </div>
 
         <h3 className="mt-3 font-display text-[20px] font-bold tracking-[0.02em] text-fg">

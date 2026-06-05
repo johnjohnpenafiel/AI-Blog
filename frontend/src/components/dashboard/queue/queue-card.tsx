@@ -1,6 +1,7 @@
 "use client";
 
 import { ChamferedPanel } from "@/components/chamfered-panel";
+import { EvalBadge } from "@/components/eval-badge";
 import { Tag } from "@/components/tag";
 import type { PostListItem } from "@/lib/api";
 
@@ -37,11 +38,14 @@ export function QueueCard({ post, onOpen }: QueueCardProps) {
           <span className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
             Generated {formatDate(post.created_at)}
           </span>
-          {post.generation_attempt > 1 && (
-            <span className="font-mono text-[10px] tracking-[0.25em] text-accent uppercase">
-              Attempt {post.generation_attempt}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {post.generation_attempt > 1 && (
+              <span className="font-mono text-[10px] tracking-[0.25em] text-accent uppercase">
+                Attempt {post.generation_attempt}
+              </span>
+            )}
+            <EvalBadge post={post} />
+          </div>
         </div>
 
         <h3 className="mt-3 font-display text-[20px] font-bold tracking-[0.02em] text-fg">
