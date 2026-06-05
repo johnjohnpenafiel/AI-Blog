@@ -48,7 +48,7 @@ The audience is dealership operators, automotive tech executives, and industry o
 ### Components
 
 - **Frontend** (`frontend/`): Next.js 16 (App Router) + React 19 + Tailwind CSS v4 + shadcn/ui. Source layout is `src/app/`. Two route groups: `(public)` for The Garage AI blog (homepage, post pages, about) and `dashboard/` for the admin UI (overview, queue, scheduled, published, settings). NextAuth handles credential-based login for the admin only.
-- **Backend** (`backend/`): Python + FastAPI. Routers: `auth.py`, `posts.py` (admin), `public.py` (public read-only), `pipeline.py`, `settings.py`. Services: `news_fetcher.py` (Perplexity), `blog_writer.py` (Claude), `pipeline.py` (`run_pipeline` orchestrator), `publisher.py` (status routing + `publish_due_posts` bulk-publisher). `scheduler.py` runs APScheduler in-process for the twice-weekly (Mon + Thu) cron AND a 1-minute interval job (`scheduled-publisher`) that flips accepted posts whose `scheduled_at` has passed to `published`.
+- **Backend** (`backend/`): Python + FastAPI. Routers: `auth.py`, `posts.py` (admin), `public.py` (public read-only), `pipeline.py`, `settings.py`. Services: `news_fetcher.py` (Perplexity, open-canvas sourcing), `content_classifier.py` (Haiku promo-vs-news + importance classifier), `blog_writer.py` (Claude, format-aware generation + Roundup), `pipeline.py` (`run_pipeline` + `run_roundup` orchestrators), `publisher.py` (status routing + `publish_due_posts` bulk-publisher), `evals.py` (in-loop generation-quality judge). Canonical category vocabulary lives in `taxonomy.py`. `scheduler.py` runs APScheduler in-process for the **Mon / Thu / Fri** cron — each day mapped to a format (Mon → Brief, Thu → Deep Dive, Fri → Roundup) — AND a 1-minute interval job (`scheduled-publisher`) that flips accepted posts whose `scheduled_at` has passed to `published`.
 - **Database**: PostgreSQL. Schema managed by SQLAlchemy models + Alembic migrations.
 - **External services**:
   - Anthropic Claude API (`claude-sonnet-4-20250514`) — blog generation.
@@ -214,7 +214,7 @@ Notes:
 ### Pipeline
 | Method | Path | Description |
 |---|---|---|
-| POST | `/pipeline/run` | Manually trigger a pipeline run |
+| POST | `/pipeline/run` | Manually trigger a pipeline run. Optional body `{format: "Brief" \| "Deep Dive"}` (default `Deep Dive`). |
 | GET | `/pipeline/status` | Last run time, next scheduled run, current status |
 
 ### Settings
@@ -225,17 +225,21 @@ Notes:
 
 ## Pipeline logic
 
-> **Current (as-built) behavior.** v2 reshapes this substantially — open-canvas sourcing + an AI promo classifier, importance-based topic selection with anti-repetition, and three distinct formats each on their own scheduled run. Those changes are sequenced in the Roadmap (Phases 1–2) and described in `notes/v2-ideas.md`; they land here as they ship.
+> **Current (as-built) v2 behavior.** This reflects the shipped Phase 1–3 engine: open-canvas sourcing + an AI promo/importance classifier, importance-based section selection with anti-repetition, and three formats each on their own scheduled run (Mon Brief / Thu Deep Dive / Fri Roundup). Rationale lives in `notes/v2-ideas.md` and the 2026-06-05 decision-log entries.
 
-### Step 1 — News fetching (`backend/services/news_fetcher.py`)
+### Step 1 — News fetching (`backend/services/news_fetcher.py` + `content_classifier.py`)
 
-Send seven news-flavored queries to Perplexity Sonar's `/search` endpoint, **one HTTP call per query** (not batched) so each result's source query — and therefore its post tag — is known by attribution. Every request applies `search_recency_filter: "week"` and a `search_domain_filter` allowlist of ~18 curated automotive / tech / business news outlets (second-layer safety against vendor product pages).
+Send **six** `news:`-prefixed queries to Perplexity Sonar's `/search` endpoint — **one HTTP call per query** (not batched) so each result's source query, and therefore its **section**, is known by attribution. Each request applies `search_recency_filter: "week"`. **Open canvas — no `search_domain_filter` allowlist** (the classifier is the real quality gate); a small `DOMAIN_BLOCKLIST` drops obvious non-news (PR wires, video/social hosts) deterministically first.
 
-Each query maps 1:1 to one of the seven current post tags (Voice AI, CRM, Merchandising, Industry Move, Pricing & Analytics, Sales Dev, OT & Infrastructure). Articles inherit the tag of the query that surfaced them. Results are deduped by URL (first-seen wins) and grouped by tag into clusters. The **largest cluster wins**; ties are broken by preferring a tag different from the most recently published post. The ≥3-article threshold applies to the **winning cluster, not the total pool** — a run where no single category reaches 3 articles is skipped. Only the winning cluster's articles are returned to the blog writer.
+Each query maps 1:1 to one of six queried sections (Customer Experience, Inventory & Merchandising, Pricing & Analytics, Sales & Lead Gen / BDC, Fixed Ops / Service, CRM & Marketing); articles inherit that section. Results are deduped by URL (first-seen section wins), and any URL already cited by a prior post is dropped (**anti-repetition**). The remaining articles go to the **Haiku promo-vs-news + importance classifier** (`content_classifier.py`, `claude-haiku-4-5-...`, **fails open**) — non-news is filtered out and each surviving article gets an importance score (0–2).
+
+Articles are grouped into section clusters; the **`MIN_ARTICLES = 3` threshold applies to the winning cluster** (a run where no section reaches 3 classified-news articles is skipped). The winner is picked by **operator-relevance, not raw count** (`_pick_winning_section`): rank key = (# high-importance stories, summed importance, distinct-publisher breadth, cluster size). The most-recently-published section is skipped when another qualifies (**no back-to-back repeats**). Only the winning section's articles go to the blog writer.
 
 ### Step 2 — Blog generation (`backend/services/blog_writer.py`)
 
-Send the winning cluster's articles to Claude. Claude returns JSON with `title`, `slug`, `summary`, `meta_description`, `body` (Markdown), `tags` (1–2 of the seven), and `sources`. Current voice guidance: *authoritative, clear, slightly forward-looking* (v2 replaces this with the operator-first / proof-over-hype POV). Body is 600–900 words. The full current prompt lives in `archive/PLANNING-MVP.md` and in `blog_writer.py`.
+Send the winning section's articles to Claude (`claude-sonnet-4-...`) with a **format-aware** prompt. Generation is driven by `FORMAT_SPECS` — **Brief** (200–400w, Smart-Brevity skeleton) and **Deep Dive** (600–900w, multi-source synthesis) — each carrying the **operator-first / proof-over-hype POV** baked into the prompt (replaces the old "authoritative, forward-looking" tone line). Claude returns `title`, `slug`, `summary`, `meta_description`, `body` (Markdown), `tags` (1–2 from the section's vocabulary), and `sources`. The post is attributed to the winning `section` and the run's `format`.
+
+> **`story_type` is a stored column but is not yet populated by generation** — the generator doesn't classify it, so it is currently always NULL. (Captured as a known gap; wiring it is future work.)
 
 ### Step 3 — Routing (`backend/services/publisher.py`)
 
@@ -243,6 +247,14 @@ Send the winning cluster's articles to Claude. Claude returns JSON with `title`,
 - `publishing_mode = approve_only` → set `status = pending_review`. Post appears in admin review queue.
 
 `publishing_mode` is snapshotted onto the post at generation time. Changing the global setting later does NOT retroactively change posts already in the queue.
+
+### Step 4 — Quality eval (`backend/services/evals.py`, in-loop)
+
+After generation, each post is scored by a Haiku LLM-judge against the source excerpts it was written from — POV / format / source-grounding (0–2 each) + pass/fail + notes — and the result is **persisted on the post** (`eval_*` columns) and shown in the dashboard. This is **observational only**: a failing post in `auto` mode still publishes. The eval fails soft (a judge error never breaks a run → scores stay NULL). Regeneration clears the score (no source excerpts to re-score against). See the 2026-06-05 decision-log entries.
+
+### The Roundup run (`run_roundup`, Fridays)
+
+The Friday run does **not** fetch news. `run_roundup` reads the week's own `published` posts from the DB and synthesizes a Roundup (~500–600w: week-range → through-line → "The Big Story" → "Also This Week" → "Worth Watching"), linking the week's Brief + Deep Dive. It's the safety net for important stories that didn't win an earlier slot. Skips cleanly if nothing was published that week.
 
 ## Conventions
 
@@ -270,7 +282,7 @@ Send the winning cluster's articles to Claude. Claude returns JSON with `title`,
 | **Approve Only** | Post is generated and placed in the review queue. Admin must accept before it publishes. Once accepted, admin can publish instantly or schedule for a future date/time. |
 
 ### Scheduling
-- APScheduler cron in-process — currently every Monday and Thursday at 8:00 AM, both days hardcoded. **v2 (Phase 2) extends this to Mon / Thu / Fri with each day tied to a specific format** (see Roadmap).
+- APScheduler cron in-process — **Monday, Thursday, and Friday at 8:00 AM**, all hardcoded. Each day is tied to a format: **Mon → Brief, Thu → Deep Dive, Fri → Roundup** (`WEEKDAY_FORMATS` in `scheduler.py`). Mon/Thu run the news pipeline; Fri runs `run_roundup`.
 - Cadence is fixed in code, not exposed in the Settings UI.
 - Manual trigger always available from the dashboard.
 
@@ -297,13 +309,18 @@ This roadmap covers **Pillar 1 (Content) + Pillar 2 (AI Generation)** — the co
 
 > 🔒 = trips the architecture-change gate (STOP + confirm + update `PLANNING.md` and `PLANNING-decisions.md` in the same commit).
 
-### Phase 1 — Foundation
+> **Status (2026-06-05):** **Phases 1–3 are shipped** on the `automated-work` branch (pending review + merge to `main`). The as-built behavior is documented above (Data model, Pipeline logic, Scheduling). Notable deltas from the original plan, and follow-ups surfaced during the build:
+> - **`generation-evals` shipped as *observational*, not a hard publish gate.** Posts are scored in-loop and the result is persisted + shown in the dashboard, but a failing `auto`-mode post still publishes. Gating is parked as the "Eval-Gated Auto Publishing" idea (`notes/v2-ideas.md`), pending eval hardening (the judge is non-deterministic on borderline posts). **Promo-classifier-accuracy** check was deferred (needs labeled data).
+> - **Emergent work folded in beyond the original scope:** source-grounding investigation → video/social blocklist + a source-aware eval; eval scores persisted on `posts` + surfaced across the dashboard. All captured in the 2026-06-05 decision-log entries.
+> - **Known gaps (tracked, not yet done):** `story_type` is stored but never populated by generation; source excerpts aren't persisted (so regeneration clears the eval and stored-post re-eval is blind); the public homepage tag filter still references the legacy 7 tags and needs reconciling with the new taxonomy.
+
+### Phase 1 — Foundation ✅ Shipped
 
 #### `taxonomy-data-model` 🔒
 - **Goal:** posts carry real categorization — `section`, `format`, `story_type` (single values) + `tags[]` (many) — backed by a canonical vocabulary kept in code (plain text, app-validated, **not** DB enums, so categories graduate without a migration).
 - **Done when:** a post saves with all four labels; an invalid value is rejected by the app; the migration applies cleanly; existing posts are backfilled to a default section; the legacy "Industry Move" tag is relocated to `story_type`; adding a new category is a one-line code change.
 
-### Phase 2 — Content Engine
+### Phase 2 — Content Engine ✅ Shipped
 
 Once Phase 1 lands, `news-sourcing-v2` and `multi-format-generation` can run as the parallel pair; `roundup-generation` follows them.
 
@@ -323,7 +340,7 @@ Once Phase 1 lands, `news-sourcing-v2` and `multi-format-generation` can run as 
 - **Includes:** a distinct input path (reads the week's published posts from the DB, not Perplexity); the Roundup skeleton (week-range → through-line → "The Big Story" → "Also This Week" → "Worth Watching"); the Friday run wired to it.
 - **Done when:** Friday produces a Roundup linking the week's Brief + Deep Dive and surfacing notable runners-up.
 
-### Phase 3 — Quality & Voice
+### Phase 3 — Quality & Voice ✅ Shipped
 
 #### `generation-evals`
 - **Goal:** confidence the auto-produced posts are actually good before they publish unattended.
