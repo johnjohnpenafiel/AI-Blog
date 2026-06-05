@@ -26,6 +26,23 @@ from schemas.blog_writer import GeneratedPost, GeneratedSource
 from services.news_fetcher import Article
 
 
+@pytest.fixture(autouse=True)
+def _stub_eval() -> Generator[None, None, None]:
+    """The in-loop post-generation eval calls Haiku; stub it so pipeline tests
+    never make a real API call. Behavior under test is persistence/routing."""
+    from schemas.evals import EvalResult
+
+    stub = EvalResult(
+        pov_adherence=2,
+        format_adherence=2,
+        source_grounding=2,
+        passed=True,
+        notes="stub",
+    )
+    with patch("services.pipeline.evaluate_post", return_value=stub):
+        yield
+
+
 @pytest.fixture
 def client(db: Session) -> Generator[TestClient, None, None]:
     def override_get_db() -> Generator[Session, None, None]:
@@ -259,3 +276,47 @@ def test_status_reflects_last_run_after_run(client: TestClient, db: Session) -> 
     assert status_response.status_code == 200
     assert status_response.json()["last_run_at"] is not None
     assert status_response.json()["state"] == "idle"
+
+
+def test_in_loop_eval_receives_source_excerpts(client: TestClient, db: Session) -> None:
+    """The in-loop eval must get each source's snippet as its excerpt — that's
+    what makes its grounding score meaningful (the 2026-06-05 gate-free path)."""
+    _set_mode(db, "auto")
+    articles = [
+        Article(
+            title="t0",
+            url="https://example.com/match-0",
+            publisher="example.com",
+            published_date=date(2026, 5, 10),
+            snippet="real snippet text zero",
+            section="Customer Experience",
+        )
+    ]
+    generated = _generated(slug="excerpt-wiring")
+    generated.sources = [
+        GeneratedSource(
+            title="S0",
+            url="https://example.com/match-0",  # matches the article URL
+            publisher="example.com",
+            published_date=date(2026, 5, 9),
+        )
+    ]
+    fetch_patch, gen_patch = _patch_services(generated, articles)
+    with fetch_patch, gen_patch, patch(
+        "services.pipeline.evaluate_post"
+    ) as eval_mock:
+        from schemas.evals import EvalResult
+
+        eval_mock.return_value = EvalResult(
+            pov_adherence=1,
+            format_adherence=1,
+            source_grounding=1,
+            passed=True,
+            notes="",
+        )
+        client.post("/pipeline/run")
+
+    eval_mock.assert_called_once()
+    post_arg = eval_mock.call_args.args[0]
+    assert post_arg["format"] == "Deep Dive"
+    assert post_arg["sources"][0]["excerpt"] == "real snippet text zero"

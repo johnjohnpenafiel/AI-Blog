@@ -20,6 +20,23 @@ from services.pipeline import (
 )
 
 
+@pytest.fixture(autouse=True)
+def _stub_eval():
+    """run_roundup runs the in-loop post-generation eval (a Haiku call); stub it
+    so roundup tests stay offline. The eval is observational, not under test."""
+    from schemas.evals import EvalResult
+
+    stub = EvalResult(
+        pov_adherence=2,
+        format_adherence=2,
+        source_grounding=2,
+        passed=True,
+        notes="stub",
+    )
+    with patch("services.pipeline.evaluate_post", return_value=stub):
+        yield
+
+
 def _published_post(db, *, slug, fmt="Deep Dive", days_ago=1) -> Post:
     post = Post(
         slug=slug,

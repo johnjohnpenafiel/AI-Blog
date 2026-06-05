@@ -15,6 +15,7 @@ from models import Post, Setting, Source
 from schemas.blog_writer import GeneratedPost
 from services import publisher
 from services.blog_writer import generate_post, generate_roundup
+from services.evals import evaluate_post
 from services.news_fetcher import fetch_qualifying_articles
 
 logger = logging.getLogger(__name__)
@@ -112,6 +113,54 @@ def overwrite_generated_post(
         )
 
 
+def _log_generation_eval(
+    generated: GeneratedPost,
+    *,
+    fmt: str,
+    section: str | None,
+    excerpts_by_url: dict[str, str],
+) -> None:
+    """Score a freshly generated post against the source text it was written
+    from, and log the result. Purely observational — stores nothing, gates
+    nothing, and NEVER raises (a QA score must not break a real run).
+
+    Feeding the in-hand excerpts (the Article snippets / week-post summaries we
+    still have here) is the gate-free way to make the eval's grounding axis
+    meaningful without persisting an excerpt column. See the 2026-06-05 decision.
+    """
+    try:
+        result = evaluate_post(
+            {
+                "title": generated.title,
+                "body": generated.body,
+                "format": fmt,
+                "section": section,
+                "sources": [
+                    {
+                        "title": s.title,
+                        "publisher": s.publisher,
+                        "url": s.url,
+                        "excerpt": excerpts_by_url.get(s.url, ""),
+                    }
+                    for s in generated.sources
+                ],
+            }
+        )
+    except Exception as exc:  # noqa: BLE001 — observability must never break a run
+        logger.warning("post-generation eval skipped: %s", exc)
+        return
+
+    log = logger.info if result.passed else logger.warning
+    log(
+        "post-generation eval: pov=%d format=%d grounding=%d passed=%s — %s",
+        result.pov_adherence,
+        result.format_adherence,
+        result.source_grounding,
+        result.passed,
+        result.notes,
+    )
+
+
 def run_pipeline(db: Session, *, format: str = "Deep Dive") -> PipelineResult:
     settings = db.query(Setting).filter(Setting.id == 1).one()
     mode = settings.publishing_mode
@@ -129,6 +178,12 @@ def run_pipeline(db: Session, *, format: str = "Deep Dive") -> PipelineResult:
 
     # All winning-cluster articles share one section; attribute the post to it.
     section = articles[0].section
+    _log_generation_eval(
+        generated,
+        fmt=format,
+        section=section,
+        excerpts_by_url={a.url: a.snippet for a in articles},
+    )
     post = persist_generated_post(
         db, generated, mode=mode, attempt=1, section=section, format=format
     )
@@ -184,6 +239,14 @@ def run_roundup(db: Session) -> PipelineResult:
         for p in week_posts
     ]
     generated = generate_roundup(payload)
+    # Roundup sources are our own posts (url = /blog/{slug}); the excerpt is the
+    # summary the roundup was synthesized from.
+    _log_generation_eval(
+        generated,
+        fmt="Roundup",
+        section=None,
+        excerpts_by_url={f"/blog/{p.slug}": (p.summary or "") for p in week_posts},
+    )
     post = persist_generated_post(
         db, generated, mode=mode, attempt=1, section=None, format="Roundup"
     )
