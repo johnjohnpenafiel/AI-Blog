@@ -204,6 +204,35 @@ def test_blocklisted_domains_are_dropped(monkeypatch, db):
     assert all(blocked not in a.url for a in articles)
 
 
+def test_video_hosts_blocked_including_subdomains(monkeypatch, db):
+    monkeypatch.setenv("PERPLEXITY_API_KEY", "test-key")
+    ce_query = SECTION_QUERIES["Customer Experience"]
+    results = {q: [] for q in SECTION_QUERIES.values()}
+    results[ce_query] = [
+        {"title": "ok 0", "url": "https://techcrunch.com/ce-0", "snippet": "", "date": "2026-05-10"},
+        {"title": "ok 1", "url": "https://techcrunch.com/ce-1", "snippet": "", "date": "2026-05-10"},
+        {"title": "ok 2", "url": "https://techcrunch.com/ce-2", "snippet": "", "date": "2026-05-10"},
+        {"title": "yt watch", "url": "https://www.youtube.com/watch?v=abc", "snippet": "", "date": "2026-05-10"},
+        {"title": "yt mobile", "url": "https://m.youtube.com/watch?v=def", "snippet": "", "date": "2026-05-10"},
+        {"title": "yt short", "url": "https://youtu.be/ghi", "snippet": "", "date": "2026-05-10"},
+        # Lookalike host must NOT be blocked by the suffix match.
+        {"title": "not yt", "url": "https://notyoutube.com/ce-9", "snippet": "", "date": "2026-05-10"},
+    ]
+
+    with patch("services.news_fetcher.httpx.post") as mock_post, patch(
+        CLASSIFY, _classifier()
+    ):
+        mock_post.side_effect = _dispatch(results)
+        articles = fetch_qualifying_articles(db)
+
+    urls = {a.url for a in articles}
+    # The three real video URLs are dropped; the lookalike host survives.
+    assert "https://www.youtube.com/watch?v=abc" not in urls
+    assert "https://m.youtube.com/watch?v=def" not in urls
+    assert "https://youtu.be/ghi" not in urls
+    assert "https://notyoutube.com/ce-9" in urls
+
+
 def test_importance_not_raw_count_picks_winner(monkeypatch, db):
     monkeypatch.setenv("PERPLEXITY_API_KEY", "test-key")
     # Equal cluster sizes; Pricing has the high-importance stories.

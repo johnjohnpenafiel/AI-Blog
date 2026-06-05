@@ -51,15 +51,34 @@ SECTION_QUERIES: dict[str, str] = {
     "CRM & Marketing": "news: AI CRM automation and marketing for automotive dealerships 2026",
 }
 
-# Pure vendor-controlled distribution channels — promotional by construction.
-# The classifier is the real gate; this is a cheap deterministic first pass.
+# Domains we drop before the classifier ever sees them — a cheap deterministic
+# first pass (the Haiku classifier is still the real gate).
+#
+# Two kinds:
+#   1. PR wires — vendor-controlled distribution, promotional by construction.
+#   2. Video / social hosts — structurally thin source material. We never fetch
+#      a URL; Claude only sees the snippet Perplexity returns, which for a video
+#      is its description blurb, not the transcript. A few sentences of marketing
+#      copy is too little to ground a post on, so we drop them at the host level
+#      regardless of who posted them. (See the 2026-06-05 grounding finding.)
 DOMAIN_BLOCKLIST: set[str] = {
+    # PR wires
     "prnewswire.com",
     "businesswire.com",
     "globenewswire.com",
     "einpresswire.com",
     "prweb.com",
     "accesswire.com",
+    # Video / social (no transcript reaches us — snippet only)
+    "youtube.com",
+    "youtu.be",
+    "vimeo.com",
+    "tiktok.com",
+    "facebook.com",
+    "instagram.com",
+    "reddit.com",
+    "x.com",
+    "twitter.com",
 }
 
 
@@ -79,7 +98,11 @@ def _derive_publisher(url: str) -> str:
 
 def _is_blocklisted(url: str) -> bool:
     host = (urlparse(url).hostname or "").removeprefix("www.")
-    return host in DOMAIN_BLOCKLIST
+    # Match the apex domain and any subdomain (m.youtube.com, music.youtube.com),
+    # but not lookalikes (notyoutube.com).
+    return any(
+        host == domain or host.endswith(f".{domain}") for domain in DOMAIN_BLOCKLIST
+    )
 
 
 def _parse_result(raw: dict, section: str) -> Article | None:
