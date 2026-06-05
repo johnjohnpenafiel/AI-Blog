@@ -74,6 +74,23 @@ describe("ReviewPanel", () => {
     expect(screen.getByText("Sources [1]")).toBeInTheDocument();
   });
 
+  it("renders the generation-eval verdict and notes", async () => {
+    render(
+      <ReviewPanel
+        postId={DETAIL.id}
+        initial={DETAIL}
+        onClose={() => {}}
+        onMutated={() => {}}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("review-eval")).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("eval-badge").textContent).toBe("Pass 2·2·1");
+    expect(screen.getByText("minor grounding gap")).toBeInTheDocument();
+  });
+
   it("opens accept modal when Accept is clicked", async () => {
     render(
       <ReviewPanel

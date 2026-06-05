@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { ChamferedPanel } from "@/components/chamfered-panel";
+import { EvalBadge } from "@/components/eval-badge";
 import {
   acceptPost,
   getPost,
@@ -162,6 +163,26 @@ export function ReviewPanel({
               <div className="flex flex-col gap-8">
                 <section>
                   <MarkdownBody source={detail.content} />
+                </section>
+
+                <section className="flex flex-col gap-2" data-testid="review-eval">
+                  <h3 className="font-mono text-[11px] tracking-[0.25em] text-dim uppercase">
+                    Generation Eval
+                  </h3>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <EvalBadge post={detail} />
+                    {detail.eval_passed !== null && (
+                      <span className="font-mono text-[10px] tracking-[0.2em] text-muted uppercase">
+                        POV {detail.eval_pov}/2 · Format {detail.eval_format}/2 ·
+                        Grounding {detail.eval_grounding}/2
+                      </span>
+                    )}
+                  </div>
+                  {detail.eval_notes && (
+                    <p className="text-sm leading-relaxed text-muted">
+                      {detail.eval_notes}
+                    </p>
+                  )}
                 </section>
 
                 <section className="flex flex-col gap-3">
