@@ -23,7 +23,7 @@ from schemas.posts import (
 )
 from services.blog_writer import FORMAT_SPECS, generate_post
 from services.news_fetcher import Article
-from services.pipeline import overwrite_generated_post
+from services.pipeline import apply_eval, overwrite_generated_post
 
 logger = logging.getLogger(__name__)
 
@@ -152,6 +152,10 @@ def regenerate_post(
     generated = generate_post(articles, format=fmt, feedback=body.feedback)
     overwrite_generated_post(db, post, generated)
     post.generation_attempt += 1
+    # Regen has no source excerpts (snippet=""), so any prior eval score no
+    # longer applies and can't be re-run meaningfully. Clear it to "not scored"
+    # rather than leave a stale score on changed content. (2026-06-05 decision.)
+    apply_eval(post, None)
 
     db.commit()
     db.refresh(post)

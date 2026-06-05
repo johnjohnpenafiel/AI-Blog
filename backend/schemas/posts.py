@@ -54,6 +54,12 @@ class PostListItem(BaseModel):
     scheduled_at: datetime | None = None
     published_at: datetime | None = None
     generation_attempt: int
+    # Generation-eval scores (0–2 each; None = not scored). Enough for the card
+    # badge; the explanatory `eval_notes` lives on the detail shape (PostOut).
+    eval_pov: int | None = None
+    eval_format: int | None = None
+    eval_grounding: int | None = None
+    eval_passed: bool | None = None
 
 
 class PostOut(BaseModel):
@@ -78,6 +84,12 @@ class PostOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     generation_attempt: int
+    eval_pov: int | None = None
+    eval_format: int | None = None
+    eval_grounding: int | None = None
+    eval_passed: bool | None = None
+    eval_notes: str | None = None
+    eval_at: datetime | None = None
     sources: list[PostSourceOut] = Field(default_factory=list)
 
 

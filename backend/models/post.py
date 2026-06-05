@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Enum, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, Enum, Integer, SmallInteger, String, Text, func
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
@@ -83,6 +83,19 @@ class Post(Base):
     section: Mapped[str | None] = mapped_column(String, nullable=True)
     format: Mapped[str | None] = mapped_column(String, nullable=True)
     story_type: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    # v2 generation-eval scores (the in-loop Haiku judge). All nullable —
+    # NULL means "not scored": pre-eval posts, runs where the fail-soft eval was
+    # skipped, and regenerated posts (regen has no source excerpts, so its stale
+    # score is cleared rather than re-run source-blind). Each axis is 0–2.
+    eval_pov: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    eval_format: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    eval_grounding: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    eval_passed: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    eval_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    eval_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     sources: Mapped[list["Source"]] = relationship(
         "Source",

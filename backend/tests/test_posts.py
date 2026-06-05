@@ -324,6 +324,35 @@ def test_regenerate_overwrites_content_and_bumps_attempt(
     assert len(fresh_sources) == 3
 
 
+def test_regenerate_clears_eval_score(client: TestClient, db: Session) -> None:
+    """Regen has no source excerpts to score against, so the stale eval score is
+    cleared to NULL rather than left on the new content (2026-06-05 decision)."""
+    post = _seed_pending_post(db, slug="regen-eval")
+    post.eval_pov = 2
+    post.eval_format = 2
+    post.eval_grounding = 1
+    post.eval_passed = True
+    post.eval_notes = "was scored"
+    post.eval_at = datetime.now(timezone.utc)
+    db.flush()
+    post_id = post.id
+
+    with patch(
+        "routers.posts.generate_post",
+        return_value=_generated_revision(slug="regen-eval-new"),
+    ):
+        response = client.post(f"/posts/{post_id}/regenerate", json={})
+
+    assert response.status_code == 200
+    db.expire_all()
+    fresh = db.query(Post).filter(Post.id == post_id).one()
+    assert fresh.eval_passed is None
+    assert fresh.eval_pov is None
+    assert fresh.eval_grounding is None
+    assert fresh.eval_notes is None
+    assert fresh.eval_at is None
+
+
 def test_regenerate_passes_feedback_to_generator(
     client: TestClient, db: Session
 ) -> None:

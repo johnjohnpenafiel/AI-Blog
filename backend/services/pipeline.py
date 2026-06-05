@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from models import Post, Setting, Source
 from schemas.blog_writer import GeneratedPost
+from schemas.evals import EvalResult
 from services import publisher
 from services.blog_writer import generate_post, generate_roundup
 from services.evals import evaluate_post
@@ -113,16 +114,16 @@ def overwrite_generated_post(
         )
 
 
-def _log_generation_eval(
+def _evaluate_generated(
     generated: GeneratedPost,
     *,
     fmt: str,
     section: str | None,
     excerpts_by_url: dict[str, str],
-) -> None:
+) -> EvalResult | None:
     """Score a freshly generated post against the source text it was written
-    from, and log the result. Purely observational — stores nothing, gates
-    nothing, and NEVER raises (a QA score must not break a real run).
+    from. Returns the EvalResult, or None if scoring was skipped — it NEVER
+    raises, because a QA score must not break a real run.
 
     Feeding the in-hand excerpts (the Article snippets / week-post summaries we
     still have here) is the gate-free way to make the eval's grounding axis
@@ -148,7 +149,7 @@ def _log_generation_eval(
         )
     except Exception as exc:  # noqa: BLE001 — observability must never break a run
         logger.warning("post-generation eval skipped: %s", exc)
-        return
+        return None
 
     log = logger.info if result.passed else logger.warning
     log(
@@ -159,6 +160,29 @@ def _log_generation_eval(
         result.passed,
         result.notes,
     )
+    return result
+
+
+def apply_eval(post: Post, result: EvalResult | None) -> None:
+    """Persist an eval result onto a post (or clear it when result is None).
+
+    Clearing to NULL is deliberate: a regenerated post has no source excerpts to
+    score against, so we drop the stale score rather than show it as still valid
+    or re-run the eval source-blind. NULL reads as "not scored" everywhere."""
+    if result is None:
+        post.eval_pov = None
+        post.eval_format = None
+        post.eval_grounding = None
+        post.eval_passed = None
+        post.eval_notes = None
+        post.eval_at = None
+        return
+    post.eval_pov = result.pov_adherence
+    post.eval_format = result.format_adherence
+    post.eval_grounding = result.source_grounding
+    post.eval_passed = result.passed
+    post.eval_notes = result.notes
+    post.eval_at = datetime.now(timezone.utc)
 
 
 def run_pipeline(db: Session, *, format: str = "Deep Dive") -> PipelineResult:
@@ -178,7 +202,7 @@ def run_pipeline(db: Session, *, format: str = "Deep Dive") -> PipelineResult:
 
     # All winning-cluster articles share one section; attribute the post to it.
     section = articles[0].section
-    _log_generation_eval(
+    eval_result = _evaluate_generated(
         generated,
         fmt=format,
         section=section,
@@ -187,6 +211,7 @@ def run_pipeline(db: Session, *, format: str = "Deep Dive") -> PipelineResult:
     post = persist_generated_post(
         db, generated, mode=mode, attempt=1, section=section, format=format
     )
+    apply_eval(post, eval_result)
 
     publisher.route_post(post, mode)
     settings.last_run_at = datetime.now(timezone.utc)
@@ -241,7 +266,7 @@ def run_roundup(db: Session) -> PipelineResult:
     generated = generate_roundup(payload)
     # Roundup sources are our own posts (url = /blog/{slug}); the excerpt is the
     # summary the roundup was synthesized from.
-    _log_generation_eval(
+    eval_result = _evaluate_generated(
         generated,
         fmt="Roundup",
         section=None,
@@ -250,6 +275,7 @@ def run_roundup(db: Session) -> PipelineResult:
     post = persist_generated_post(
         db, generated, mode=mode, attempt=1, section=None, format="Roundup"
     )
+    apply_eval(post, eval_result)
 
     publisher.route_post(post, mode)
     settings.last_run_at = datetime.now(timezone.utc)

@@ -320,3 +320,37 @@ def test_in_loop_eval_receives_source_excerpts(client: TestClient, db: Session) 
     post_arg = eval_mock.call_args.args[0]
     assert post_arg["format"] == "Deep Dive"
     assert post_arg["sources"][0]["excerpt"] == "real snippet text zero"
+
+
+def test_run_persists_eval_scores(client: TestClient, db: Session) -> None:
+    """The in-loop eval result is written onto the post (the _stub_eval fixture
+    returns a 2/2/2 pass)."""
+    _set_mode(db, "auto")
+    fetch_patch, gen_patch = _patch_services(_generated(slug="eval-persist"))
+    with fetch_patch, gen_patch:
+        client.post("/pipeline/run")
+
+    post = db.query(Post).filter(Post.slug == "eval-persist").one()
+    assert post.eval_pov == 2
+    assert post.eval_format == 2
+    assert post.eval_grounding == 2
+    assert post.eval_passed is True
+    assert post.eval_notes == "stub"
+    assert post.eval_at is not None
+
+
+def test_eval_skip_leaves_scores_null(client: TestClient, db: Session) -> None:
+    """If the fail-soft eval is skipped (raises), the post saves with NULL
+    scores — the run must not break, and nothing stale is recorded."""
+    _set_mode(db, "auto")
+    fetch_patch, gen_patch = _patch_services(_generated(slug="eval-skip"))
+    with fetch_patch, gen_patch, patch(
+        "services.pipeline.evaluate_post", side_effect=RuntimeError("judge down")
+    ):
+        response = client.post("/pipeline/run")
+
+    assert response.status_code == 200
+    post = db.query(Post).filter(Post.slug == "eval-skip").one()
+    assert post.eval_passed is None
+    assert post.eval_pov is None
+    assert post.eval_at is None

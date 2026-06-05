@@ -127,7 +127,7 @@ Notes:
 
 ## Data model
 
-> **Current (as-built) schema.** v2 **Phase 1** (`taxonomy-data-model`) adds per-post categorization fields to `posts` (`section`, `format`, `story_type` + a richer `tags`) — see the Roadmap. That change reflects here only once built.
+> **Current (as-built) schema.** The `posts` table carries the v2 taxonomy fields (`section`, `format`, `story_type`, added by Phase 1 `taxonomy-data-model`) and the generation-eval scores (`eval_*`) persisted by the in-loop judge — see the 2026-06-05 decision-log entries.
 
 ### `users`
 | Column | Type | Notes |
@@ -154,6 +154,15 @@ Notes:
 | updated_at | TIMESTAMP | |
 | meta_description | VARCHAR | Auto-generated for SEO |
 | generation_attempt | INT | Tracks regeneration count |
+| section | VARCHAR | nullable; v2 taxonomy, validated against code vocab |
+| format | VARCHAR | nullable; v2 taxonomy (Brief / Deep Dive / Roundup …) |
+| story_type | VARCHAR | nullable; v2 taxonomy |
+| eval_pov | SMALLINT | nullable; generation-eval POV score (0–2) |
+| eval_format | SMALLINT | nullable; generation-eval format score (0–2) |
+| eval_grounding | SMALLINT | nullable; generation-eval grounding score (0–2) |
+| eval_passed | BOOLEAN | nullable; eval pass/fail |
+| eval_notes | TEXT | nullable; eval one-line rationale |
+| eval_at | TIMESTAMP | nullable; when scored — NULL = not scored |
 
 ### `sources`
 | Column | Type | Notes |
