@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { ChamferedPanel } from "@/components/chamfered-panel";
 import { EvalBadge } from "@/components/eval-badge";
+import { TaxonomyMeta } from "@/components/taxonomy-meta";
 import {
   acceptPost,
   getPost,
@@ -136,6 +137,7 @@ export function ReviewPanel({
                   Generated {formatDateTime(detail.created_at)}
                 </p>
               )}
+              {detail && <TaxonomyMeta post={detail} className="text-[10px]" />}
             </div>
             <button
               type="button"

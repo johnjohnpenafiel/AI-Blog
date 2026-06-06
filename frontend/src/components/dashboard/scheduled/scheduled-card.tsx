@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ChamferedPanel } from "@/components/chamfered-panel";
 import { EvalBadge } from "@/components/eval-badge";
 import { Tag } from "@/components/tag";
+import { TaxonomyMeta } from "@/components/taxonomy-meta";
 import {
   publishPost,
   reschedulePost,
@@ -84,6 +85,8 @@ export function ScheduledCard({ post, onMutated }: ScheduledCardProps) {
         <h3 className="mt-3 font-display text-[20px] font-bold tracking-[0.02em] text-fg">
           {post.title}
         </h3>
+
+        <TaxonomyMeta post={post} className="mt-2" />
 
         <p className="mt-2 text-sm leading-relaxed text-muted">
           {post.summary}

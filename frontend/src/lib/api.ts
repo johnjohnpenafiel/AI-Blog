@@ -40,6 +40,11 @@ export interface PostListItem {
   scheduled_at: string | null;
   published_at: string | null;
   generation_attempt: number;
+  // v2 taxonomy (null = unset / not-yet-classified). Admin-only — not surfaced
+  // on the public site yet.
+  section: string | null;
+  format: string | null;
+  story_type: string | null;
   // Generation-eval scores (0–2 each; null = not scored).
   eval_pov: number | null;
   eval_format: number | null;
