@@ -3,7 +3,32 @@
 > Autonomous integration of the Claude Design handoff into the public site.
 > Branch: `feature/public-redesign`. Dashboard intentionally untouched.
 > This file is the single place to see what got built, what needs your eyes,
-> and what's waiting on content. Updated continuously during the run.
+> and what's waiting on content.
+
+## Status: ✅ COMPLETE — ready for your review
+
+**Verification (all green):**
+- `npm run typecheck` → exit 0
+- `npm run lint` → exit 0
+- `npm run build` → exit 0 (✓ Compiled successfully)
+- `npm test` → 70 passed / 13 files
+- **Dashboard untouched:** the diff vs `main` touches no `dashboard/` files, no
+  `globals.css`, no `components/ui/`, no Tailwind config. The *only* shared file
+  changed is the **root** `app/layout.tsx`, and that change is purely additive
+  (loads Archivo + DM Mono); the `<body>` class is unchanged, so the dashboard
+  renders exactly as before. All new public tokens are namespaced `--tg-*` and
+  scoped under `.tg-surface`.
+
+**To see it locally:** `cd frontend && npm run dev`, then open `/`, `/blog/<slug>`,
+and `/about`. Live data needs the backend running (`docker compose up -d`) and at
+least one published post; otherwise the index shows its empty state.
+
+**Backend note:** the public API gained a `format` field (additive). The schema
+shape test was updated; I did **not** run `pytest` here (no DB/Docker in this
+unattended run) — worth a `docker compose run --rm backend pytest` before merge.
+
+**Top things to look at first:** the locked-viewport decision (§2), the cadence
+copy correction (§2), and the image placeholders (§3).
 
 **Design at a glance (what changed vs. the old site):** a complete visual
 overhaul — square corners (radius 0, no chamfers), Archivo (extended) + DM Mono
