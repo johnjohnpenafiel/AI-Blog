@@ -61,6 +61,7 @@ def persist_generated_post(
         tags=list(generated.tags),
         section=section,
         format=format,
+        story_type=generated.story_type,
         publishing_mode=mode,
         generation_attempt=attempt,
     )
@@ -96,6 +97,7 @@ def overwrite_generated_post(
     post.summary = generated.summary
     post.meta_description = generated.meta_description
     post.tags = list(generated.tags)
+    post.story_type = generated.story_type
 
     db.query(Source).filter(Source.post_id == post.id).delete(
         synchronize_session=False

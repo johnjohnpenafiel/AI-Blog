@@ -106,6 +106,7 @@ def _generated_revision(slug: str = "regenerated-slug") -> GeneratedPost:
         meta_description="Regenerated meta.",
         body="# Regen\n\nNew body content.",
         tags=["Voice AI", "Sales Dev"],
+        story_type="Industry Move",
         sources=[
             GeneratedSource(
                 title=f"Regen Source {i}",
@@ -320,6 +321,7 @@ def test_regenerate_overwrites_content_and_bumps_attempt(
     fresh = db.query(Post).filter(Post.id == post_id).one()
     assert fresh.slug == "regen-new"
     assert fresh.generation_attempt == 2
+    assert fresh.story_type == "Industry Move"  # regen refreshes the classification
     fresh_sources = db.query(Source).filter(Source.post_id == post_id).all()
     assert len(fresh_sources) == 3
 

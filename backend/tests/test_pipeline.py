@@ -82,6 +82,7 @@ def _generated(slug: str = "ai-voice-agents-reshape-service") -> GeneratedPost:
         meta_description="Meta description for SEO.",
         body="# Heading\n\nMarkdown body content.",
         tags=["Voice AI", "CRM"],
+        story_type="Vendor Launch",
         sources=[
             GeneratedSource(
                 title=f"Source {i}",
@@ -320,6 +321,17 @@ def test_in_loop_eval_receives_source_excerpts(client: TestClient, db: Session) 
     post_arg = eval_mock.call_args.args[0]
     assert post_arg["format"] == "Deep Dive"
     assert post_arg["sources"][0]["excerpt"] == "real snippet text zero"
+
+
+def test_run_persists_story_type(client: TestClient, db: Session) -> None:
+    """The LLM-classified story_type is written onto the post."""
+    _set_mode(db, "auto")
+    fetch_patch, gen_patch = _patch_services(_generated(slug="story-type-persist"))
+    with fetch_patch, gen_patch:
+        client.post("/pipeline/run")
+
+    post = db.query(Post).filter(Post.slug == "story-type-persist").one()
+    assert post.story_type == "Vendor Launch"
 
 
 def test_run_persists_eval_scores(client: TestClient, db: Session) -> None:

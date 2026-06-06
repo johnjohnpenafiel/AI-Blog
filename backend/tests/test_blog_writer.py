@@ -20,6 +20,7 @@ VALID_TOOL_INPUT: dict = {
     "meta_description": "How AI voice agents are changing dealership service operations.",
     "body": "## Intro\n\nVoice AI is now in the lane...\n\n" + ("Filler paragraph. " * 50),
     "tags": ["Voice AI", "CRM"],
+    "story_type": "Field Report",
     "sources": [
         {
             "title": "Voice AI hits the dealership floor",
@@ -89,6 +90,7 @@ def test_happy_path_returns_validated_post(monkeypatch):
     assert isinstance(post, GeneratedPost)
     assert post.slug == "voice-agents-reshape-service-drive"
     assert post.tags == ["Voice AI", "CRM"]
+    assert post.story_type == "Field Report"
     assert post.sources[0].url == "https://example.com/voice-ai"
 
     create_kwargs = mock_client.messages.create.call_args.kwargs
@@ -215,3 +217,37 @@ def test_unsupported_format_raises(monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
     with pytest.raises(BlogWriterError, match="unsupported format"):
         generate_post([_article()], format="Tweet")
+
+
+# --- story_type ----------------------------------------------------------
+
+def test_story_type_required_in_tool_schema():
+    """The post tool must force Claude to classify story_type, using the
+    canonical taxonomy values."""
+    from taxonomy import STORY_TYPES
+
+    schema = SUBMIT_POST_TOOL["input_schema"]
+    assert "story_type" in schema["required"]
+    assert schema["properties"]["story_type"]["enum"] == list(STORY_TYPES)
+
+
+def test_story_type_literal_matches_taxonomy():
+    """schemas.blog_writer.StoryType must stay in sync with taxonomy.STORY_TYPES."""
+    from typing import get_args
+
+    from schemas.blog_writer import StoryType
+    from taxonomy import STORY_TYPES
+
+    assert list(get_args(StoryType)) == list(STORY_TYPES)
+
+
+def test_invalid_story_type_raises(monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    bad_input = {**VALID_TOOL_INPUT, "story_type": "Hot Take"}
+    response = _fake_response([_tool_use_block(bad_input)])
+    patcher, _ = _patch_anthropic(response)
+    try:
+        with pytest.raises(BlogWriterError, match="validation"):
+            generate_post([_article()])
+    finally:
+        patcher.stop()

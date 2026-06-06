@@ -14,6 +14,14 @@ AllowedTag = Literal[
     "Industry Move",
 ]
 
+# Mirrors taxonomy.STORY_TYPES (kept in sync by test_blog_writer). The post tool
+# requires it; Roundups leave it NULL (none of the three fit a week-in-review).
+StoryType = Literal[
+    "Vendor Launch",
+    "Field Report",
+    "Industry Move",
+]
+
 
 class GeneratedSource(BaseModel):
     title: str
@@ -29,6 +37,9 @@ class GeneratedPost(BaseModel):
     meta_description: str = Field(min_length=1)
     body: str = Field(min_length=1)
     tags: list[AllowedTag] = Field(min_length=1, max_length=2)
+    # Optional on the model so Roundups (built from RoundupDraft) validate without
+    # it; the post tool's schema marks it required so fresh-news posts always set it.
+    story_type: StoryType | None = None
     sources: list[GeneratedSource] = Field(min_length=1)
 
 

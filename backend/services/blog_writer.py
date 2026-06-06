@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from schemas.blog_writer import GeneratedPost, GeneratedSource, RoundupDraft
 from services.news_fetcher import Article
+from taxonomy import STORY_TYPES
 
 
 logger = logging.getLogger(__name__)
@@ -68,6 +69,12 @@ Requirements:
 - Body: markdown formatted, no fluff, matching the format above
 - Tags: select 1–2 from [Voice AI, Pricing & Analytics, CRM, Merchandising,
   Sales Dev, OT & Infrastructure, Industry Move]
+- Story type: classify the post as exactly one of:
+    - "Vendor Launch" — a company announces or ships an AI product or feature.
+    - "Field Report" — a real dealership using a tool, with results or evidence
+      ("does it actually work"). This is the proof-over-hype signal.
+    - "Industry Move" — funding, M&A, partnerships, earnings, or market shifts.
+  Pick the single best fit for the dominant angle of the post.
 - Sources: list each article used
 
 Articles:
@@ -83,6 +90,17 @@ Editor revision feedback (apply this when revising the post):
 
 def _build_tool_schema() -> dict:
     schema = GeneratedPost.model_json_schema()
+    # story_type is optional on the model (so Roundups validate without it), but
+    # for a fresh-news post we want Claude to always classify it — override the
+    # property to a plain required enum sourced from the canonical taxonomy.
+    schema["properties"]["story_type"] = {
+        "type": "string",
+        "enum": list(STORY_TYPES),
+        "description": "What kind of event this post is.",
+    }
+    required = schema.setdefault("required", [])
+    if "story_type" not in required:
+        required.append("story_type")
     return {
         "name": TOOL_NAME,
         "description": "Submit the finished blog post for publication.",
@@ -167,7 +185,12 @@ def generate_post(
             f"Claude response failed GeneratedPost validation: {exc}"
         ) from exc
 
-    logger.info("Claude returned valid post: slug=%s, tags=%s", post.slug, post.tags)
+    logger.info(
+        "Claude returned valid post: slug=%s, tags=%s, story_type=%s",
+        post.slug,
+        post.tags,
+        post.story_type,
+    )
     return post
 
 

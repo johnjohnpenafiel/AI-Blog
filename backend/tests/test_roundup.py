@@ -132,6 +132,7 @@ def test_run_roundup_creates_roundup_post(db: Session):
     post = result.post
     assert post.format == "Roundup"
     assert post.section is None
+    assert post.story_type is None  # none of the 3 story types fit a week-in-review
     assert post.status == "published"
     sources = db.query(Source).filter(Source.post_id == post.id).all()
     assert len(sources) >= 1
