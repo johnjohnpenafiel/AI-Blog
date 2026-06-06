@@ -1,68 +1,170 @@
-"use client";
-
 import Link from "next/link";
 
-import { ChamferedPanel } from "@/components/chamfered-panel";
-import { Tag } from "@/components/tag";
 import type { PublicPostListItem } from "@/lib/public-api";
+import { readLabel, shortDate } from "@/lib/public-format";
 
-interface PostCardProps {
+/**
+ * Post card — the halftone-header card used in the reading-modes grid and the
+ * related-dispatches grid. Mono uppercase title + excerpt (the card voice),
+ * with the post's tags as the `>` point list.
+ *
+ * The image header is a clearly-marked placeholder slot (`.tg-img-slot`) — the
+ * design intends procedural halftone art or an image here; the only real asset
+ * wired in the redesign is the hero video. See REVIEW.md → Needs content.
+ */
+export function PostCard({
+  post,
+  accent = "var(--tg-orange)",
+  figNumber,
+}: {
   post: PublicPostListItem;
-}
-
-function formatPublishDate(iso: string): string {
-  try {
-    return new Date(iso)
-      .toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-      })
-      .toUpperCase();
-  } catch {
-    return iso;
-  }
-}
-
-export function PostCard({ post }: PostCardProps) {
+  accent?: string;
+  figNumber?: number;
+}) {
+  const points = post.tags.slice(0, 3);
   return (
-    <ChamferedPanel
-      tier="component"
-      size="card"
-      cut="single"
-      className="w-full"
-    >
-      <div className="relative">
-        {/* Left accent bar — runs the full card height below the chamfer */}
-        <span
-          aria-hidden
-          className="absolute top-4 bottom-0 left-0 w-[2px] bg-accent"
-        />
-        <Link
-          href={`/blog/${post.slug}`}
-          data-testid="post-card"
-          className="group block px-7 py-6 transition-colors hover:bg-[var(--surface-raised)]"
-        >
-          <h3 className="font-display text-[18px] leading-tight font-bold tracking-[0.02em] text-fg sm:text-[22px]">
-            {post.title}
-          </h3>
-
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
-              <div className="flex flex-wrap gap-2">
-                {post.tags.slice(0, 2).map((tag) => (
-                  <Tag key={tag} label={tag} />
-                ))}
-              </div>
-              <span>{formatPublishDate(post.published_at)}</span>
-              <span>{post.read_time_minutes} MIN READ</span>
-            </div>
-            <span className="font-mono text-[10px] tracking-[0.25em] text-accent uppercase transition-colors group-hover:text-[var(--accent-dim)]">
-              Read →
-            </span>
-          </div>
-        </Link>
+    <Link href={`/blog/${post.slug}`} className="tg-card">
+      {/* image placeholder header (framed/inset) */}
+      <div
+        className="tg-img-slot"
+        style={{ aspectRatio: "5 / 4", margin: "13px 13px 0" }}
+      >
+        {figNumber != null && (
+          <span
+            style={{
+              position: "absolute",
+              top: 8,
+              left: 8,
+              fontFamily: "var(--tg-font-mono)",
+              fontSize: 8,
+              letterSpacing: "0.14em",
+              color: "var(--tg-ink)",
+              background: "rgba(10,10,10,0.7)",
+              padding: "3px 7px",
+              textTransform: "uppercase",
+            }}
+          >
+            FIG. {figNumber}
+          </span>
+        )}
       </div>
-    </ChamferedPanel>
+
+      <div
+        style={{
+          padding: "14px 14px 16px",
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            marginBottom: 12,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "var(--tg-font-mono)",
+              fontSize: 9,
+              letterSpacing: "0.12em",
+              color: accent,
+              textTransform: "uppercase",
+            }}
+          >
+            {shortDate(post.published_at)}
+          </span>
+          <span
+            style={{ width: 3, height: 3, background: "var(--tg-frame)" }}
+          />
+          <span
+            style={{
+              fontFamily: "var(--tg-font-mono)",
+              fontSize: 9,
+              letterSpacing: "0.12em",
+              color: "var(--tg-faint)",
+            }}
+          >
+            {readLabel(post.read_time_minutes)}
+          </span>
+        </div>
+
+        <h4
+          style={{
+            fontFamily: "var(--tg-font-mono)",
+            fontWeight: 500,
+            fontSize: "13.5px",
+            lineHeight: 1.28,
+            letterSpacing: "0.005em",
+            color: "var(--tg-ink)",
+            margin: "0 0 9px",
+            textTransform: "uppercase",
+          }}
+        >
+          {post.title}
+        </h4>
+
+        <p
+          style={{
+            fontFamily: "var(--tg-font-mono)",
+            fontSize: 10,
+            lineHeight: 1.6,
+            letterSpacing: "0.02em",
+            color: "var(--tg-mute)",
+            margin: "0 0 18px",
+            textTransform: "uppercase",
+          }}
+        >
+          {post.summary}
+        </p>
+
+        {points.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+              marginTop: "auto",
+            }}
+          >
+            {points.map((pt) => (
+              <div
+                key={pt}
+                style={{ display: "flex", alignItems: "center", gap: 9 }}
+              >
+                <span
+                  style={{
+                    fontFamily: "var(--tg-font-mono)",
+                    fontSize: 11,
+                    color: accent,
+                    lineHeight: 1,
+                  }}
+                >
+                  &gt;
+                </span>
+                <span
+                  style={{
+                    fontFamily: "var(--tg-font-mono)",
+                    fontSize: 9,
+                    fontWeight: 400,
+                    letterSpacing: "0.05em",
+                    background: "rgba(255,255,255,0.035)",
+                    color: "var(--tg-ink-soft)",
+                    border: "1px solid var(--tg-frame-hair)",
+                    padding: "4px 8px",
+                    textTransform: "uppercase",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {pt}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </Link>
   );
 }

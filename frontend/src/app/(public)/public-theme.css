@@ -470,6 +470,50 @@
   padding: 0;
 }
 
+/* ── Card grids (responsive) ──────────────────────────────────────────────── */
+.tg-post-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .tg-post-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 520px) {
+  .tg-post-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.tg-rel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .tg-rel-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .tg-rel-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ── Two-column bands collapse on narrow viewports ────────────────────────── */
+@media (max-width: 860px) {
+  .tg-hero-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+@media (max-width: 760px) {
+  .tg-featured-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
 /* ── Keyframes ────────────────────────────────────────────────────────────── */
 @keyframes tg-ticker {
   from {
