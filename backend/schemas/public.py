@@ -20,6 +20,7 @@ class PublicPostListItem(BaseModel):
     title: str
     summary: str
     tags: list[str]
+    section: str | None = None
     published_at: datetime
     read_time_minutes: int
 

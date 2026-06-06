@@ -37,6 +37,7 @@ def _seed_post(
     published_at: datetime | None = None,
     content: str = "body",
     tags: list[str] | None = None,
+    section: str | None = "Customer Experience",
 ) -> Post:
     post = Post(
         slug=slug,
@@ -45,6 +46,7 @@ def _seed_post(
         summary="Summary.",
         meta_description="Meta.",
         tags=tags or ["Voice AI"],
+        section=section,
         publishing_mode="auto",
         status=status,
         published_at=published_at,
@@ -77,6 +79,9 @@ def test_list_public_posts_returns_only_published(
     slugs = {item["slug"] for item in body["items"]}
     assert "pub-a" in slugs
     assert {"draft-a", "pending-a", "accepted-a", "rejected-a"}.isdisjoint(slugs)
+    # The public list exposes section (the browse axis for the index filter).
+    pub_a = next(item for item in body["items"] if item["slug"] == "pub-a")
+    assert pub_a["section"] == "Customer Experience"
 
 
 def test_list_public_posts_orders_by_published_at_desc(
@@ -158,6 +163,7 @@ def test_list_public_posts_response_shape(
         "title",
         "summary",
         "tags",
+        "section",
         "published_at",
         "read_time_minutes",
     }

@@ -15,6 +15,7 @@ export interface PublicPostListItem {
   title: string;
   summary: string;
   tags: string[];
+  section: string | null;
   published_at: string;
   read_time_minutes: number;
 }

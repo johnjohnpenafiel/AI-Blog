@@ -6,6 +6,22 @@
 
 New entries at the top.
 
+### 2026-06-06 — Public index filter: browse by Section, data-driven pills (was: legacy tag list)
+
+**Context**: The homepage filter shipped as a hardcoded list of the legacy 7 tags (`Voice AI`, `CRM`, `Merchandising`, `Industry Move`, …), filtering by `post.tags`. After the v2 taxonomy landed, this drifted: `Industry Move` became a `story_type` (not a tag), the fine tags were never meant to be navigation, and the list was a static thing to maintain. The v2 taxonomy explicitly says readers should **browse at the Section level**, and warns against shipping empty/fine-grained filter buckets at low post volume.
+
+**Decision**: The public index now filters by **`section`** (the v2 primary nav axis), and the filter pills are **derived from the sections present in the loaded posts** — `ALL` plus each distinct `post.section`, sorted — not a hardcoded list. A section pill appears only once a post carries that section. The pill visual is unchanged (6px quad-chamfer Tier 2, accent active state). Fine `tags` remain on the post cards as labels, but are no longer a navigation axis. (Required exposing `section` on the public API list shape.)
+
+**Rationale**:
+- **Section is the right altitude for navigation** — broad, stable, one-per-post, and meaningful to a reader scanning the index; the fine tags fragment into dead-end buckets at ~3 posts/week (the v2 "vocabulary, not navigation" principle).
+- **Data-driven pills eliminate dead buckets by construction** — no empty `Industry Move` pill, nothing to maintain as sections graduate; the filter always reflects what's actually published. Directly implements the "don't ship empty filters" guidance.
+- **Tags stay as card labels** — they still add fine-grained context on each card without pretending to be browsable.
+
+**Tradeoffs**:
+- **The visible filter set varies with content** — early on, only a couple of section pills show. That's intended (better than empty buckets), but it means the nav isn't a fixed, predictable set until the catalog fills out.
+- **Doesn't yet surface Format or Story-Type as browse axes** — those remain admin-only dataset values for now (a deliberate hold per the v2 Index Types plan); the public site stays single-axis (Section) + the date feed.
+- **Legacy tag/`tags` vocabulary is still what generation emits** — reconciling the tag vocabulary to the new nested tags is a separate, still-deferred backend change; this decision only moves *navigation* to sections.
+
 ### 2026-05-19 — Data cards: expose all related data through a value hierarchy
 
 **Context**: The original stat card spec showed a label and a primary value. For time-based cards (Last Run, Next Run), a single value ("2 DAYS AGO" or "MON MAY 18") is incomplete — it loses the complementary dimension of the data (the exact timestamp for a relative value, or the countdown for a future one). An operator glancing at the dashboard needs to answer different questions at different speeds.

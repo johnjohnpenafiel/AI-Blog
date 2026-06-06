@@ -34,6 +34,7 @@ def _to_list_item(post: Post) -> PublicPostListItem:
         title=post.title,
         summary=post.summary,
         tags=list(post.tags),
+        section=post.section,
         published_at=post.published_at,
         read_time_minutes=_read_time_minutes(post.content),
     )

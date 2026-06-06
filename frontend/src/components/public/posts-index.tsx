@@ -7,18 +7,6 @@ import { Tag } from "@/components/tag";
 import { cn } from "@/lib/utils";
 import type { PublicPostListItem } from "@/lib/public-api";
 
-// Canonical tag set per PLANNING.md — Claude is prompted to choose 2–4 from
-// this list. Displayed as filter pills above the index grid.
-const FILTER_TAGS = [
-  "Voice AI",
-  "Pricing & Analytics",
-  "CRM",
-  "Merchandising",
-  "Sales Dev",
-  "OT & Infrastructure",
-  "Industry Move",
-] as const;
-
 const ALL = "ALL";
 
 interface PostsIndexProps {
@@ -26,12 +14,24 @@ interface PostsIndexProps {
 }
 
 export function PostsIndex({ posts }: PostsIndexProps) {
-  const [activeTag, setActiveTag] = useState<string>(ALL);
+  const [activeSection, setActiveSection] = useState<string>(ALL);
+
+  // Browse by Section (the v2 primary nav axis). Pills are derived from the
+  // sections actually present in the loaded posts — so there are never empty/
+  // dead buckets, and a section appears the moment it has a post (per the
+  // "don't ship empty filters" guidance in notes/v2-ideas.md).
+  const sections = useMemo(() => {
+    const present = new Set<string>();
+    for (const p of posts) {
+      if (p.section) present.add(p.section);
+    }
+    return [...present].sort();
+  }, [posts]);
 
   const filtered = useMemo(() => {
-    if (activeTag === ALL) return posts;
-    return posts.filter((p) => p.tags.includes(activeTag));
-  }, [posts, activeTag]);
+    if (activeSection === ALL) return posts;
+    return posts.filter((p) => p.section === activeSection);
+  }, [posts, activeSection]);
 
   return (
     <section
@@ -55,19 +55,19 @@ export function PostsIndex({ posts }: PostsIndexProps) {
       <div
         className="mt-8 flex flex-wrap gap-2"
         role="group"
-        aria-label="Filter posts by tag"
+        aria-label="Filter posts by section"
       >
         <FilterButton
           label={ALL}
-          active={activeTag === ALL}
-          onClick={() => setActiveTag(ALL)}
+          active={activeSection === ALL}
+          onClick={() => setActiveSection(ALL)}
         />
-        {FILTER_TAGS.map((tag) => (
+        {sections.map((section) => (
           <FilterButton
-            key={tag}
-            label={tag}
-            active={activeTag === tag}
-            onClick={() => setActiveTag(tag)}
+            key={section}
+            label={section}
+            active={activeSection === section}
+            onClick={() => setActiveSection(section)}
           />
         ))}
       </div>

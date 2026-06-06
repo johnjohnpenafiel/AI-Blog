@@ -203,9 +203,9 @@ Keep values concise: `MON MAY 18`, `IN 2 DAYS`, `08:00`. Never fill a slot with 
 - **Structural framing:** two thin horizontal rules isolate the content block like a terminal readout
 - No card chrome on the hero — framing is done through lines + glow, not a clipped panel
 
-**Tag Filter**
+**Section Filter**
 - Sits between hero and posts grid
-- 6px quad-chamfer pill tags (Tier 2 component): `ALL` `VOICE AI` `CRM` `PRICING & ANALYTICS` `MERCHANDISING` `SALES DEV` `OT & INFRASTRUCTURE` `INDUSTRY MOVE`
+- 6px quad-chamfer pill tags (Tier 2 component). The pills are **`ALL` + the sections actually present in the loaded posts** — derived from the data, not a hardcoded list, so there are never empty/dead buckets (a section appears once it has a post). Navigation is by **Section** (the v2 primary nav axis), not the fine tags — see the v2 taxonomy. Example: `ALL` `CUSTOMER EXPERIENCE` `PRICING & ANALYTICS` `INVENTORY & MERCHANDISING`.
 - Default active: `ALL`
 - Active state: `--accent` border perimeter, `--accent-glow` background tint, `--accent` text
 - Inactive: `--border` perimeter, orange ONLY on the chamfer cut lines, `--text-secondary` text
