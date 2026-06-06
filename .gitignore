@@ -76,3 +76,6 @@ backend/scripts/smoke_*.py
 
 # Local planning / research scratch (local-only, not tracked)
 notes/
+
+# Claude Design handoff bundle — reference only, not part of the app
+design-handoff/
