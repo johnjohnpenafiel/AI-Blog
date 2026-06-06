@@ -56,6 +56,16 @@ _(updated as each piece lands)_
   a live **Related dispatches** grid (same section first), and the Subscribe
   CTA. Old `PostBody` / `ShareBar` removed; `SourcesList` restyled.
 
+- **About page (`/about`).** Recomposed in the design language (gutter bands,
+  `//` kickers, extended-Archivo headings + prose), with accurate copy: the
+  thesis, What We Cover, How It Works (the real 3×/week Mon-Thu-Fri pipeline),
+  and the operator-first POV. The route-transition `loading.tsx` was re-themed
+  to the stage as well.
+
+- **Tests.** Replaced the deleted `posts-index` test with a `dispatch-index`
+  test (data-driven chips + section filtering). Full suite green — 70 tests,
+  13 files.
+
 ---
 
 ## 2. Decisions to review
