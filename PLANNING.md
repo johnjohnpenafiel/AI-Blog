@@ -293,6 +293,7 @@ The Friday run does **not** fetch news. `run_roundup` reads the week's own `publ
 - **Single admin user.** No registration flow, no multi-user roles.
 - **Stay in the niche.** "AI as the dealership operating system" — no expansion into adjacent automotive beats.
 - **Source transparency.** Every post must list its sources (title, publisher, link, date) — part of the editorial contract with the audience.
+- **Measurement is first-class.** The product *is* the content, so the system is built to measure what it fetches and writes — not as a later analytics phase. Every post carries its full classification (`section` / `format` / `story_type`) and its generation-eval scores as part of the record, so outcomes can be tracked by eye now and analyzed properly later ("which kinds of posts perform?"). Adding a measurable dimension to a post is expected work, not scope creep.
 - **Secrets stay in `.env`.** `ANTHROPIC_API_KEY`, `PERPLEXITY_API_KEY`, `NEXTAUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL`, `BACKEND_API_SECRET` never committed.
 
 ## Decision log
