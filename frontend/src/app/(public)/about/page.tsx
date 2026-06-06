@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "About — The Garage AI",
   description:
-    "The Garage AI is an automated twice-weekly blog covering AI and operational technology developments in the automotive industry.",
+    "The Garage AI is an automated blog covering AI and operational technology developments in the automotive industry, publishing three times a week.",
 };
 
 const sections = [
@@ -15,7 +15,7 @@ const sections = [
   {
     index: "02",
     label: "How It Works",
-    body: `Every Monday and Thursday at 8 AM, an automated pipeline queries Perplexity Sonar for recent automotive AI news, identifies the most relevant developments of the past week, and sends those sources to Claude — Anthropic's large language model — to synthesize into a 600–900 word post. The result is reviewed, accepted, and published. No human journalist in the loop; the editorial judgment is in the pipeline design. Sources are listed on every post because transparency about how the content is made is part of the editorial contract with readers.`,
+    body: `Every Monday, Thursday, and Friday at 8 AM, an automated pipeline produces a post. On Monday and Thursday it queries Perplexity Sonar for recent automotive AI news, identifies the most operator-relevant developments of the past week, and sends those sources to Claude — Anthropic's large language model — to synthesize into a post: a concise Brief on Monday and a longer Deep Dive on Thursday. On Friday it produces a Roundup of the week's own coverage. The result is reviewed, accepted, and published. No human journalist in the loop; the editorial judgment is in the pipeline design. Sources are listed on every post because transparency about how the content is made is part of the editorial contract with readers.`,
   },
 ];
 
@@ -38,9 +38,9 @@ export default function AboutPage() {
           </h1>
 
           <p className="max-w-none font-sans text-[17px] leading-[1.6] text-white lg:max-w-2xl">
-            Automated twice-weekly dispatches on the software, services, and
-            strategies transforming how dealerships and automotive operators do
-            business.
+            Automated dispatches three times a week on the software, services,
+            and strategies transforming how dealerships and automotive operators
+            do business.
           </p>
         </div>
       </section>

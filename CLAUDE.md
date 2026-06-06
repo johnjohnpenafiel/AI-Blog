@@ -1,6 +1,6 @@
 # AI-Blog (The Garage AI)
 
-Automated twice-weekly blog on AI and operational technology in the automotive industry. The pipeline runs on a fixed Monday + Thursday cadence at 8 AM. Two surfaces: a public-facing blog (The Garage AI) and a private admin dashboard for the single operator.
+Automated blog on AI and operational technology in the automotive industry, publishing three times a week. The pipeline runs on a fixed Monday / Thursday / Friday cadence at 8 AM — a Brief on Monday, a Deep Dive on Thursday, and a Roundup on Friday. Two surfaces: a public-facing blog (The Garage AI) and a private admin dashboard for the single operator.
 
 > **Naming:** "The Garage AI" is the public brand used everywhere in code and user-facing surfaces. "DeLorean" is the internal codename, retained only in the design language (`Design/README.md`) and historical decision-log entries.
 

@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "The Garage AI — AI in the automotive industry",
   description:
-    "Twice-weekly dispatches on AI and operational technology reshaping the automotive industry.",
+    "Dispatches three times a week on AI and operational technology reshaping the automotive industry.",
 };
 
 export default async function HomePage() {

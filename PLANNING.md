@@ -13,7 +13,7 @@
 
 ## Project overview
 
-The Garage AI is an automated twice-weekly blog covering AI and operational technology developments in the automotive industry. The system has two surfaces: a public-facing blog where readers discover and share posts, and a private admin dashboard where a single operator manages the publishing pipeline, reviews AI-generated content, and configures system behavior. Content is generated end-to-end by an automated pipeline that fetches news from Perplexity Sonar, drafts a post with Claude, and either publishes immediately or routes to a review queue based on the configured publishing mode.
+The Garage AI is an automated blog covering AI and operational technology developments in the automotive industry, publishing three times a week (a Brief on Monday, a Deep Dive on Thursday, and a Roundup on Friday). The system has two surfaces: a public-facing blog where readers discover and share posts, and a private admin dashboard where a single operator manages the publishing pipeline, reviews AI-generated content, and configures system behavior. Content is generated end-to-end by an automated pipeline that fetches news from Perplexity Sonar, drafts a post with Claude, and either publishes immediately or routes to a review queue based on the configured publishing mode.
 
 > **Naming:** "The Garage AI" is the public brand used across all user-facing surfaces and the codebase. "DeLorean" is the internal codename and survives only in the design language (`Design/README.md`) and in historical decision-log entries.
 

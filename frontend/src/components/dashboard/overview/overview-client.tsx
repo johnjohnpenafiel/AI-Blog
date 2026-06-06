@@ -190,7 +190,7 @@ export function OverviewClient() {
                 </span>
               ) : null
             }
-            footer={<>Cadence — Mon · Thu · 08:00</>}
+            footer={<>Cadence — Mon · Thu · Fri · 08:00</>}
             testId="stat-next-run"
           />
         </div>

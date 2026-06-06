@@ -175,7 +175,7 @@ export function SettingsClient() {
             Pipeline Schedule
           </p>
           <p className="font-display text-[22px] font-semibold tracking-[0.02em] text-fg">
-            MON + THU AT 8:00 AM
+            MON · THU · FRI AT 8:00 AM
           </p>
           <p className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
             Cadence fixed in code — not configurable here.

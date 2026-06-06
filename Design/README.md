@@ -1,14 +1,10 @@
 # The Garage AI — UI Design Brief (v2.0)
 
-> **Naming:** "The Garage AI" is the product's public brand (used everywhere in code and user-facing copy). "DeLorean" was the internal codename and lives on here only as the *retrofuturist design inspiration* — the DeLorean car / Back to the Future aesthetic that drives the visual language. Where this doc references "DeLorean" below, it means that aesthetic, not the product name.
-
-> **v2.0 — May 2026.** Major language overhaul: orange accent on inverted-depth chassis, Chakra Petch display type, chamfered geometry as the signature visual system, and a two-tier border hierarchy. Applies to **both surfaces** (public blog + admin dashboard).
->
-> Companion file: `Desktop/delorean-design-language.html` is the visual spec sheet for the admin dashboard. This README is the dev-facing source of truth and extends the language across the public blog.
+> **Naming:** "The Garage AI" is the product's public brand (used everywhere in code and user-facing copy). *retrofuturist design inspiration* — the DeLorean car / Back to the Future aesthetic that drives the visual language.
 
 ## What Is The Garage AI
 
-The Garage AI is an automated twice-weekly blog covering AI and operational technology developments in the automotive industry. It has two surfaces:
+The Garage AI is an automated news site covering AI and operational technology developments in the automotive industry, publishing three times a week (Mon/Thu/Fri). It has two surfaces:
 
 - **Public Blog (The Garage AI)** — where readers discover and read posts
 - **Admin Dashboard** — where a single operator manages the publishing pipeline
@@ -443,8 +439,8 @@ All dashboard pages share this shell:
 
 **Schedule** (read-only)
 - Label: `PIPELINE SCHEDULE`
-- Current schedule displayed: `MON + THU AT 8:00 AM` (Chakra Petch 600)
-- Note: cadence (both days and frequency) is fixed in code and not configurable in UI
+- Current schedule displayed: `MON · THU · FRI AT 8:00 AM` (Chakra Petch 600)
+- Note: cadence (days and frequency) is fixed in code and not configurable in UI
 
 **Pipeline**
 - Label: `MANUAL CONTROLS`
