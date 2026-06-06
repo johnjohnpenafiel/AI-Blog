@@ -16,6 +16,7 @@ function post(
     summary: `Summary ${slug}`,
     tags: ["Voice AI"],
     section,
+    format: "Brief",
     published_at: "2026-05-04T08:00:00Z",
     read_time_minutes: 3,
   };

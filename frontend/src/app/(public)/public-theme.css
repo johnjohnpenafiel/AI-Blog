@@ -71,6 +71,12 @@
   position: relative;
 }
 
+/* keep all frame children above the scanline texture */
+.tg-frame > *:not(.tg-scanline) {
+  position: relative;
+  z-index: 1;
+}
+
 .tg-scanline {
   position: absolute;
   inset: 0;

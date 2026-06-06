@@ -1,31 +1,55 @@
-import Link from "next/link";
+import { LogoMark } from "./logo-mark";
 
+/**
+ * Inner footer line — the last band inside the scroll region on every public
+ * page. LogoMark in the gutter, copyright + the brand thesis (sand) in the
+ * content column.
+ */
 export function PublicFooter() {
   return (
-    <footer
+    <div
       data-testid="public-footer"
-      className="mt-24 border-t border-border-dim"
+      style={{
+        borderTop: "1px solid var(--tg-frame)",
+        display: "grid",
+        gridTemplateColumns: "var(--tg-gutter) 1fr",
+      }}
     >
-      <div className="flex flex-col gap-4 px-6 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-16">
-        <span className="font-mono text-[11px] tracking-[0.22em] text-muted uppercase">
-          © The Garage AI · v1
-        </span>
-
-        <div className="flex items-center gap-6">
-          <Link
-            href="/"
-            className="font-mono text-[10px] tracking-[0.25em] text-fg uppercase transition-colors hover:text-accent"
-          >
-            Blog
-          </Link>
-          <Link
-            href="/about"
-            className="font-mono text-[10px] tracking-[0.25em] text-fg uppercase transition-colors hover:text-accent"
-          >
-            About
-          </Link>
-        </div>
+      <div style={{ paddingLeft: 24, paddingTop: 22 }}>
+        <LogoMark size={30} />
       </div>
-    </footer>
+      <div
+        style={{
+          padding: "22px var(--tg-content-pad) 24px 0",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 12,
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "var(--tg-font-mono)",
+            fontSize: 10,
+            color: "var(--tg-faint)",
+            letterSpacing: "0.1em",
+          }}
+        >
+          © 2026 THE GARAGE AI
+        </span>
+        <span
+          style={{
+            fontFamily: "var(--tg-font-mono)",
+            fontSize: 10,
+            color: "var(--tg-sand)",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+          }}
+        >
+          AI as the dealership operating system
+        </span>
+      </div>
+    </div>
   );
 }
