@@ -39,6 +39,55 @@ New entries at the top.
 - **Video blocklist is a small static list.** It enumerates the obvious offenders (YouTube, Vimeo, TikTok, Reddit, X/Twitter, Facebook, Instagram); a new video host slips through until added. The classifier remains the backstop behind it.
 - **Snippet depth is Perplexity's call, not ours.** If Sonar changes what `high` returns, our grounding silently shifts. The volume probe (which records raw/news counts weekly) would surface a gross change but not a subtle depth regression.
 
+### 2026-06-03 — v2 taxonomy: section / format / story_type as plain text + code-level vocabulary (not DB enums)
+**Context**: MVP categorized posts with a single flat `tags VARCHAR[]` (7 legacy tags) at one altitude — no notion of *where* in the dealership OS a post lives vs. *how* it's written vs. *what kind* of event it is. v2 needs richer, browsable categorization that can **grow** (graduate a tag → section) as weekly volume data dictates. Shipped as Phase 1 `taxonomy-data-model` (merge `5d91807`).
+**Decision**: Add three nullable TEXT columns to `posts` — `section`, `format`, `story_type` (single-value each) — alongside the existing `tags[]` (many). The allowed values live in **one canonical place in code** (`backend/taxonomy.py`: `SECTION_TAGS` = 9 sections → nested tags, `FORMATS`, `STORY_TYPES` + `is_valid_*` helpers), validated in the app (`@validates` on the model + the `PostTaxonomyIn` schema) before save — **not** as database enums. Forward-only migration `c4f1a2b3d6e7` adds the columns and backfills pre-v2 rows (legacy tag → section default `Customer Experience`; format → `Deep Dive`; the legacy `Industry Move` tag relocated out of `tags` into `story_type`).
+**Rationale**:
+- **Code vocab over DB enums** so adding/graduating a category is a one-line code edit, not a migration every time — essential because the weekly volume probe continuously reshapes which areas are live sections vs. tags. The app validates against the canonical list (safe — only our own pipeline writes posts).
+- **Single-value section/format/story_type + many tags** matches the real shape: one primary nav axis, one format, one event-kind, many fine topical labels.
+- **`story_type` stored now though not yet a browse filter** — storing it early makes promoting it to an index later a UI change, not a migration.
+- **Nullable, no separate `categories` table** — overkill at single-operator scale; revisit only if a section needs its own metadata.
+**Tradeoffs**:
+- **The DB won't reject an out-of-vocab value on its own** — enforcement is app-side. Acceptable since only the pipeline writes posts.
+- **`Industry-Move`-only posts backfill to `section = Customer Experience`** (no better signal) — documented heuristic.
+- **`story_type` is a column the generator does not yet populate** — every post currently has `story_type = NULL`; storing-capable but inert until generation classifies it (tracked gap). Full rationale in `notes/v2-ideas.md` (Data Model entry).
+
+### 2026-06-03 — News sourcing: open canvas + Haiku classifier + importance-over-volume selection
+**Context**: The shipped `news-fetcher-quality-filter` (2026-05-24 entry) gated news by an ~18-domain `search_domain_filter` allowlist and picked the topic by **largest cluster** (article count). The 2026-05-30 volume research proved the allowlist *starves* the best beats (Voice AI: raw 17 but only 1 allowlisted) and that *volume ≠ importance* (evergreen-noisy topics always win, repeating the same category and articles). Shipped as Phase 2 `news-sourcing-v2` (merge `c37f7a5`); **revisits** the 2026-05-24 decision.
+**Decision**: Rework `news_fetcher` + add a classifier:
+1. **Open canvas** — drop the `search_domain_filter` allowlist; keep `news:` phrasing + `week` recency. A small deterministic `DOMAIN_BLOCKLIST` (PR wires; later video/social) is a cheap first pass.
+2. **`content_classifier.py`** — one cheap Haiku call scores each article `is_news` (drops vendor promo by *what the article is*, not its domain) + `importance` 0–2. **Fails open** (API error → treat as news, importance 1) so a hiccup never kills a run.
+3. **Importance-over-volume selection** (`_pick_winning_section`) — rank qualifying sections by (high-importance count → summed importance → distinct-publisher breadth → cluster size), with **anti-repetition**: never repeat the last published section when an alternative qualifies, and drop any URL already cited by a prior post. Six section-based queries; `MIN_ARTICLES = 3` runs on classified-news results. Folds in the parked `news-fetcher-repetition-fix`.
+**Rationale**:
+- **Classifier over allowlist** — the allowlist conflated "reputable source" with "not promotional" (different questions) and was unbounded to maintain; judging what the *article* is, is the right axis and reuses a model already in our stack.
+- **Importance over count** — the editorial POV (operator-first) defines "important," not media buzz; coverage breadth + funding/M&A weight approximate a real deal better than a raw pile.
+- **Anti-repetition** keeps the site fresh with cheap deterministic rules, no extra model calls.
+- **Fail-open classifier** — a classifier outage should publish-as-usual, not skip the run.
+**Tradeoffs**:
+- **Open canvas lowers the source-quality floor** the allowlist enforced — the classifier + blocklist now carry it, and real accuracy is only judgeable on a live run (tests mock it).
+- **`importance` is a single 0–2 Haiku score**, coarser than the ideas-doc spec (explicit spike-vs-baseline needs historical data — deferred).
+- **Only 6 sections queried** (F&I, Back Office/DMS, AI Car Shopping excluded as tag-only/thin for now). Full rationale in `notes/v2-ideas.md` (News Filter + Topic Selection) and the 2026-05-30 volume finding.
+
+### 2026-06-03 — Multi-format generation + day→format run model (Brief Mon / Deep Dive Thu)
+**Context**: MVP generated one shape of post (a 600–900w synthesis) with an "authoritative, forward-looking" tone and no thesis. v2 wants the *right kind* of post in *our voice* on the *right day*, plus an editorial POV the site is known for. Shipped as Phase 2 `multi-format-generation` (merge `0cad71d`).
+**Decision**: **Format-aware generation** driven by `FORMAT_SPECS` — **Brief** (~200–400w, Smart-Brevity skeleton) and **Deep Dive** (600–900w, multi-source synthesis) — each carrying the **operator-first / proof-over-hype POV** baked into the prompt (replaces the old tone line; unsupported format raises). The pipeline threads `format` → sets `post.format`. **Each format is its own scheduled run**: the cron derives the format by weekday (`WEEKDAY_FORMATS`; this feature wired Mon→Brief, Thu→Deep Dive — Friday/Roundup lands in the next entry). Manual `POST /pipeline/run` takes an optional `{format}` (Brief/Deep Dive; default Deep Dive, 422 on bad value).
+**Rationale**:
+- **Each-on-its-own-day over one batch up front** — freshness (Thursday's post reflects Thursday's news) and no cross-format repeats (each run grabs the latest news and skips used articles). Three small independent runs are sturdier than one batch — a thin news day only skips that day's post.
+- **POV in the prompt** is the generation half of the cross-cutting editorial POV (the content half is the importance ranking above); it gives the site an identity and resists AI-hype saturation.
+**Tradeoffs**:
+- **The scheduler becomes behavior-bearing** (run output now depends on the weekday) — inherits the single-instance assumption of the in-process scheduler (a standing CLAUDE.md gotcha).
+- **Explainer / Timeline / Rankings formats deferred**; **the blog writer still emits the legacy 7-tag set** (tag-vocabulary migration deferred). Format skeletons + run-model rationale in `notes/v2-ideas.md` (Format Index).
+
+### 2026-06-03 — Weekly Roundup: synthesize the week's own posts, Friday completes Mon/Thu/Fri
+**Context**: With Brief (Mon) + Deep Dive (Thu) shipping (entry above), importance-based selection means some genuinely important stories won't win a slot. The run model also called for a Friday recap that *can't* be pre-made — it must read back the week's published posts, so it runs last. Shipped as Phase 2 `roundup-generation` (merge `690efa2`).
+**Decision**: Add `run_roundup(db)` — a **distinct input path that reads the week's own `published` posts from the DB (not Perplexity)** over a 7-day lookback (excluding prior roundups), and `generate_roundup()` which writes a ~500–600w week-in-review (through-line → "The Big Story" → "Also This Week" → "Worth Watching") with sources derived as `/blog/{slug}` links. The scheduler now fires **Mon/Thu/Fri** (`_FIRE_WEEKDAYS` + `WEEKDAY_FORMATS` + `compute_next_run_at` include Friday); Friday branches to `run_roundup`. Skips cleanly if nothing was published that week.
+**Rationale**:
+- **Reads our own posts, not news** — the Roundup is a look-back, so its input is the week's output; this also makes it the **safety net** for important stories that didn't win an earlier slot.
+- **Friday completes the each-format-own-day run model** from the previous entry — the Roundup must run last, so it owns the last cadence day.
+**Tradeoffs**:
+- **Completes the scheduler behavior change** (now three behavior-bearing days + a Roundup branch) — same single-instance caveat as above.
+- **7-day lookback is fixed**; an empty publishing week yields no Roundup (acceptable — nothing to recap). Roundup skeleton rationale in `notes/v2-ideas.md` (Format Index).
+
 ### 2026-05-29 — Backend auth: shared-secret gate + proxy session check (not JWT verification)
 **Context**: A QA audit on 2026-05-29 found the backend enforced **no auth on any endpoint** — `require_api_key` did not exist, and the only auth check anywhere was `frontend/src/proxy.ts` guarding the `/dashboard/*` *pages*. The FastAPI service (public on Render) would execute any admin/pipeline/settings write from an unauthenticated request — e.g. `curl -X POST $BACKEND/pipeline/run` spends real Claude + Perplexity money. CORS does not mitigate this (it only constrains browser JS, not `curl`/server-side callers). The `backend-auth` feature closes the gap.
 **Decision**: Two enforcement points, one shared secret (`BACKEND_API_SECRET`):
