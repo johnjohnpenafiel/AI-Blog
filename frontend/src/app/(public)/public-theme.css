@@ -1,0 +1,512 @@
+/* ============================================================================
+   THE GARAGE AI — PUBLIC SURFACE THEME
+   Ported from the Claude Design handoff (design-handoff/the-garage-ai).
+   Dark "console" aesthetic: neutral gray ramp, orange + sand the only accents,
+   square corners everywhere, a 3px stage frame and a 132px indexed gutter.
+
+   SCOPING: every token is namespaced `--tg-*` and every rule is nested under
+   `.tg-surface`. Nothing here leaks to the admin dashboard, which keeps its own
+   `:root` tokens (--bg, --accent, …) and Tailwind @theme mapping untouched.
+   Loaded only by the (public) route group via its layout.
+   ============================================================================ */
+
+.tg-surface {
+  /* ── neutrals ── */
+  --tg-ink-black: #0a0a0a;
+  --tg-bg: #1a1a1a;
+  --tg-band: #242424;
+  --tg-card: #2a2a2a;
+  --tg-card-hover: #303030;
+  --tg-frame: #646464;
+  --tg-frame-hair: #333333;
+
+  /* ── text ── */
+  --tg-ink: #f9f9f9;
+  --tg-mute: #a7a7a7;
+  --tg-faint: #646464;
+  --tg-ink-soft: #cfcbc5;
+
+  /* ── brand (the only saturated hues) ── */
+  --tg-orange: #e85002;
+  --tg-orange-bright: #f16001;
+  --tg-red: #c10801;
+  --tg-sand: #d9c3ab;
+  --tg-halftone-field: #2a0700;
+
+  /* ── layout ── */
+  --tg-gutter: 132px;
+  --tg-frame-pad: clamp(10px, 1.4vw, 22px);
+  --tg-content-pad: clamp(24px, 5vw, 96px);
+
+  /* ── type ── */
+  --tg-font-display: var(--font-archivo), "Archivo", sans-serif;
+  --tg-font-mono: var(--font-dm-mono), "DM Mono", monospace;
+
+  background: var(--tg-bg);
+  color: var(--tg-ink);
+  font-family: var(--tg-font-display);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (max-width: 720px) {
+  .tg-surface {
+    --tg-gutter: 64px;
+    --tg-content-pad: 24px;
+  }
+}
+
+/* Square corners are the house rule — defensively kill any inherited radius. */
+.tg-surface *,
+.tg-surface *::before,
+.tg-surface *::after {
+  border-radius: 0;
+}
+
+/* ── Stage frame ──────────────────────────────────────────────────────────── */
+.tg-frame {
+  border-top: 3px solid var(--tg-frame);
+  border-left: 3px solid var(--tg-frame);
+  border-right: 3px solid var(--tg-frame);
+  margin: var(--tg-frame-pad) var(--tg-frame-pad) 0;
+  position: relative;
+}
+
+.tg-scanline {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.02) 3px,
+    rgba(0, 0, 0, 0.02) 4px
+  );
+}
+
+/* ── Gutter row: indexed marker column + content column ───────────────────── */
+.tg-row {
+  display: grid;
+  grid-template-columns: var(--tg-gutter) 1fr;
+}
+.tg-marker {
+  padding-left: 24px;
+  font-family: var(--tg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--tg-faint);
+}
+
+/* ── Kicker / eyebrow ─────────────────────────────────────────────────────── */
+.tg-kicker {
+  font-family: var(--tg-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--tg-orange);
+  text-transform: uppercase;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+.tg-btn {
+  font-family: var(--tg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 14px 30px;
+  background: var(--tg-orange);
+  color: var(--tg-ink-black);
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  display: inline-block;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+.tg-btn:hover {
+  background: var(--tg-orange-bright);
+}
+
+.tg-btn-ghost {
+  font-family: var(--tg-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 11px 22px;
+  background: transparent;
+  color: var(--tg-mute);
+  border: 1px solid var(--tg-frame);
+  cursor: pointer;
+  display: inline-block;
+  text-decoration: none;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.tg-btn-ghost:hover {
+  color: var(--tg-ink);
+  border-color: var(--tg-orange);
+}
+
+/* ── Nav + body links ─────────────────────────────────────────────────────── */
+.tg-nav-link {
+  font-family: var(--tg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--tg-mute);
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.tg-nav-link:hover {
+  color: var(--tg-ink);
+}
+
+.tg-body-link {
+  color: var(--tg-orange);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(232, 80, 20, 0.4);
+  transition: border-color 0.15s ease;
+}
+.tg-body-link:hover {
+  border-bottom-color: var(--tg-orange);
+}
+
+/* ── Section / format tab buttons (filter) ────────────────────────────────── */
+.tg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--tg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 9px 9px 9px 14px;
+  background: transparent;
+  color: #8a8680;
+  border: 1px solid var(--tg-frame);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.tg-chip:hover {
+  color: var(--tg-ink);
+  border-color: var(--tg-orange);
+}
+.tg-chip[data-active="true"] {
+  background: var(--tg-orange);
+  color: var(--tg-ink-black);
+  border-color: var(--tg-orange);
+}
+.tg-chip-count {
+  font-size: 9px;
+  line-height: 1;
+  padding: 3px 6px;
+  border: 1px solid currentColor;
+  opacity: 0.55;
+  letter-spacing: 0.05em;
+}
+.tg-chip[data-active="true"] .tg-chip-count {
+  opacity: 1;
+  background: var(--tg-ink-black);
+  color: var(--tg-orange);
+  border-color: var(--tg-ink-black);
+}
+
+/* ── Post card (halftone header + mono title + > point list) ──────────────── */
+.tg-card {
+  background: var(--tg-card);
+  border: 1px solid var(--tg-frame-hair);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease,
+    background 0.18s ease;
+}
+.tg-card:hover {
+  background: var(--tg-card-hover);
+  border-color: rgba(232, 80, 20, 0.45);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
+  transform: translateY(-3px);
+}
+.tg-card-read {
+  color: var(--tg-faint);
+  transition: color 0.18s ease;
+}
+.tg-card:hover .tg-card-read {
+  color: var(--tg-orange);
+}
+
+/* ── Dispatch row (editorial list) ────────────────────────────────────────── */
+.tg-dispatch {
+  display: grid;
+  grid-template-columns: var(--tg-gutter) 1fr;
+  border-bottom: 1px solid var(--tg-frame-hair);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.18s ease;
+}
+.tg-dispatch:hover {
+  background: rgba(232, 80, 20, 0.025);
+}
+.tg-dispatch-headline {
+  color: var(--tg-ink-soft);
+  transition: color 0.18s ease;
+}
+.tg-dispatch:hover .tg-dispatch-headline {
+  color: var(--tg-ink);
+}
+.tg-dispatch-index,
+.tg-dispatch-read {
+  color: var(--tg-faint);
+  transition: color 0.18s ease;
+}
+.tg-dispatch:hover .tg-dispatch-index,
+.tg-dispatch:hover .tg-dispatch-read {
+  color: var(--tg-orange);
+}
+
+/* ── Share chip ───────────────────────────────────────────────────────────── */
+.tg-share-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--tg-frame);
+  color: var(--tg-mute);
+  cursor: pointer;
+  background: transparent;
+  font-family: var(--tg-font-mono);
+  font-size: 11px;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.tg-share-chip:hover {
+  color: var(--tg-ink-black);
+  background: var(--tg-orange);
+  border-color: var(--tg-orange);
+}
+
+/* ── Ticker (pure-CSS infinite scroll; items duplicated 2x → -50% loop) ───── */
+.tg-ticker {
+  overflow: hidden;
+  border-bottom: 3px solid var(--tg-frame);
+  padding: 10px 0;
+  background: var(--tg-ink-black);
+}
+.tg-ticker-track {
+  display: flex;
+  gap: 70px;
+  width: max-content;
+  white-space: nowrap;
+  padding-left: 24px;
+  will-change: transform;
+  animation: tg-ticker 60s linear infinite;
+}
+.tg-ticker-item {
+  font-family: var(--tg-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--tg-faint);
+  text-transform: uppercase;
+}
+.tg-ticker-item[data-accent="true"] {
+  color: var(--tg-orange);
+}
+
+/* ── Image placeholder slot (hero.mp4 is the only real asset; everything else
+      is a clearly-marked empty slot the operator fills later). NOTE: the old
+      "no images in the UI" constraint is an authorized deviation for the
+      redesign — these slots are intentional. ───────────────────────────────── */
+.tg-img-slot {
+  position: relative;
+  background: var(--tg-halftone-field);
+  border: 1px solid var(--tg-frame-hair);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.tg-img-slot::after {
+  content: "IMAGE";
+  font-family: var(--tg-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: rgba(217, 195, 171, 0.5);
+  text-transform: uppercase;
+}
+
+/* ── ⟨NEEDS CONTENT⟩ marker — deliberately loud so gaps are obvious ────────── */
+.tg-needs {
+  display: inline-block;
+  font-family: var(--tg-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffd500;
+  background: rgba(255, 213, 0, 0.1);
+  border: 1px dashed #ffd500;
+  padding: 2px 7px;
+}
+
+/* ── Themed article prose (markdown body → design's editorial voice) ──────── */
+.tg-prose {
+  max-width: 720px;
+}
+.tg-prose > * {
+  max-width: 700px;
+}
+.tg-prose p {
+  font-family: var(--tg-font-display);
+  font-weight: 400;
+  font-stretch: 110%;
+  font-size: 18px;
+  line-height: 1.62;
+  letter-spacing: 0.002em;
+  color: #d2cec8;
+  margin: 0 0 26px;
+}
+.tg-prose > p:first-child {
+  font-size: 22px;
+  font-weight: 500;
+  font-stretch: 112%;
+  color: #e4e0da;
+  line-height: 1.5;
+}
+.tg-prose h2,
+.tg-prose h3 {
+  font-family: var(--tg-font-display);
+  font-weight: 700;
+  font-stretch: 112%;
+  font-size: clamp(22px, 2.4vw, 30px);
+  line-height: 1.1;
+  letter-spacing: -0.012em;
+  color: var(--tg-ink);
+  margin: 36px 0 18px;
+}
+.tg-prose h3 {
+  font-size: clamp(20px, 2vw, 24px);
+}
+.tg-prose ul,
+.tg-prose ol {
+  margin: 0 0 26px;
+  padding-left: 0;
+  list-style: none;
+  max-width: 700px;
+}
+.tg-prose li {
+  position: relative;
+  padding-left: 26px;
+  margin-bottom: 12px;
+  font-family: var(--tg-font-display);
+  font-weight: 400;
+  font-stretch: 108%;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--tg-mute);
+}
+.tg-prose li::before {
+  content: ">";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: var(--tg-font-mono);
+  font-size: 14px;
+  color: var(--tg-orange);
+}
+.tg-prose a {
+  color: var(--tg-orange);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(232, 80, 20, 0.4);
+}
+.tg-prose a:hover {
+  border-bottom-color: var(--tg-orange);
+}
+.tg-prose strong {
+  color: var(--tg-ink);
+  font-weight: 600;
+}
+.tg-prose blockquote {
+  border-left: 3px solid var(--tg-orange);
+  padding: 6px 0 6px 28px;
+  margin: 40px 0;
+}
+.tg-prose blockquote p {
+  font-family: var(--tg-font-display);
+  font-weight: 600;
+  font-stretch: 108%;
+  font-size: clamp(22px, 2.6vw, 30px);
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+  color: var(--tg-ink);
+  margin: 0;
+}
+.tg-prose code {
+  font-family: var(--tg-font-mono);
+  font-size: 0.9em;
+  background: var(--tg-band);
+  border: 1px solid var(--tg-frame-hair);
+  padding: 1px 5px;
+}
+.tg-prose pre {
+  font-family: var(--tg-font-mono);
+  font-size: 13px;
+  background: var(--tg-band);
+  border: 1px solid var(--tg-frame-hair);
+  padding: 16px;
+  overflow-x: auto;
+  margin: 0 0 26px;
+}
+.tg-prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+/* ── Keyframes ────────────────────────────────────────────────────────────── */
+@keyframes tg-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes tg-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes tg-pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+.tg-fade-up {
+  opacity: 0;
+  animation: tg-fade-up 0.7s var(--tg-ease, ease) forwards;
+}
+.tg-pulse {
+  animation: tg-pulse-dot 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-surface .tg-ticker-track,
+  .tg-surface .tg-pulse {
+    animation: none;
+  }
+  .tg-surface .tg-fade-up {
+    opacity: 1;
+    animation: none;
+  }
+}
