@@ -48,6 +48,14 @@ _(updated as each piece lands)_
     exist, with live counts) + the editorial dispatch rows.
   - Clean empty state before the first post is published.
 
+- **Dispatch page (`/blog/[slug]`).** Fully rebuilt: breadcrumb (Index /
+  section / format), title block (section + format + lede), metadata strip
+  (Published / By / Read time / Filed under + working Share chips), lead-image
+  placeholder, themed markdown body (`.tg-prose` — Archivo prose, mono-orange
+  `>` lists, orange-rule pull quotes), a **Sources band** (added — see below),
+  a live **Related dispatches** grid (same section first), and the Subscribe
+  CTA. Old `PostBody` / `ShareBar` removed; `SourcesList` restyled.
+
 ---
 
 ## 2. Decisions to review
@@ -88,6 +96,25 @@ _(choices I made that you should confirm match your intent)_
   hero are computed from the loaded posts (distinct values), not hardcoded to
   the design's "4 / 4". Explainer mode will read empty until that format ships.
 
+- **Byline is "The Garage Desk."** Posts have no author in the data model; I
+  used the publication's desk name (the brand voice in the handoff), not a
+  fabricated person. → Fine, or do you want a real/configurable byline?
+
+- **Added a Sources band the handoff didn't have.** "Every post lists its
+  sources" is a project non-negotiable, but the handoff's dispatch had no
+  sources section. I built one in the design language (gutter row, mono header,
+  orange-underline links). → Confirm placement (currently between the body and
+  related dispatches).
+
+- **Omitted three sample-only article bands.** The handoff dispatch had a stat
+  band (`0s / 24/7 / +22% / 3.1×`), a standalone pull-quote, and a capability
+  list — all hardcoded to the sample story with no equivalent in our data model.
+  I omitted them rather than fabricate numbers. Pull quotes / lists / subheads
+  still render *when present in the post's own markdown* (themed via `.tg-prose`).
+  The handoff's "About the desk / Go further" band was also dropped (it overlaps
+  the footer + related grid). → Say if you want any of these back, generated
+  per post.
+
 ---
 
 ## 3. Needs content
@@ -102,8 +129,8 @@ _(every on-screen ⟨NEEDS CONTENT⟩ marker and what it's waiting on)_
   per the design, waiting on real art (or a procedural-halftone implementation):
   - Post cards in the reading-modes grid (5:4 header).
   - Featured-story image (16:9).
-  - Related-dispatch cards + the article hero image (on the dispatch page —
-    built in the next step).
+  - Related-dispatch cards (5:4 header) on the dispatch page.
+  - Article **lead image** (16:9, labelled `FIG.0 — Lead image placeholder`).
 
 ---
 

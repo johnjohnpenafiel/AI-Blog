@@ -1,62 +1,126 @@
-"use client";
-
-import { useState } from "react";
-
 import type { PublicPostSource } from "@/lib/public-api";
+import { longDate } from "@/lib/public-format";
 
-interface SourcesListProps {
-  sources: PublicPostSource[];
-}
-
-function formatSourceDate(d: string | null): string {
-  if (!d) return "";
-  try {
-    return new Date(d)
-      .toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })
-      .toUpperCase();
-  } catch {
-    return d;
-  }
-}
-
-export function SourcesList({ sources }: SourcesListProps) {
-  const [open, setOpen] = useState(false);
-
-  if (sources.length === 0) return null;
-
+/**
+ * Sources band — the editorial contract: every dispatch lists its sources
+ * (title, publisher, date, link). The handoff article didn't include this
+ * section, so it's recreated here in the design language (gutter row, mono
+ * "SOURCES [n]" header, orange-underline source links). Rendered as a full
+ * band — the page drops it straight into the scroll region.
+ */
+export function SourcesList({ sources }: { sources: PublicPostSource[] }) {
   return (
-    <div data-testid="sources-list" className="mt-8 border-t border-[var(--border-dim)] pt-6">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-3 font-mono text-[10px] tracking-[0.25em] text-muted uppercase transition-colors hover:text-fg"
-        aria-expanded={open}
-      >
-        <span>Sources [{sources.length}]</span>
-        <span aria-hidden>{open ? "▲" : "▼"}</span>
-      </button>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "var(--tg-gutter) 1fr",
+        borderTop: "1px solid var(--tg-frame-hair)",
+        background: "var(--tg-band)",
+      }}
+    >
+      <div style={{ paddingLeft: 24, paddingTop: 34 }}>
+        <span
+          style={{
+            fontFamily: "var(--tg-font-mono)",
+            fontSize: 11,
+            letterSpacing: "0.1em",
+            color: "var(--tg-faint)",
+          }}
+        >
+          (src)
+        </span>
+      </div>
+      <div style={{ padding: "34px var(--tg-content-pad) 40px 0" }}>
+        <div
+          style={{
+            fontFamily: "var(--tg-font-mono)",
+            fontSize: 11,
+            letterSpacing: "0.16em",
+            color: "var(--tg-ink)",
+            textTransform: "uppercase",
+            marginBottom: 22,
+          }}
+        >
+          Sources [{String(sources.length).padStart(2, "0")}]
+        </div>
 
-      {open && (
-        <ul className="mt-4 space-y-3">
-          {sources.map((src, i) => (
-            <li key={i} className="flex flex-col gap-0.5">
-              <a
-                href={src.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-mono text-[11px] tracking-[0.1em] text-accent underline underline-offset-2 hover:text-[var(--accent-dim)] transition-colors"
+        {sources.length === 0 ? (
+          <div
+            style={{
+              fontFamily: "var(--tg-font-mono)",
+              fontSize: 11,
+              letterSpacing: "0.14em",
+              color: "var(--tg-faint)",
+              textTransform: "uppercase",
+            }}
+          >
+            {"// No sources listed"}
+          </div>
+        ) : (
+          <ol
+            style={{
+              listStyle: "none",
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+              maxWidth: 720,
+            }}
+          >
+            {sources.map((src, i) => (
+              <li
+                key={`${src.url}-${i}`}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "28px 1fr",
+                  gap: 10,
+                  borderBottom: "1px solid var(--tg-frame-hair)",
+                  paddingBottom: 14,
+                }}
               >
-                {src.title}
-              </a>
-              <span className="font-mono text-[10px] tracking-[0.15em] text-muted uppercase">
-                {src.publisher}
-                {src.published_date && (
-                  <> · {formatSourceDate(src.published_date)}</>
-                )}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+                <span
+                  style={{
+                    fontFamily: "var(--tg-font-mono)",
+                    fontSize: 10,
+                    color: "var(--tg-faint)",
+                    letterSpacing: "0.1em",
+                    paddingTop: 2,
+                  }}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <a
+                    href={src.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="tg-body-link"
+                    style={{
+                      fontFamily: "var(--tg-font-display)",
+                      fontStretch: "108%",
+                      fontSize: 15,
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    {src.title}
+                  </a>
+                  <span
+                    style={{
+                      fontFamily: "var(--tg-font-mono)",
+                      fontSize: 9,
+                      letterSpacing: "0.12em",
+                      color: "var(--tg-faint)",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {src.publisher}
+                    {src.published_date ? ` · ${longDate(src.published_date)}` : ""}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
     </div>
   );
 }

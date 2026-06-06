@@ -1,30 +1,22 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-import { PostBody } from "@/components/public/post-body";
-import { ShareBar } from "@/components/public/share-bar";
+import { DispatchBody } from "@/components/public/dispatch-body";
+import { DispatchHeader } from "@/components/public/dispatch-header";
+import { RelatedDispatches } from "@/components/public/related-dispatches";
 import { SourcesList } from "@/components/public/sources-list";
-import { Tag } from "@/components/tag";
-import { getPublicPost, NotFoundError } from "@/lib/public-api";
+import { SubscribeCta } from "@/components/public/subscribe-cta";
+import {
+  getPublicPost,
+  listPublicPosts,
+  NotFoundError,
+  type PublicPostListItem,
+} from "@/lib/public-api";
 
 export const dynamic = "force-dynamic";
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
-}
-
-function formatPublishDate(iso: string): string {
-  try {
-    return new Date(iso)
-      .toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-      })
-      .toUpperCase();
-  } catch {
-    return iso;
-  }
 }
 
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
@@ -48,7 +40,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
       },
     };
   } catch {
-    return { title: "Post — The Garage AI" };
+    return { title: "Dispatch — The Garage AI" };
   }
 }
 
@@ -63,37 +55,54 @@ export default async function PostPage({ params }: PostPageProps) {
     throw err;
   }
 
+  // Related dispatches: other published posts, same section first, then recent.
+  let related: PublicPostListItem[] = [];
+  try {
+    const { items } = await listPublicPosts({ limit: 12 });
+    const others = items.filter((p) => p.slug !== slug);
+    const sameSection = others.filter(
+      (p) => post.section != null && p.section === post.section,
+    );
+    const rest = others.filter(
+      (p) => !(post.section != null && p.section === post.section),
+    );
+    related = [...sameSection, ...rest].slice(0, 3);
+  } catch {
+    related = [];
+  }
+
   return (
-    <article className="mx-auto max-w-3xl px-6 py-16">
-      {/* Header */}
-      <header className="mb-10">
-        <h1 className="font-display text-[36px] font-bold leading-[1.08] tracking-[0.01em] text-fg sm:text-[44px] md:text-[52px]">
-          {post.title}
-        </h1>
+    <>
+      <DispatchHeader post={post} />
 
-        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-[var(--border-dim)] pb-6">
-          <span className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
-            {formatPublishDate(post.published_at)}
+      {/* article body */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "var(--tg-gutter) 1fr",
+          background: "var(--tg-bg)",
+        }}
+      >
+        <div style={{ paddingLeft: 24, paddingTop: 44 }}>
+          <span
+            style={{
+              fontFamily: "var(--tg-font-mono)",
+              fontSize: 11,
+              letterSpacing: "0.1em",
+              color: "var(--tg-faint)",
+            }}
+          >
+            (01)
           </span>
-          <span className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
-            {post.read_time_minutes} min read
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {post.tags.map((tag) => (
-              <Tag key={tag} label={tag} />
-            ))}
-          </div>
         </div>
-      </header>
+        <div style={{ padding: "44px var(--tg-content-pad) 8px 0" }}>
+          <DispatchBody content={post.content} />
+        </div>
+      </div>
 
-      {/* Body */}
-      <PostBody content={post.content} />
-
-      {/* Share */}
-      <ShareBar title={post.title} slug={post.slug} />
-
-      {/* Sources */}
       <SourcesList sources={post.sources} />
-    </article>
+      <RelatedDispatches posts={related} />
+      <SubscribeCta />
+    </>
   );
 }

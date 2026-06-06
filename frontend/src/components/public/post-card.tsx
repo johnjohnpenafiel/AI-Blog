@@ -16,10 +16,12 @@ export function PostCard({
   post,
   accent = "var(--tg-orange)",
   figNumber,
+  showSection = false,
 }: {
   post: PublicPostListItem;
   accent?: string;
   figNumber?: number;
+  showSection?: boolean;
 }) {
   const points = post.tags.slice(0, 3);
   return (
@@ -90,6 +92,21 @@ export function PostCard({
             {readLabel(post.read_time_minutes)}
           </span>
         </div>
+
+        {showSection && post.section && (
+          <div
+            style={{
+              fontFamily: "var(--tg-font-mono)",
+              fontSize: 8,
+              letterSpacing: "0.12em",
+              color: accent,
+              textTransform: "uppercase",
+              marginBottom: 9,
+            }}
+          >
+            ◆ {post.section}
+          </div>
+        )}
 
         <h4
           style={{
