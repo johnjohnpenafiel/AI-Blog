@@ -5,7 +5,6 @@ import { DispatchBody } from "@/components/public/dispatch-body";
 import { DispatchHeader } from "@/components/public/dispatch-header";
 import { RelatedDispatches } from "@/components/public/related-dispatches";
 import { SourcesList } from "@/components/public/sources-list";
-import { SubscribeCta } from "@/components/public/subscribe-cta";
 import {
   getPublicPost,
   listPublicPosts,
@@ -102,7 +101,6 @@ export default async function PostPage({ params }: PostPageProps) {
 
       <SourcesList sources={post.sources} />
       <RelatedDispatches posts={related} />
-      <SubscribeCta />
     </>
   );
 }

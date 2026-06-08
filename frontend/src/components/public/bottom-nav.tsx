@@ -7,8 +7,9 @@ import { LogoMark } from "./logo-mark";
  * mono nav links at right, both on a blurred near-black panel.
  *
  * Deviation from the handoff (which showed Home / Blogs / Subscribe): the index
- * *is* the blog, so "Blogs" was redundant. Wired to our real routes — Home,
- * About — plus Subscribe, which has no destination yet (Phase 4 newsletter).
+ * *is* the blog, so "Blogs" was redundant, and Subscribe is omitted until the
+ * newsletter flow is built (Phase 4) — re-add it then. Wired to our real
+ * routes: Home, About.
  */
 export function BottomNav() {
   const panel: React.CSSProperties = {
@@ -47,16 +48,6 @@ export function BottomNav() {
         <Link href="/about" className="tg-nav-link">
           About
         </Link>
-        {/* Subscribe flow not built yet (Phase 4). Rendered but inert + dimmed
-            so the gap is visible; tracked in REVIEW.md → Needs content. */}
-        <span
-          className="tg-nav-link"
-          aria-disabled="true"
-          title="Subscribe — not yet wired (Phase 4 newsletter)"
-          style={{ opacity: 0.45, cursor: "not-allowed" }}
-        >
-          Subscribe
-        </span>
       </div>
     </div>
   );

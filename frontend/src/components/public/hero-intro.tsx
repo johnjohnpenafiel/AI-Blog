@@ -160,16 +160,6 @@ export function HeroIntro({
             <Link href={`/blog/${coverPost.slug}`} className="tg-btn">
               Read the latest →
             </Link>
-            {/* Subscribe flow not built yet (Phase 4). */}
-            <span
-              className="tg-btn-ghost"
-              aria-disabled="true"
-              title="Subscribe — not yet wired (Phase 4 newsletter)"
-              style={{ opacity: 0.6, cursor: "not-allowed" }}
-            >
-              Subscribe
-            </span>
-            <span className="tg-needs">⟨NEEDS CONTENT: subscribe flow⟩</span>
           </div>
           {/* stats */}
           <div className="tg-fade-up" style={{ display: "flex", gap: 48, animationDelay: "0.22s" }}>
