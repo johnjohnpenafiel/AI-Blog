@@ -42,9 +42,31 @@ The user is new to **FastAPI** and **Docker Compose** and is learning both while
 
 - Branch naming: `feature/<name>`, `bugfix/<name>`, `chore/<name>`.
 - Commit style: present-tense imperative (`add ...`, `fix ...`, `update ...`). One logical change per commit.
-- Never commit secrets. `.env` is git-ignored — values for `ANTHROPIC_API_KEY`, `PERPLEXITY_API_KEY`, `NEXTAUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL`, `BACKEND_API_SECRET` live there only (the frontend's copy of `BACKEND_API_SECRET` lives in the git-ignored `frontend/.env.local`).
+- Never commit secrets. `.env` is git-ignored — values for `ANTHROPIC_API_KEY`, `PERPLEXITY_API_KEY`, `NEXTAUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL`, `BACKEND_API_SECRET`, `TRELLO_API_KEY`, `TRELLO_TOKEN` live there only (the frontend's copy of `BACKEND_API_SECRET` lives in the git-ignored `frontend/.env.local`).
 - Never use `--no-verify` on commits.
 - Before claiming a task complete: list what was asked vs. what was done; explicitly call out anything skipped.
+
+# Trello (idea & task tracking)
+
+**Trello is the source of truth for future ideas and action items.** When the user shares an idea or future action to track (or says "add this to Trello"), create a card via the REST API below — default to the **Backlog** list. Do **not** add new ideas to `notes/v2-ideas.md`: that doc is **frozen/historical** as of 2026-06-08 (its pending ideas were ported to Trello) and `notes/` is gitignored scratch anyway. Read `v2-ideas.md` only for the *why* behind a past decision.
+
+- **Auth:** `TRELLO_API_KEY` + `TRELLO_TOKEN` live in the root `.env` (git-ignored secrets — never print or commit them). Read them inline; never echo: `K=$(grep '^TRELLO_API_KEY=' .env | cut -d= -f2-); T=$(grep '^TRELLO_TOKEN=' .env | cut -d= -f2-)`. Token is `read,write` scope, 30-day expiry — re-authorize when it lapses (cards start 401ing).
+- **Board id:** `6a2706e706ae9d3f9804f73f`
+- **List ids:** Backlog `6a2706e706ae9d3f9804f755` · Up Next `6a2706e706ae9d3f9804f756` · In Progress `6a2706e706ae9d3f9804f757` · Blocked `6a27070d3199301e737b92f0` · Done `6a2707105fd49468e7e1b4e2`
+- **Default landing list for new ideas:** **Backlog** (unless the user names another).
+- IDs are not secret — safe to keep here. Only the key/token are secret (in `.env`).
+
+Common calls (always pass secrets via `--data-urlencode`, never in a printed URL):
+```bash
+# Create a card
+curl -s -X POST "https://api.trello.com/1/cards" \
+  --data-urlencode "idList=$LIST_ID" --data-urlencode "name=Title" \
+  --data-urlencode "desc=Body" --data-urlencode "key=$K" --data-urlencode "token=$T"
+# List cards in a list
+curl -s "https://api.trello.com/1/lists/$LIST_ID/cards?fields=name,id,desc&key=$K&token=$T"
+# Move/rename a card
+curl -s -X PUT "https://api.trello.com/1/cards/$CARD_ID?idList=$LIST_ID&key=$K&token=$T"
+```
 
 # Architecture context
 
