@@ -103,13 +103,13 @@ _(choices I made that you should confirm match your intent)_
   dashboard impact). → Confirm you're OK with the public response gaining a
   `format` field.
 
-- **Locked-viewport stage (vs. natural scroll).** The layout faithfully
-  recreates the handoff's 100dvh stage with an internal scroll region (fixed
-  masthead, content scrolls inside the frame). It's the design's signature but
-  trades away native page scroll, which has SEO/mobile implications (you care
-  about SEO in Phase 4). It's isolated to `(public)/layout.tsx`, so flipping to
-  a sticky-masthead + natural-document-scroll later is a one-file change.
-  → Confirm you want the locked stage, or want me to switch to natural scroll.
+- **Locked-viewport stage (vs. natural scroll). ✅ RESOLVED (2026-06-08).** Keep
+  the locked 100dvh stage on **desktop**; switch to **natural document scroll on
+  mobile**. (SEO indexing is unaffected by the locked viewport — the cost is
+  mobile usability, which feeds ranking second-order.) Build is **deferred to
+  Phase 4** (Distribution/SEO). Captured as an idea in
+  `notes/v2-ideas.md` → "Responsive Scroll: Desktop-Locked / Mobile-Natural."
+  Site stays fully locked at all breakpoints until then.
 
 - **Cadence copy corrected: "three a week," not "two."** The handoff's sample
   copy said *twice-weekly / "Two dispatches a week"*, but the real pipeline
@@ -122,14 +122,18 @@ _(choices I made that you should confirm match your intent)_
   bound them to each post's real `tags` (1–2 items) rather than invent phrases.
   → Fine, or do you want a dedicated short "points" field generated per post?
 
-- **Featured story = the most recent post.** The design shows the top story in
-  three places (hero card, featured band, dispatch row 01); I mirrored that with
-  the cover post. → Confirm you're OK with the cover appearing in all three, or
-  want the featured band to pick a different/editor's-choice post.
+- **Featured story = the most recent post. ✅ RESOLVED (2026-06-08).** Keep
+  auto = most-recent for now (cover shown in all three slots). Making it an
+  **admin-selected editor's choice** (pinned from the dashboard) is logged as a
+  future idea in `notes/v2-ideas.md` → "Featured Story: Admin-Selected (Editor's
+  Choice)." No change now.
 
-- **Reading-mode stats are data-driven.** `SECTIONS` / `FORMATS` counts in the
-  hero are computed from the loaded posts (distinct values), not hardcoded to
-  the design's "4 / 4". Explainer mode will read empty until that format ships.
+- **Reading-mode stats are data-driven. ✅ RESOLVED (2026-06-08).** `SECTIONS` /
+  `FORMATS` counts in the hero are computed from the loaded posts (distinct
+  values), not hardcoded to the design's "4 / 4". Explainer mode reads empty
+  until that format ships — expected, not a bug; logged in `notes/v2-ideas.md`
+  under Format Index (the mode fills automatically when Explainer launches, no
+  frontend change needed).
 
 - **Byline is "The Garage Desk."** Posts have no author in the data model; I
   used the publication's desk name (the brand voice in the handoff), not a
@@ -156,16 +160,23 @@ _(choices I made that you should confirm match your intent)_
 
 _(every on-screen ⟨NEEDS CONTENT⟩ marker and what it's waiting on)_
 
-- **Subscribe flow** — `⟨NEEDS CONTENT: subscribe flow⟩` marker shown beside the
-  hero CTA; the "Subscribe" buttons in the hero and bottom nav are rendered but
-  inert + dimmed (Phase 4 newsletter — no destination yet).
-- **Image slots (all placeholders except the hero video).** Every non-hero image
-  in the design is a clearly-marked `IMAGE` placeholder slot, sized/positioned
-  per the design, waiting on real art (or a procedural-halftone implementation):
+- **Subscribe flow — REMOVED (2026-06-08).** Per decision, all Subscribe UI was
+  pulled until the newsletter is actually built (Phase 4): the hero ghost button
+  + `⟨NEEDS CONTENT⟩` marker, the bottom-nav Subscribe link, and the entire
+  Subscribe CTA band on the post page (component `subscribe-cta.tsx` deleted).
+  Re-add when the flow ships. (The generic `tg-needs` marker class is kept in
+  `public-theme.css` for other content gaps; it renders nowhere now.)
+- **Image slots (all placeholders except the hero video). ✅ DECISION (2026-06-08):
+  leave as-is for now.** Every non-hero image is a clearly-marked `IMAGE`
+  placeholder slot, sized/positioned per the design:
   - Post cards in the reading-modes grid (5:4 header).
   - Featured-story image (16:9).
   - Related-dispatch cards (5:4 header) on the dispatch page.
   - Article **lead image** (16:9, labelled `FIG.0 — Lead image placeholder`).
+
+  These will be filled by **per-post image generation in the pipeline** (likely
+  Grok Imagine API) — the planned next step **before Phases 4–5**. Logged in
+  `notes/v2-ideas.md` → "Per-Post Image Generation (in-pipeline)."
 
 ---
 
