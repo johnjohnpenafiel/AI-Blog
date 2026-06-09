@@ -154,6 +154,7 @@ Notes:
 | updated_at | TIMESTAMP | |
 | meta_description | VARCHAR | Auto-generated for SEO |
 | generation_attempt | INT | Tracks regeneration count |
+| is_featured | BOOLEAN | NOT NULL, default false; editor's-choice pin for the homepage featured band. At most one row true (enforced in app code, not by a DB constraint) |
 | section | VARCHAR | nullable; v2 taxonomy, validated against code vocab |
 | format | VARCHAR | nullable; v2 taxonomy (Brief / Deep Dive / Roundup …) |
 | story_type | VARCHAR | nullable; v2 taxonomy |
@@ -197,17 +198,21 @@ Notes:
 | Method | Path | Description |
 |---|---|---|
 | GET | `/public/posts` | List published posts |
+| GET | `/public/posts/featured` | The homepage featured-band post: the editor's-choice pin if one exists (regardless of recency), else the most-recent published post. `is_featured` flag distinguishes a real pin from the fallback. `null` when nothing is published. Declared before `/{slug}` so the literal path wins. |
 | GET | `/public/posts/{slug}` | Get single published post by slug |
 
 ### Posts (admin-only — `require_api_key` + proxy session check, see note above)
 | Method | Path | Description |
 |---|---|---|
 | GET | `/posts` | List all posts (filterable by status) |
+| GET | `/posts/featured` | The post currently pinned to the homepage featured band, or `null`. Read from a dedicated endpoint (not derived from the published list) so the dashboard readout is correct even when the pin has scrolled past the first page. Declared before `/{id}`. |
 | GET | `/posts/{id}` | Get single post with sources |
 | POST | `/posts/{id}/accept` | Accept post (optionally set scheduled_at) |
 | POST | `/posts/{id}/reject` | Reject post |
 | POST | `/posts/{id}/regenerate` | Regenerate with optional feedback |
 | POST | `/posts/{id}/publish` | Manually publish an accepted post |
+| POST | `/posts/{id}/feature` | Pin a **published** post as the homepage featured story; clears any prior pin (single-pin). 409 if not published. |
+| POST | `/posts/{id}/unfeature` | Clear the featured pin (idempotent). With no pin, the band falls back to the most-recent post. |
 | POST | `/posts/{id}/reschedule` | Change an accepted post's `scheduled_at` |
 | POST | `/posts/{id}/unschedule` | Move an accepted post back to `pending_review` |
 

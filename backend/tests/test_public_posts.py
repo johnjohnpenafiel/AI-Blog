@@ -251,3 +251,80 @@ def test_get_public_post_does_not_leak_admin_fields(
     assert "publishing_mode" not in body
     assert "generation_attempt" not in body
     assert "scheduled_at" not in body
+
+
+# ---------------------------------------------------------------------------
+# GET /public/posts/featured
+# ---------------------------------------------------------------------------
+
+
+def test_featured_returns_pin_regardless_of_recency(
+    client: TestClient, db: Session
+) -> None:
+    now = datetime.now(timezone.utc)
+    # Newest post is NOT pinned; an older post IS — the pin must still win.
+    _seed_post(db, slug="newest-unpinned", published_at=now)
+    old_pin = _seed_post(
+        db, slug="old-pin", published_at=now - timedelta(days=30)
+    )
+    old_pin.is_featured = True
+    db.flush()
+
+    response = client.get("/public/posts/featured")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["slug"] == "old-pin"
+    assert body["is_featured"] is True
+
+
+def test_featured_falls_back_to_most_recent_when_no_pin(
+    client: TestClient, db: Session
+) -> None:
+    now = datetime.now(timezone.utc)
+    _seed_post(db, slug="fb-older", published_at=now - timedelta(days=2))
+    _seed_post(db, slug="fb-newest", published_at=now)
+
+    response = client.get("/public/posts/featured")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["slug"] == "fb-newest"
+    # Flag tells the band this is a fallback, not a real editor's-choice pin.
+    assert body["is_featured"] is False
+
+
+def test_featured_returns_null_when_no_published(
+    client: TestClient, db: Session
+) -> None:
+    _seed_post(db, slug="only-draft-feat", status="draft")
+
+    response = client.get("/public/posts/featured")
+    assert response.status_code == 200
+    assert response.json() is None
+
+
+def test_featured_response_shape(client: TestClient, db: Session) -> None:
+    post = _seed_post(
+        db, slug="feat-shape", published_at=datetime.now(timezone.utc)
+    )
+    post.is_featured = True
+    db.flush()
+
+    response = client.get("/public/posts/featured")
+    assert response.status_code == 200
+    body = response.json()
+    expected_keys = {
+        "id",
+        "slug",
+        "title",
+        "summary",
+        "tags",
+        "section",
+        "format",
+        "published_at",
+        "read_time_minutes",
+        "is_featured",
+    }
+    assert set(body.keys()) == expected_keys
+    # The featured endpoint must not leak admin-only fields either.
+    assert "status" not in body
+    assert "content" not in body

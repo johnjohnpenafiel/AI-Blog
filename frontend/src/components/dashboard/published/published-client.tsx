@@ -2,7 +2,16 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { listPosts, type PostListItem } from "@/lib/api";
+import {
+  featurePost,
+  getFeaturedPost,
+  listPosts,
+  unfeaturePost,
+  type PostListItem,
+} from "@/lib/api";
+
+import { FeaturedSpotlight } from "@/components/dashboard/featured-spotlight";
+import { SectionHeader } from "@/components/dashboard/section-header";
 
 import { PublishedEmptyState } from "./published-empty-state";
 import { PublishedRow } from "./published-row";
@@ -14,21 +23,25 @@ const PAGE_SIZE = 20;
 export function PublishedClient() {
   const [items, setItems] = useState<PostListItem[]>([]);
   const [total, setTotal] = useState(0);
+  const [featured, setFeatured] = useState<PostListItem | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [error, setError] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [actionMsg, setActionMsg] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const data = await listPosts("published", {
-          limit: PAGE_SIZE,
-          offset: 0,
-        });
+        const [data, pinned] = await Promise.all([
+          listPosts("published", { limit: PAGE_SIZE, offset: 0 }),
+          getFeaturedPost(),
+        ]);
         if (cancelled) return;
         setItems(data.items);
         setTotal(data.total);
+        setFeatured(pinned);
         setLoadState("ready");
         setError(null);
       } catch (e) {
@@ -59,10 +72,47 @@ export function PublishedClient() {
     }
   }, [items.length, loadingMore]);
 
+  const handleFeature = useCallback(async (post: PostListItem) => {
+    setBusyId(post.id);
+    setActionMsg(null);
+    try {
+      await featurePost(post.id);
+      // Single-pin: this post becomes featured, every other loaded row clears.
+      setItems((prev) =>
+        prev.map((p) => ({ ...p, is_featured: p.id === post.id })),
+      );
+      setFeatured({ ...post, is_featured: true });
+      setActionMsg(`Featured “${post.title}” on the homepage.`);
+    } catch (e) {
+      setActionMsg(e instanceof Error ? e.message : "Failed to feature post.");
+    } finally {
+      setBusyId(null);
+    }
+  }, []);
+
+  const handleUnfeature = useCallback(async (post: PostListItem) => {
+    setBusyId(post.id);
+    setActionMsg(null);
+    try {
+      await unfeaturePost(post.id);
+      setItems((prev) =>
+        prev.map((p) =>
+          p.id === post.id ? { ...p, is_featured: false } : p,
+        ),
+      );
+      setFeatured(null);
+      setActionMsg("Cleared the featured post — homepage shows the most recent.");
+    } catch (e) {
+      setActionMsg(e instanceof Error ? e.message : "Failed to unfeature post.");
+    } finally {
+      setBusyId(null);
+    }
+  }, []);
+
   const hasMore = items.length < total;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-full flex-col gap-8">
       {loadState === "loading" && (
         <p className="font-mono text-xs tracking-[0.2em] text-muted uppercase">
           Loading published…
@@ -82,29 +132,67 @@ export function PublishedClient() {
 
       {loadState === "ready" && items.length > 0 && (
         <>
-          <ul className="flex flex-col gap-4">
-            {items.map((post) => (
-              <li key={post.id}>
-                <PublishedRow post={post} />
-              </li>
-            ))}
-          </ul>
-
-          {hasMore && (
-            <div className="flex justify-center pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  void loadMore();
-                }}
-                disabled={loadingMore}
-                className="border border-border px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-muted uppercase transition-colors hover:text-fg disabled:opacity-50"
-                data-testid="published-load-more"
+          {/* Featured: the post currently driving the homepage ★ band.
+              Pinned — stays put while the list below scrolls in place. */}
+          <section className="flex shrink-0 flex-col gap-4">
+            <SectionHeader index="01" label="Featured" />
+            <FeaturedSpotlight
+              post={featured}
+              onUnfeature={(p) => {
+                void handleUnfeature(p);
+              }}
+              busy={featured ? busyId === featured.id : false}
+            />
+            {actionMsg && (
+              <p
+                role="status"
+                aria-live="polite"
+                className="font-mono text-[11px] tracking-[0.15em] text-muted"
+                data-testid="featured-action-msg"
               >
-                {loadingMore ? "Loading…" : `Load more (${total - items.length} left)`}
-              </button>
+                {actionMsg}
+              </p>
+            )}
+          </section>
+
+          {/* All Published: header stays pinned; only this list scrolls. */}
+          <section className="flex min-h-0 flex-1 flex-col gap-4">
+            <SectionHeader index="02" label="All Published" />
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <ul className="flex flex-col gap-4">
+                {items.map((post) => (
+                  <li key={post.id}>
+                    <PublishedRow
+                      post={post}
+                      onFeature={(p) => {
+                        void handleFeature(p);
+                      }}
+                      onUnfeature={(p) => {
+                        void handleUnfeature(p);
+                      }}
+                      busy={busyId === post.id}
+                    />
+                  </li>
+                ))}
+              </ul>
+
+              {hasMore && (
+                <div className="flex justify-center pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void loadMore();
+                    }}
+                    disabled={loadingMore}
+                    className="border border-border px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-muted uppercase transition-colors hover:text-fg disabled:opacity-50"
+                    data-testid="published-load-more"
+                  >
+                    {loadingMore ? "Loading…" : `Load more (${total - items.length} left)`}
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+          </section>
         </>
       )}
     </div>

@@ -8,7 +8,13 @@ from sqlalchemy.orm import Session, selectinload
 
 from database import get_db
 from models import Post
-from schemas.public import PublicPostDetail, PublicPostListItem, PublicPostListResponse, PublicPostSource
+from schemas.public import (
+    PublicFeaturedPost,
+    PublicPostDetail,
+    PublicPostListItem,
+    PublicPostListResponse,
+    PublicPostSource,
+)
 
 router = APIRouter(prefix="/public", tags=["public"])
 
@@ -41,6 +47,22 @@ def _to_list_item(post: Post) -> PublicPostListItem:
     )
 
 
+def _to_featured(post: Post, *, is_featured: bool) -> PublicFeaturedPost:
+    assert post.published_at is not None
+    return PublicFeaturedPost(
+        id=post.id,
+        slug=post.slug,
+        title=post.title,
+        summary=post.summary,
+        tags=list(post.tags),
+        section=post.section,
+        format=post.format,
+        published_at=post.published_at,
+        read_time_minutes=_read_time_minutes(post.content),
+        is_featured=is_featured,
+    )
+
+
 @router.get("/posts", response_model=PublicPostListResponse)
 def list_public_posts(
     limit: int = Query(default=20, ge=1, le=100),
@@ -59,6 +81,32 @@ def list_public_posts(
         items=[_to_list_item(p) for p in posts],
         total=total,
     )
+
+
+@router.get("/posts/featured", response_model=PublicFeaturedPost | None)
+def get_featured_post(db: Session = Depends(get_db)) -> PublicFeaturedPost | None:
+    """The post for the homepage featured (★) band.
+
+    Returns the editor's-choice pin when one exists — regardless of recency, so
+    the band never silently falls back just because the pinned post aged out of
+    the index window. With no pin, returns the most-recent published post (the
+    `is_featured=false` flag tells the band it's a fallback, not a real pin).
+    Returns null only when nothing is published yet.
+
+    Declared before `/posts/{slug}` so the literal path wins over the slug
+    converter (otherwise a post with slug "featured" would shadow it).
+    """
+    base = db.query(Post).filter(Post.status == "published")
+    pinned = base.filter(Post.is_featured.is_(True)).order_by(
+        Post.published_at.desc()
+    ).first()
+    if pinned is not None:
+        return _to_featured(pinned, is_featured=True)
+
+    latest = base.order_by(Post.published_at.desc()).first()
+    if latest is None:
+        return None
+    return _to_featured(latest, is_featured=False)
 
 
 @router.get("/posts/{slug}", response_model=PublicPostDetail)

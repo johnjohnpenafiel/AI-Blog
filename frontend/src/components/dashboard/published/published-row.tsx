@@ -9,9 +9,20 @@ import { formatDate } from "@/lib/utils";
 
 interface PublishedRowProps {
   post: PostListItem;
+  /** Pin this post to the homepage featured band. */
+  onFeature: (post: PostListItem) => void;
+  /** Clear the pin (only meaningful when this post is featured). */
+  onUnfeature: (post: PostListItem) => void;
+  /** A feature/unfeature request for this row is in flight. */
+  busy: boolean;
 }
 
-export function PublishedRow({ post }: PublishedRowProps) {
+export function PublishedRow({
+  post,
+  onFeature,
+  onUnfeature,
+  busy,
+}: PublishedRowProps) {
   return (
     <ChamferedPanel tier="component" size="card" className="w-full">
       <div className="px-5 py-5" data-testid="published-row">
@@ -43,15 +54,40 @@ export function PublishedRow({ post }: PublishedRowProps) {
               <Tag key={tag} label={tag} />
             ))}
           </div>
-          <a
-            href={`/blog/${post.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="border border-accent px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-accent uppercase transition-colors hover:bg-[var(--accent-glow)]"
-            data-testid="published-view-link"
-          >
-            View post →
-          </a>
+          <div className="flex flex-wrap items-center gap-2">
+            {post.is_featured ? (
+              <button
+                type="button"
+                onClick={() => onUnfeature(post)}
+                disabled={busy}
+                aria-pressed="true"
+                className="border border-accent bg-[var(--accent-glow)] px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-accent uppercase transition-colors hover:bg-transparent disabled:opacity-50"
+                data-testid="published-feature-toggle"
+              >
+                ★ Featured
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onFeature(post)}
+                disabled={busy}
+                aria-pressed="false"
+                className="border border-border px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-muted uppercase transition-colors hover:text-fg disabled:opacity-50"
+                data-testid="published-feature-toggle"
+              >
+                ★ Feature
+              </button>
+            )}
+            <a
+              href={`/blog/${post.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border border-accent px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-accent uppercase transition-colors hover:bg-[var(--accent-glow)]"
+              data-testid="published-view-link"
+            >
+              View post →
+            </a>
+          </div>
         </div>
       </div>
     </ChamferedPanel>

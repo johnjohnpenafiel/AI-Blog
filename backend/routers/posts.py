@@ -15,6 +15,7 @@ from dependencies import require_api_key
 from models import Post, Source
 from schemas.posts import (
     AcceptRequest,
+    PostListItem,
     PostListResponse,
     PostOut,
     PostStatus,
@@ -24,6 +25,7 @@ from schemas.posts import (
 from services.blog_writer import FORMAT_SPECS, generate_post
 from services.news_fetcher import Article
 from services.pipeline import apply_eval, overwrite_generated_post
+from services.publisher import set_featured
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +79,23 @@ def list_posts(
         .all()
     )
     return PostListResponse(items=items, total=total)
+
+
+@router.get("/featured", response_model=PostListItem | None)
+def get_featured_post(db: Session = Depends(get_db)) -> Post | None:
+    """The single post currently pinned to the homepage featured band, or null.
+
+    Declared before `/{post_id}` so the literal path wins — otherwise the UUID
+    converter would try (and fail) to parse "featured" as a post id. Returns the
+    pin regardless of recency, so the dashboard readout is correct even when the
+    pinned post has scrolled past the published list's first page.
+    """
+    return (
+        db.query(Post)
+        .filter(Post.is_featured.is_(True))
+        .order_by(Post.published_at.desc())
+        .first()
+    )
 
 
 @router.get("/{post_id}", response_model=PostOut)
@@ -208,4 +227,34 @@ def publish_post(post_id: uuid.UUID, db: Session = Depends(get_db)) -> Post:
     db.commit()
     db.refresh(post)
     logger.info("post published: id=%s", post.id)
+    return post
+
+
+@router.post("/{post_id}/feature", response_model=PostOut)
+def feature_post(post_id: uuid.UUID, db: Session = Depends(get_db)) -> Post:
+    """Pin a published post as the homepage featured story (editor's choice).
+
+    Only `published` posts are eligible (a queued/scheduled post isn't public
+    yet). Pinning clears any prior pin, so at most one post is ever featured.
+    """
+    post = _load_post_or_404(db, post_id)
+    _require_status(post, "published")
+
+    set_featured(db, post)
+    db.commit()
+    db.refresh(post)
+    logger.info("post featured: id=%s", post.id)
+    return post
+
+
+@router.post("/{post_id}/unfeature", response_model=PostOut)
+def unfeature_post(post_id: uuid.UUID, db: Session = Depends(get_db)) -> Post:
+    """Clear the featured pin. Idempotent — unfeaturing a non-pinned post is a
+    no-op. With no pin, the homepage band falls back to the most-recent post."""
+    post = _load_post_or_404(db, post_id)
+
+    post.is_featured = False
+    db.commit()
+    db.refresh(post)
+    logger.info("post unfeatured: id=%s", post.id)
     return post

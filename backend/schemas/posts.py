@@ -54,6 +54,9 @@ class PostListItem(BaseModel):
     scheduled_at: datetime | None = None
     published_at: datetime | None = None
     generation_attempt: int
+    # Editor's choice — true on the single post pinned to the homepage featured
+    # band. Drives the dashboard FEATURE/FEATURED toggle + header readout.
+    is_featured: bool = False
     # Generation-eval scores (0–2 each; None = not scored). Enough for the card
     # badge; the explanatory `eval_notes` lives on the detail shape (PostOut).
     eval_pov: int | None = None
@@ -84,6 +87,7 @@ class PostOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     generation_attempt: int
+    is_featured: bool = False
     eval_pov: int | None = None
     eval_format: int | None = None
     eval_grounding: int | None = None

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import { PublishedRow } from "../published-row";
 import type { PostListItem } from "@/lib/api";
@@ -15,6 +15,7 @@ const POST: PostListItem = {
   scheduled_at: null,
   published_at: "2026-05-04T08:00:00Z",
   generation_attempt: 1,
+  is_featured: false,
   section: "Customer Experience",
   format: "Deep Dive",
   story_type: "Vendor Launch",
@@ -23,6 +24,28 @@ const POST: PostListItem = {
   eval_grounding: 2,
   eval_passed: true,
 };
+
+function renderRow(
+  overrides: Partial<PostListItem> = {},
+  handlers: {
+    onFeature?: (p: PostListItem) => void;
+    onUnfeature?: (p: PostListItem) => void;
+    busy?: boolean;
+  } = {},
+) {
+  const post = { ...POST, ...overrides };
+  return {
+    post,
+    ...render(
+      <PublishedRow
+        post={post}
+        onFeature={handlers.onFeature ?? (() => {})}
+        onUnfeature={handlers.onUnfeature ?? (() => {})}
+        busy={handlers.busy ?? false}
+      />,
+    ),
+  };
+}
 
 beforeEach(() => {
   vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({
@@ -44,7 +67,7 @@ afterEach(() => {
 
 describe("PublishedRow", () => {
   it("renders title, summary, tags, and PUBLISHED marker", () => {
-    render(<PublishedRow post={POST} />);
+    renderRow();
     expect(screen.getByText(POST.title)).toBeInTheDocument();
     expect(screen.getByText(POST.summary)).toBeInTheDocument();
     expect(screen.getByText("Voice AI")).toBeInTheDocument();
@@ -52,10 +75,35 @@ describe("PublishedRow", () => {
   });
 
   it("links View post to /blog/{slug} opening in a new tab", () => {
-    render(<PublishedRow post={POST} />);
+    renderRow();
     const link = screen.getByTestId("published-view-link") as HTMLAnchorElement;
     expect(link).toHaveAttribute("href", "/blog/ai-voice-agents");
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
+  it("shows '★ Feature' and calls onFeature when not featured", () => {
+    const onFeature = vi.fn();
+    const { post } = renderRow({ is_featured: false }, { onFeature });
+    const toggle = screen.getByTestId("published-feature-toggle");
+    expect(toggle).toHaveTextContent(/^★ Feature$/i);
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(toggle);
+    expect(onFeature).toHaveBeenCalledWith(post);
+  });
+
+  it("shows '★ Featured' and calls onUnfeature when featured", () => {
+    const onUnfeature = vi.fn();
+    const { post } = renderRow({ is_featured: true }, { onUnfeature });
+    const toggle = screen.getByTestId("published-feature-toggle");
+    expect(toggle).toHaveTextContent(/Featured/i);
+    expect(toggle).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(toggle);
+    expect(onUnfeature).toHaveBeenCalledWith(post);
+  });
+
+  it("disables the toggle while busy", () => {
+    renderRow({ is_featured: false }, { busy: true });
+    expect(screen.getByTestId("published-feature-toggle")).toBeDisabled();
   });
 });

@@ -4,7 +4,11 @@ import { DispatchIndex } from "@/components/public/dispatch-index";
 import { FeaturedStory } from "@/components/public/featured-story";
 import { HeroIntro } from "@/components/public/hero-intro";
 import { ReadingModes } from "@/components/public/reading-modes";
-import { listPublicPosts, type PublicPostListItem } from "@/lib/public-api";
+import {
+  getFeaturedPost,
+  listPublicPosts,
+  type PublicPostListItem,
+} from "@/lib/public-api";
 
 export const dynamic = "force-dynamic";
 
@@ -70,12 +74,19 @@ function EmptyIndex() {
 }
 
 export default async function HomePage() {
-  // SSR fetch — the index reflects the live DB state on every request.
-  const { items: posts, total } = await listPublicPosts({ limit: 50 });
+  // SSR fetch — the index reflects the live DB state on every request. The
+  // featured band is fetched alongside: it resolves the editor's-choice pin
+  // (or the most-recent fallback) independently of the index window, so a
+  // pinned older post still headlines the band. Hero + index stay newest-first.
+  const [{ items: posts, total }, featured] = await Promise.all([
+    listPublicPosts({ limit: 50 }),
+    getFeaturedPost(),
+  ]);
 
   if (posts.length === 0) return <EmptyIndex />;
 
   const coverPost = posts[0];
+  const featuredPost = featured ?? coverPost;
 
   // group by format for the reading-modes band
   const byFormat: Record<string, PublicPostListItem[]> = {};
@@ -97,7 +108,7 @@ export default async function HomePage() {
         formatsCount={formatsCount}
       />
       <ReadingModes postsByFormat={byFormat} />
-      <FeaturedStory post={coverPost} />
+      <FeaturedStory post={featuredPost} />
       <DispatchIndex posts={posts} hotSlug={coverPost.slug} />
     </>
   );

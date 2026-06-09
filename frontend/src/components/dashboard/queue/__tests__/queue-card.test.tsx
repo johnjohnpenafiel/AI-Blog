@@ -15,6 +15,7 @@ const POST: PostListItem = {
   scheduled_at: null,
   published_at: null,
   generation_attempt: 1,
+  is_featured: false,
   section: "Customer Experience",
   format: "Deep Dive",
   story_type: "Vendor Launch",
