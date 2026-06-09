@@ -93,18 +93,20 @@ describe("PublishedClient", () => {
     });
   });
 
-  it("shows the empty readout when no post is pinned", async () => {
+  it("shows the empty spotlight when no post is pinned", async () => {
     vi.spyOn(api, "listPosts").mockResolvedValue({
       items: [makePost(1)],
       total: 1,
     });
     render(<PublishedClient />);
     await waitFor(() => {
-      expect(screen.getByTestId("featured-readout-empty")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("featured-spotlight-empty"),
+      ).toBeInTheDocument();
     });
   });
 
-  it("shows the featured readout with the pinned post's title", async () => {
+  it("shows the featured spotlight with the pinned post's title", async () => {
     vi.spyOn(api, "listPosts").mockResolvedValue({
       items: [makePost(1)],
       total: 1,
@@ -116,13 +118,13 @@ describe("PublishedClient", () => {
     });
     render(<PublishedClient />);
     await waitFor(() => {
-      const readout = screen.getByTestId("featured-readout");
-      expect(readout).toHaveTextContent(/Featured on homepage/i);
-      expect(readout).toHaveTextContent(/Pinned Headline/);
+      const spotlight = screen.getByTestId("featured-spotlight");
+      expect(spotlight).toHaveTextContent(/Featured on homepage/i);
+      expect(spotlight).toHaveTextContent(/Pinned Headline/);
     });
   });
 
-  it("features a post: calls the API, updates the row and the readout", async () => {
+  it("features a post: calls the API, updates the row and the spotlight", async () => {
     const post = makePost(1);
     vi.spyOn(api, "listPosts").mockResolvedValue({ items: [post], total: 1 });
     const featureSpy = vi
@@ -131,15 +133,17 @@ describe("PublishedClient", () => {
 
     render(<PublishedClient />);
     await waitFor(() => {
-      expect(screen.getByTestId("featured-readout-empty")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("featured-spotlight-empty"),
+      ).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByTestId("published-feature-toggle"));
 
     await waitFor(() => {
       expect(featureSpy).toHaveBeenCalledWith(post.id);
-      // readout flips from empty to the pinned post
-      expect(screen.getByTestId("featured-readout")).toHaveTextContent(
+      // spotlight flips from empty to the pinned post
+      expect(screen.getByTestId("featured-spotlight")).toHaveTextContent(
         new RegExp(post.title),
       );
       // row toggle now reads "Featured"
@@ -149,7 +153,7 @@ describe("PublishedClient", () => {
     });
   });
 
-  it("unfeatures from the readout: calls the API and clears the readout", async () => {
+  it("unfeatures from the spotlight: calls the API and clears it", async () => {
     const post = { ...makePost(1), is_featured: true };
     vi.spyOn(api, "listPosts").mockResolvedValue({ items: [post], total: 1 });
     vi.spyOn(api, "getFeaturedPost").mockResolvedValue(post);
@@ -159,14 +163,16 @@ describe("PublishedClient", () => {
 
     render(<PublishedClient />);
     await waitFor(() => {
-      expect(screen.getByTestId("featured-readout")).toBeInTheDocument();
+      expect(screen.getByTestId("featured-spotlight")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId("featured-readout-unfeature"));
+    fireEvent.click(screen.getByTestId("featured-spotlight-unfeature"));
 
     await waitFor(() => {
       expect(unfeatureSpy).toHaveBeenCalledWith(post.id);
-      expect(screen.getByTestId("featured-readout-empty")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("featured-spotlight-empty"),
+      ).toBeInTheDocument();
     });
   });
 });

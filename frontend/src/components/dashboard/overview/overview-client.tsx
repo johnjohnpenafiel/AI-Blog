@@ -2,12 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { FeaturedSpotlight } from "@/components/dashboard/featured-spotlight";
 import { useQueueCount } from "@/components/dashboard/queue-count-context";
 import { SectionHeader } from "@/components/dashboard/section-header";
 import {
+  getFeaturedPost,
   getPipelineStatus,
   listPosts,
   type PipelineStatus,
+  type PostListItem,
 } from "@/lib/api";
 import {
   formatRelative,
@@ -37,6 +40,7 @@ export function OverviewClient() {
   const [error, setError] = useState<string | null>(null);
   const [pipeline, setPipeline] = useState<PipelineStatus | null>(null);
   const [publishedCount, setPublishedCount] = useState<number | null>(null);
+  const [featured, setFeatured] = useState<PostListItem | null>(null);
 
   const prevStateRef = useRef<PipelineStatus["state"] | null>(null);
 
@@ -73,13 +77,15 @@ export function OverviewClient() {
 
     void (async () => {
       try {
-        const [status, total] = await Promise.all([
+        const [status, total, pinned] = await Promise.all([
           getPipelineStatus(),
           fetchPublishedTotal(),
+          getFeaturedPost(),
         ]);
         if (cancelled) return;
         setPipeline(status);
         setPublishedCount(total);
+        setFeatured(pinned);
         prevStateRef.current = status.state;
         setLoadState("ready");
         const delay =
@@ -197,7 +203,12 @@ export function OverviewClient() {
       </section>
 
       <section className="flex flex-col gap-5">
-        <SectionHeader index="02" label="Quick Actions" />
+        <SectionHeader index="02" label="Featured" />
+        <FeaturedSpotlight post={featured} />
+      </section>
+
+      <section className="flex flex-col gap-5">
+        <SectionHeader index="03" label="Quick Actions" />
         <div className="flex flex-wrap items-start gap-3">
           <TriggerPipelineButton
             onStarted={handlePipelineStarted}

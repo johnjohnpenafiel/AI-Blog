@@ -10,6 +10,9 @@ import {
   type PostListItem,
 } from "@/lib/api";
 
+import { FeaturedSpotlight } from "@/components/dashboard/featured-spotlight";
+import { SectionHeader } from "@/components/dashboard/section-header";
+
 import { PublishedEmptyState } from "./published-empty-state";
 import { PublishedRow } from "./published-row";
 
@@ -109,7 +112,7 @@ export function PublishedClient() {
   const hasMore = items.length < total;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-8">
       {loadState === "loading" && (
         <p className="font-mono text-xs tracking-[0.2em] text-muted uppercase">
           Loading published…
@@ -129,82 +132,63 @@ export function PublishedClient() {
 
       {loadState === "ready" && items.length > 0 && (
         <>
-          {/* Glance state: what's on the homepage featured band right now. */}
-          {featured ? (
-            <div
-              className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-dim)] pb-3"
-              data-testid="featured-readout"
-            >
-              <span className="flex flex-wrap items-center gap-2 font-mono text-[11px] tracking-[0.2em] uppercase">
-                <span className="text-accent">★ Featured on homepage</span>
-                <span className="text-muted normal-case tracking-normal">
-                  — “{featured.title}”
-                </span>
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  void handleUnfeature(featured);
-                }}
-                disabled={busyId === featured.id}
-                className="border border-border px-3 py-1.5 font-mono text-[10px] tracking-[0.25em] text-muted uppercase transition-colors hover:text-fg disabled:opacity-50"
-                data-testid="featured-readout-unfeature"
+          {/* Featured: the post currently driving the homepage ★ band. */}
+          <section className="flex flex-col gap-4">
+            <SectionHeader index="01" label="Featured" />
+            <FeaturedSpotlight
+              post={featured}
+              onUnfeature={(p) => {
+                void handleUnfeature(p);
+              }}
+              busy={featured ? busyId === featured.id : false}
+            />
+            {actionMsg && (
+              <p
+                role="status"
+                aria-live="polite"
+                className="font-mono text-[11px] tracking-[0.15em] text-muted"
+                data-testid="featured-action-msg"
               >
-                Unfeature
-              </button>
-            </div>
-          ) : (
-            <p
-              className="border-b border-[var(--border-dim)] pb-3 font-mono text-[11px] tracking-[0.2em] text-[var(--text-dim)] uppercase"
-              data-testid="featured-readout-empty"
-            >
-              {"// No post pinned — homepage shows the most recent dispatch"}
-            </p>
-          )}
+                {actionMsg}
+              </p>
+            )}
+          </section>
 
-          {actionMsg && (
-            <p
-              role="status"
-              aria-live="polite"
-              className="font-mono text-[11px] tracking-[0.15em] text-muted"
-              data-testid="featured-action-msg"
-            >
-              {actionMsg}
-            </p>
-          )}
+          <section className="flex flex-col gap-4">
+            <SectionHeader index="02" label="All Published" />
+            <ul className="flex flex-col gap-4">
+              {items.map((post) => (
+                <li key={post.id}>
+                  <PublishedRow
+                    post={post}
+                    onFeature={(p) => {
+                      void handleFeature(p);
+                    }}
+                    onUnfeature={(p) => {
+                      void handleUnfeature(p);
+                    }}
+                    busy={busyId === post.id}
+                  />
+                </li>
+              ))}
+            </ul>
 
-          <ul className="flex flex-col gap-4">
-            {items.map((post) => (
-              <li key={post.id}>
-                <PublishedRow
-                  post={post}
-                  onFeature={(p) => {
-                    void handleFeature(p);
+            {hasMore && (
+              <div className="flex justify-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    void loadMore();
                   }}
-                  onUnfeature={(p) => {
-                    void handleUnfeature(p);
-                  }}
-                  busy={busyId === post.id}
-                />
-              </li>
-            ))}
-          </ul>
-
-          {hasMore && (
-            <div className="flex justify-center pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  void loadMore();
-                }}
-                disabled={loadingMore}
-                className="border border-border px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-muted uppercase transition-colors hover:text-fg disabled:opacity-50"
-                data-testid="published-load-more"
-              >
-                {loadingMore ? "Loading…" : `Load more (${total - items.length} left)`}
-              </button>
-            </div>
-          )}
+                  disabled={loadingMore}
+                  className="border border-border px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-muted uppercase transition-colors hover:text-fg disabled:opacity-50"
+                  data-testid="published-load-more"
+                >
+                  {loadingMore ? "Loading…" : `Load more (${total - items.length} left)`}
+                </button>
+              </div>
+            )}
+          </section>
         </>
       )}
     </div>
