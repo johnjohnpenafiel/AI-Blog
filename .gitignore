@@ -76,3 +76,8 @@ backend/scripts/smoke_*.py
 
 # Local planning / research scratch (local-only, not tracked)
 notes/
+
+# Claude Design handoff bundle — reference only, not part of the app.
+# Ignore the heavy bundle subdir (videos/screenshots) but keep the dir itself
+# trackable so the redesign REVIEW log travels with the branch.
+design-handoff/the-garage-ai/

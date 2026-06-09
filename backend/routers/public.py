@@ -35,6 +35,7 @@ def _to_list_item(post: Post) -> PublicPostListItem:
         summary=post.summary,
         tags=list(post.tags),
         section=post.section,
+        format=post.format,
         published_at=post.published_at,
         read_time_minutes=_read_time_minutes(post.content),
     )
@@ -80,6 +81,8 @@ def get_public_post(slug: str, db: Session = Depends(get_db)) -> PublicPostDetai
         meta_description=post.meta_description,
         content=post.content,
         tags=list(post.tags),
+        section=post.section,
+        format=post.format,
         published_at=post.published_at,
         read_time_minutes=_read_time_minutes(post.content),
         sources=[

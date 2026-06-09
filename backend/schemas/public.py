@@ -21,6 +21,7 @@ class PublicPostListItem(BaseModel):
     summary: str
     tags: list[str]
     section: str | None = None
+    format: str | None = None
     published_at: datetime
     read_time_minutes: int
 
@@ -53,6 +54,8 @@ class PublicPostDetail(BaseModel):
     meta_description: str
     content: str
     tags: list[str]
+    section: str | None = None
+    format: str | None = None
     published_at: datetime
     read_time_minutes: int
     sources: list[PublicPostSource]

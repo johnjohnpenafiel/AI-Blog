@@ -164,6 +164,7 @@ def test_list_public_posts_response_shape(
         "summary",
         "tags",
         "section",
+        "format",
         "published_at",
         "read_time_minutes",
     }

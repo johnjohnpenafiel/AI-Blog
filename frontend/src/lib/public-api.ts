@@ -16,6 +16,7 @@ export interface PublicPostListItem {
   summary: string;
   tags: string[];
   section: string | null;
+  format: string | null;
   published_at: string;
   read_time_minutes: number;
 }
@@ -40,6 +41,8 @@ export interface PublicPostDetail {
   meta_description: string;
   content: string;
   tags: string[];
+  section: string | null;
+  format: string | null;
   published_at: string;
   read_time_minutes: number;
   sources: PublicPostSource[];
