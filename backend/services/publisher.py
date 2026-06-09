@@ -29,6 +29,21 @@ def route_post(post: Post, mode: str) -> None:
         raise ValueError(f"unknown publishing mode: {mode!r}")
 
 
+def set_featured(db: Session, post: Post) -> None:
+    """Pin `post` as the single homepage-featured post (caller commits).
+
+    Enforces the single-pin invariant by clearing `is_featured` on every other
+    row first, then setting it on this post. The bulk UPDATE excludes `post.id`
+    so a re-feature of the already-pinned post is a harmless no-op rather than a
+    flicker through false. `synchronize_session=False` skips the ORM identity-map
+    sync — fine here because the caller `db.refresh(post)`es before reading.
+    """
+    db.query(Post).filter(Post.is_featured.is_(True), Post.id != post.id).update(
+        {"is_featured": False}, synchronize_session=False
+    )
+    post.is_featured = True
+
+
 def publish_due_posts(db: Session) -> int:
     """Flip all due accepted posts to published. Returns count of rows updated."""
     now = datetime.now(timezone.utc)

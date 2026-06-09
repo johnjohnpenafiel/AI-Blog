@@ -31,6 +31,14 @@ class PublicPostListResponse(BaseModel):
     total: int
 
 
+class PublicFeaturedPost(PublicPostListItem):
+    """The homepage featured-band post. Same shape as a list item, plus a flag
+    telling the band whether this is a real editor's-choice pin (`true`) or the
+    most-recent fallback shown when nothing is pinned (`false`)."""
+
+    is_featured: bool
+
+
 class PublicPostSource(BaseModel):
     """Single source citation on a published post."""
 

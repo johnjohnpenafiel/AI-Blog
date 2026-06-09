@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, Enum, Integer, SmallInteger, String, Text, func
+from sqlalchemy import Boolean, DateTime, Enum, Integer, SmallInteger, String, Text, false, func
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
@@ -75,6 +75,18 @@ class Post(Base):
     )
     meta_description: Mapped[str] = mapped_column(String, nullable=False)
     generation_attempt: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+    # Editor's choice — the single post pinned to the homepage featured (★) band.
+    # At most one row is true at a time (enforced by `set_featured` in
+    # services/publisher.py, which clears any prior pin). NOT NULL with a false
+    # default so every post has an explicit value; existing rows backfill to
+    # false. Drives only the featured band — hero + index stay newest-first.
+    is_featured: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default=false(),
+    )
 
     # v2 taxonomy — single-value categorization. Plain text validated against
     # the code-level vocabulary in `taxonomy.py` (not DB enums), so categories

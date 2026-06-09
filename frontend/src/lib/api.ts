@@ -40,6 +40,9 @@ export interface PostListItem {
   scheduled_at: string | null;
   published_at: string | null;
   generation_attempt: number;
+  // Editor's choice — true on the single post pinned to the homepage featured
+  // band. Drives the Published-tab FEATURE/FEATURED toggle + header readout.
+  is_featured: boolean;
   // v2 taxonomy (null = unset / not-yet-classified). Admin-only — not surfaced
   // on the public site yet.
   section: string | null;
@@ -96,7 +99,15 @@ export async function getPost(id: string): Promise<PostDetail> {
 
 async function postPostAction(
   id: string,
-  action: "accept" | "reject" | "regenerate" | "reschedule" | "unschedule" | "publish",
+  action:
+    | "accept"
+    | "reject"
+    | "regenerate"
+    | "reschedule"
+    | "unschedule"
+    | "publish"
+    | "feature"
+    | "unfeature",
   body?: Record<string, unknown>,
 ): Promise<PostDetail> {
   const res = await fetch(
@@ -158,6 +169,28 @@ export function unschedulePost(id: string): Promise<PostDetail> {
 
 export function publishPost(id: string): Promise<PostDetail> {
   return postPostAction(id, "publish");
+}
+
+export function featurePost(id: string): Promise<PostDetail> {
+  return postPostAction(id, "feature");
+}
+
+export function unfeaturePost(id: string): Promise<PostDetail> {
+  return postPostAction(id, "unfeature");
+}
+
+/**
+ * The post currently pinned to the homepage featured band, or null when none is
+ * pinned. Read from a dedicated endpoint (not derived from the published list)
+ * so the dashboard readout is correct even when the pin has scrolled past the
+ * first page.
+ */
+export async function getFeaturedPost(): Promise<PostListItem | null> {
+  const res = await fetch("/api/posts/featured", { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`Featured post fetch failed: ${res.status}`);
+  }
+  return (await res.json()) as PostListItem | null;
 }
 
 export interface Settings {

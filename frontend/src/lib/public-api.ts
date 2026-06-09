@@ -26,6 +26,11 @@ export interface PublicPostListResponse {
   total: number;
 }
 
+export interface PublicFeaturedPost extends PublicPostListItem {
+  /** true = a real editor's-choice pin; false = most-recent fallback. */
+  is_featured: boolean;
+}
+
 export interface PublicPostSource {
   title: string;
   url: string;
@@ -72,6 +77,27 @@ export async function listPublicPosts(opts?: {
     throw new Error(`Public posts fetch failed: ${res.status}`);
   }
   return res.json();
+}
+
+/**
+ * The post for the homepage featured (★) band: the editor's-choice pin when one
+ * exists, otherwise the most-recent published post (with `is_featured: false`).
+ * Returns null only when nothing is published yet.
+ */
+export async function getFeaturedPost(): Promise<PublicFeaturedPost | null> {
+  const backendUrl = process.env.BACKEND_URL;
+  if (!backendUrl) {
+    throw new Error("BACKEND_URL is not configured");
+  }
+
+  const res = await fetch(`${backendUrl}/public/posts/featured`, {
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new Error(`Featured post fetch failed: ${res.status}`);
+  }
+  // The endpoint returns a JSON `null` body when nothing is published.
+  return (await res.json()) as PublicFeaturedPost | null;
 }
 
 export async function getPublicPost(slug: string): Promise<PublicPostDetail> {

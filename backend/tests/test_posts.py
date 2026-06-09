@@ -527,3 +527,116 @@ def test_publish_on_already_published_returns_409(
 
     response = client.post(f"/posts/{post.id}/publish")
     assert response.status_code == 409
+
+
+# ---- feature / unfeature / GET featured ---------------------------------
+
+
+def _seed_published_post(
+    db: Session,
+    *,
+    slug: str = "published-post",
+    title: str = "Published Post",
+    is_featured: bool = False,
+) -> Post:
+    post = Post(
+        slug=slug,
+        title=title,
+        content="# Body\n\nPublished content.",
+        summary="Published summary.",
+        meta_description="Published meta description.",
+        tags=["CRM"],
+        publishing_mode="auto",
+        status="published",
+        published_at=datetime.now(timezone.utc),
+        is_featured=is_featured,
+        generation_attempt=1,
+    )
+    db.add(post)
+    db.flush()
+    db.refresh(post)
+    return post
+
+
+def test_feature_published_post_sets_is_featured(
+    client: TestClient, db: Session
+) -> None:
+    post = _seed_published_post(db, slug="feature-1")
+
+    response = client.post(f"/posts/{post.id}/feature")
+    assert response.status_code == 200
+    assert response.json()["is_featured"] is True
+
+    db.expire_all()
+    fresh = db.query(Post).filter(Post.id == post.id).one()
+    assert fresh.is_featured is True
+
+
+def test_feature_clears_previous_pin(client: TestClient, db: Session) -> None:
+    first = _seed_published_post(db, slug="feature-old", is_featured=True)
+    second = _seed_published_post(db, slug="feature-new")
+
+    response = client.post(f"/posts/{second.id}/feature")
+    assert response.status_code == 200
+
+    db.expire_all()
+    assert db.query(Post).filter(Post.id == first.id).one().is_featured is False
+    assert db.query(Post).filter(Post.id == second.id).one().is_featured is True
+    # Single-pin invariant: never more than one featured row at a time.
+    assert db.query(Post).filter(Post.is_featured.is_(True)).count() == 1
+
+
+def test_feature_on_non_published_returns_409(
+    client: TestClient, db: Session
+) -> None:
+    post = _seed_pending_post(db, slug="feature-pending")
+
+    response = client.post(f"/posts/{post.id}/feature")
+    assert response.status_code == 409
+
+
+def test_feature_missing_returns_404(client: TestClient) -> None:
+    response = client.post(
+        "/posts/00000000-0000-0000-0000-000000000000/feature"
+    )
+    assert response.status_code == 404
+
+
+def test_unfeature_clears_pin(client: TestClient, db: Session) -> None:
+    post = _seed_published_post(db, slug="unfeature-1", is_featured=True)
+
+    response = client.post(f"/posts/{post.id}/unfeature")
+    assert response.status_code == 200
+    assert response.json()["is_featured"] is False
+
+    db.expire_all()
+    assert db.query(Post).filter(Post.id == post.id).one().is_featured is False
+
+
+def test_unfeature_on_unpinned_is_noop(client: TestClient, db: Session) -> None:
+    post = _seed_published_post(db, slug="unfeature-noop", is_featured=False)
+
+    response = client.post(f"/posts/{post.id}/unfeature")
+    assert response.status_code == 200
+    assert response.json()["is_featured"] is False
+
+
+def test_get_featured_returns_pinned_post(
+    client: TestClient, db: Session
+) -> None:
+    _seed_published_post(db, slug="not-the-pin")
+    _seed_published_post(db, slug="the-pin", is_featured=True)
+
+    response = client.get("/posts/featured")
+    assert response.status_code == 200
+    assert response.json()["slug"] == "the-pin"
+
+
+def test_get_featured_returns_null_when_none_pinned(
+    client: TestClient, db: Session
+) -> None:
+    _seed_published_post(db, slug="plain-published")
+
+    response = client.get("/posts/featured")
+    assert response.status_code == 200
+    assert response.json() is None
