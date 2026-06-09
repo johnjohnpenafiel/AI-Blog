@@ -54,8 +54,7 @@ The user is new to **FastAPI** and **Docker Compose** and is learning both while
 - **Board id:** `6a2706e706ae9d3f9804f73f`
 - **List ids:** Backlog `6a2706e706ae9d3f9804f755` · Up Next `6a2706e706ae9d3f9804f756` · In Progress `6a2706e706ae9d3f9804f757` · Blocked `6a27070d3199301e737b92f0` · Done `6a2707105fd49468e7e1b4e2`
 - **Default landing list for new ideas:** **Backlog** (unless the user names another).
-- **Labels (apply on create via `idLabels=id1,id2`):** always tag a card *you* create with **`Claude`** (orange); add **`Frontend/UI`** (blue) or **`Pipeline`** (green) when the card is clearly that area; otherwise no area label yet. Don't add `Claude` to cards the user created themselves.
-  - `Claude` orange `6a27768225fcdee5d2365202` · `Frontend/UI` blue `6a2776830d5e824657452225` · `Pipeline` green `6a27768317fbdafad1358d21`
+- **Label:** tag every card *you* create with the **`Claude`** label (orange, id `6a27768225fcdee5d2365202`) via `idLabels=6a27768225fcdee5d2365202` on create. That's the only label — no area/topic labels. Never add `Claude` to cards the user created themselves.
 - IDs are not secret — safe to keep here. Only the key/token are secret (in `.env`).
 
 Common calls (always pass secrets via `--data-urlencode`, never in a printed URL):
