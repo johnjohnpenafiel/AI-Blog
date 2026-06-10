@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { Button } from "@/components/button";
+
 interface EditScheduleFormProps {
   initialIso: string | null;
   busy?: boolean;
@@ -56,24 +58,22 @@ export function EditScheduleForm({
         />
       </label>
       <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
+        <Button
           disabled={busy || !value}
           onClick={handleSave}
-          className="bg-accent px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-[var(--bg)] uppercase transition-colors hover:bg-[var(--accent-dim)] disabled:opacity-50"
           data-testid="edit-schedule-save"
         >
           Save
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="link"
+          size="sm"
           disabled={busy}
           onClick={onCancel}
-          className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase hover:text-fg"
           data-testid="edit-schedule-cancel"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   );

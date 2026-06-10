@@ -9,7 +9,19 @@ import {
 } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
+import { PipelineStatusProvider } from "@/components/dashboard/pipeline-status-context";
+import { ToastProvider } from "@/components/dashboard/toast-context";
 import { SettingsClient } from "@/components/dashboard/settings/settings-client";
+
+function renderSettings() {
+  return render(
+    <PipelineStatusProvider>
+      <ToastProvider>
+        <SettingsClient />
+      </ToastProvider>
+    </PipelineStatusProvider>,
+  );
+}
 
 const signOutMock = vi.fn();
 
@@ -93,7 +105,7 @@ describe("SettingsClient", () => {
       "GET /api/settings": () => jsonResponse(settingsResponse()),
     });
 
-    render(<SettingsClient />);
+    renderSettings();
 
     const approveButton = await screen.findByTestId(
       "publishing-mode-approve_only",
@@ -117,7 +129,7 @@ describe("SettingsClient", () => {
       },
     });
 
-    render(<SettingsClient />);
+    renderSettings();
     const autoButton = await screen.findByTestId("publishing-mode-auto");
     fireEvent.click(autoButton);
 
@@ -151,7 +163,7 @@ describe("SettingsClient", () => {
         }),
     });
 
-    render(<SettingsClient />);
+    renderSettings();
     const trigger = await screen.findByTestId("trigger-pipeline-run");
     fireEvent.click(trigger);
 
@@ -172,7 +184,7 @@ describe("SettingsClient", () => {
       "GET /api/settings": () => jsonResponse(settingsResponse()),
     });
 
-    render(<SettingsClient />);
+    renderSettings();
     const logout = await screen.findByTestId("logout-button");
     fireEvent.click(logout);
 

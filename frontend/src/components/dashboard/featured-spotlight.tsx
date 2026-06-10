@@ -1,7 +1,6 @@
 "use client";
 
-import { ChamferedPanel } from "@/components/chamfered-panel";
-import { Tag } from "@/components/tag";
+import { Button, buttonClasses } from "@/components/button";
 import type { PostListItem } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 
@@ -31,84 +30,66 @@ export function FeaturedSpotlight({
 }: FeaturedSpotlightProps) {
   if (!post) {
     return (
-      <ChamferedPanel tier="component" size="card" className="w-full">
+      <div className="w-full border border-border bg-surface">
         <div
-          className="flex items-center gap-3 px-5 py-5"
+          className="flex items-center gap-3 px-4 py-3"
           data-testid="featured-spotlight-empty"
         >
-          <span aria-hidden className="text-[16px] text-[var(--text-dim)]">
+          <span aria-hidden className="text-[14px] text-[var(--text-dim)]">
             ★
           </span>
-          <p className="font-mono text-[11px] tracking-[0.2em] text-[var(--text-dim)] uppercase">
+          <p className="font-mono text-[10px] tracking-[0.2em] text-[var(--text-dim)] uppercase">
             {"// No post pinned — homepage shows the most recent dispatch"}
           </p>
         </div>
-      </ChamferedPanel>
+      </div>
     );
   }
 
+  // Featured pin — a plain rectangle (no chamfer), standard component border.
   return (
-    <ChamferedPanel
-      tier="component"
-      size="card"
-      className="w-full"
-      chamferWidth={3}
-    >
-      <div className="relative px-5 py-5" data-testid="featured-spotlight">
-        <span
-          aria-hidden
-          className="absolute bottom-0 left-0 w-[3px]"
-          style={{ top: "16px", backgroundColor: "var(--accent)" }}
-        />
-        <div className="flex flex-wrap items-center justify-between gap-2 pl-3">
-          <span className="font-mono text-[10px] tracking-[0.25em] text-accent uppercase">
+    <div className="w-full border border-border bg-surface">
+      <div data-testid="featured-spotlight">
+        <div className="px-4 pt-3 pb-3">
+          <span className="font-mono text-[9px] tracking-[0.25em] text-accent uppercase">
             ★ Featured on homepage
           </span>
-          {post.published_at && (
-            <span className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
-              {formatDate(post.published_at)}
-            </span>
-          )}
+
+          <h3 className="mt-2 truncate font-editorial text-[16px] leading-tight font-bold tracking-[0.02em] text-fg">
+            {post.title}
+          </h3>
         </div>
 
-        <h3 className="mt-3 pl-3 font-display text-[20px] font-bold tracking-[0.02em] text-fg">
-          {post.title}
-        </h3>
-
-        <p className="mt-2 pl-3 text-sm leading-relaxed text-muted">
-          {post.summary}
-        </p>
-
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pl-3">
-          <div className="flex flex-wrap gap-2">
-            {post.tags.map((tag) => (
-              <Tag key={tag} label={tag} />
-            ))}
+        {/* Footer band — lighter surface + hairline divider, mirroring the
+            published card's date / action strip. */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-dim bg-surface-raised px-4 py-2.5">
+          <div className="font-mono text-[10px] tracking-[0.2em] text-muted uppercase">
+            {post.published_at && <span>{formatDate(post.published_at)}</span>}
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             {onUnfeature && (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => onUnfeature(post)}
                 disabled={busy}
-                className="border border-border px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-muted uppercase transition-colors hover:text-fg disabled:opacity-50"
                 data-testid="featured-spotlight-unfeature"
               >
                 Unfeature
-              </button>
+              </Button>
             )}
             <a
               href={`/blog/${post.slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="border border-accent px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-accent uppercase transition-colors hover:bg-[var(--accent-glow)]"
+              className={buttonClasses("outline", "sm")}
               data-testid="featured-spotlight-view"
             >
-              View post →
+              View →
             </a>
           </div>
         </div>
       </div>
-    </ChamferedPanel>
+    </div>
   );
 }

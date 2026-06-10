@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/button";
+
 interface RegenerateFormProps {
   value: string;
   onChange: (value: string) => void;
@@ -34,22 +36,12 @@ export function RegenerateForm({
         />
       </label>
       <div className="flex flex-wrap gap-3">
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => onSubmit(value)}
-          className="bg-accent px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-[var(--bg)] uppercase transition-colors hover:bg-[var(--accent-dim)] disabled:opacity-50"
-        >
+        <Button disabled={busy} onClick={() => onSubmit(value)}>
           Submit for regeneration
-        </button>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={onCancel}
-          className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase hover:text-fg"
-        >
+        </Button>
+        <Button variant="link" size="sm" disabled={busy} onClick={onCancel}>
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   );

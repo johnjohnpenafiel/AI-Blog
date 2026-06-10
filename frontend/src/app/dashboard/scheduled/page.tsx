@@ -3,7 +3,7 @@ import { ScheduledClient } from "@/components/dashboard/scheduled/scheduled-clie
 
 export default function ScheduledPage() {
   return (
-    <DashboardPageShell section="// 03 — Scheduled" title="Scheduled Posts">
+    <DashboardPageShell title="Scheduled Posts">
       <ScheduledClient />
     </DashboardPageShell>
   );

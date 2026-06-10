@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 
-import { ChamferedPanel } from "@/components/chamfered-panel";
+import { Button } from "@/components/button";
+import { usePipelineStatus } from "@/components/dashboard/pipeline-status-context";
+import {
+  runResultToast,
+  useToast,
+} from "@/components/dashboard/toast-context";
 import {
   PipelineConflictError,
   getSettings,
@@ -46,6 +51,8 @@ function formatTimestamp(iso: string | null): string {
 
 export function SettingsClient() {
   const { data: session } = useSession();
+  const { markStarted, markFinished } = usePipelineStatus();
+  const toast = useToast();
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -97,9 +104,11 @@ export function SettingsClient() {
     setRunPending(true);
     setRunError(null);
     setRunResult(null);
+    markStarted();
     try {
       const result = await triggerPipelineRun();
       setRunResult(result);
+      toast(runResultToast(result));
       // Refresh settings so LAST RUN / NEXT RUN reflect the new timestamps.
       try {
         const refreshed = await getSettings();
@@ -117,6 +126,7 @@ export function SettingsClient() {
       }
     } finally {
       setRunPending(false);
+      markFinished();
     }
   }
 
@@ -143,8 +153,8 @@ export function SettingsClient() {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Section 1: Publishing Mode */}
-      <ChamferedPanel tier="component" size="card" className="w-full">
+      {/* Publishing Mode — plain rectangle (settings aren't posts). */}
+      <div className="w-full border border-border bg-surface">
         <div className="flex flex-col gap-4 px-5 py-5">
           <p className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase">
             Publishing Mode
@@ -166,50 +176,37 @@ export function SettingsClient() {
             </p>
           )}
         </div>
-      </ChamferedPanel>
+      </div>
 
-      {/* Section 2: Schedule (read-only) */}
-      <ChamferedPanel tier="component" size="card" className="w-full">
-        <div className="flex flex-col gap-3 px-5 py-5">
-          <p className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase">
-            Pipeline Schedule
-          </p>
-          <p className="font-display text-[22px] font-semibold tracking-[0.02em] text-fg">
-            MON · THU · FRI AT 8:00 AM
-          </p>
-          <p className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
-            Cadence fixed in code — not configurable here.
-          </p>
-        </div>
-      </ChamferedPanel>
-
-      {/* Section 3: Manual Controls */}
-      <ChamferedPanel tier="component" size="card" className="w-full">
+      {/* Pipeline — schedule (read-only cadence) + manual controls, tied into
+          one card since they're the same concern. */}
+      <div className="w-full border border-border bg-surface">
         <div className="flex flex-col gap-4 px-5 py-5">
           <p className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase">
-            Manual Controls
+            Pipeline
           </p>
-          <ChamferedPanel
-            tier="component"
-            size="button"
-            cut="dual"
-            background={runPending ? "var(--accent-dim)" : "var(--accent)"}
-            perimeterStroke="var(--accent)"
-            className="self-start"
+
+          <div className="flex flex-col gap-1">
+            <p className="font-display text-[22px] font-semibold tracking-[0.02em] text-fg">
+              MON · THU · FRI AT 8:00 AM
+            </p>
+            <p className="font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
+              Cadence fixed in code — not configurable here.
+            </p>
+          </div>
+
+          <Button
+            size="lg"
+            disabled={runPending}
+            onClick={handleTriggerRun}
+            className={cn(
+              "self-start",
+              runPending && "cursor-wait bg-[var(--accent-dim)] disabled:opacity-90",
+            )}
+            data-testid="trigger-pipeline-run"
           >
-            <button
-              type="button"
-              disabled={runPending}
-              onClick={handleTriggerRun}
-              className={cn(
-                "block px-5 py-3 font-mono text-[11px] tracking-[0.25em] text-[var(--bg)] uppercase transition-opacity",
-                runPending && "cursor-wait opacity-80",
-              )}
-              data-testid="trigger-pipeline-run"
-            >
-              {runPending ? "Running…" : "Trigger Manual Run"}
-            </button>
-          </ChamferedPanel>
+            {runPending ? "Running…" : "Trigger Manual Run"}
+          </Button>
 
           <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div className="flex flex-col gap-1">
@@ -254,10 +251,10 @@ export function SettingsClient() {
             </p>
           )}
         </div>
-      </ChamferedPanel>
+      </div>
 
-      {/* Section 4: Session */}
-      <ChamferedPanel tier="component" size="card" className="w-full">
+      {/* Session — logout as a plain (neutral) button so it reads as clickable. */}
+      <div className="w-full border border-border bg-surface">
         <div className="flex flex-col gap-3 px-5 py-5">
           <p className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase">
             Session
@@ -268,16 +265,16 @@ export function SettingsClient() {
           >
             {email}
           </p>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="self-start font-mono text-[10px] tracking-[0.25em] text-dim uppercase hover:text-fg"
+            className="self-start"
             data-testid="logout-button"
           >
             Logout
-          </button>
+          </Button>
         </div>
-      </ChamferedPanel>
+      </div>
     </div>
   );
 }

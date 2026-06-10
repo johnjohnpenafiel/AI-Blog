@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { Button } from "@/components/button";
 import { ChamferedPanel } from "@/components/chamfered-panel";
 
 interface AcceptModalProps {
@@ -70,31 +71,26 @@ export function AcceptModal({
 
           {mode === "choose" ? (
             <div className="flex flex-col gap-3">
-              <button
-                type="button"
+              <Button
                 disabled={busy}
                 onClick={handlePublishNow}
-                className="bg-accent px-4 py-3 font-mono text-[11px] tracking-[0.25em] text-[var(--bg)] uppercase transition-colors hover:bg-[var(--accent-dim)] disabled:opacity-50"
+                className="w-full py-3"
                 data-testid="accept-publish-now"
               >
                 Publish now
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="outline"
                 disabled={busy}
                 onClick={() => setMode("schedule")}
-                className="border border-accent px-4 py-3 font-mono text-[11px] tracking-[0.25em] text-accent uppercase transition-colors hover:bg-[var(--accent-glow)] disabled:opacity-50"
+                className="w-full py-3"
                 data-testid="accept-schedule-open"
               >
                 Schedule for later
-              </button>
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase hover:text-fg"
-              >
+              </Button>
+              <Button variant="link" size="sm" onClick={handleCancel}>
                 Back
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="flex flex-col gap-4">
@@ -111,26 +107,25 @@ export function AcceptModal({
                 />
               </label>
               <div className="flex flex-col gap-3">
-                <button
-                  type="button"
+                <Button
                   disabled={busy || !scheduledValue}
                   onClick={handleSchedule}
-                  className="bg-accent px-4 py-3 font-mono text-[11px] tracking-[0.25em] text-[var(--bg)] uppercase transition-colors hover:bg-[var(--accent-dim)] disabled:opacity-50"
+                  className="w-full py-3"
                   data-testid="accept-schedule-confirm"
                 >
                   Confirm
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  variant="link"
+                  size="sm"
                   disabled={busy}
                   onClick={() => {
                     setMode("choose");
                     setScheduledValue("");
                   }}
-                  className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase hover:text-fg"
                 >
                   Back
-                </button>
+                </Button>
               </div>
             </div>
           )}

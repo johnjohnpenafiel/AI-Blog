@@ -10,6 +10,7 @@ import {
   type PostListItem,
 } from "@/lib/api";
 
+import { Pagination } from "@/components/dashboard/pagination";
 import { FeaturedSpotlight } from "@/components/dashboard/featured-spotlight";
 import { SectionHeader } from "@/components/dashboard/section-header";
 
@@ -18,30 +19,37 @@ import { PublishedRow } from "./published-row";
 
 type LoadState = "loading" | "ready" | "error";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 export function PublishedClient() {
   const [items, setItems] = useState<PostListItem[]>([]);
   const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [featured, setFeatured] = useState<PostListItem | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [error, setError] = useState<string | null>(null);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionMsg, setActionMsg] = useState<string | null>(null);
 
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  // Paged list — refetches whenever the page changes.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [data, pinned] = await Promise.all([
-          listPosts("published", { limit: PAGE_SIZE, offset: 0 }),
-          getFeaturedPost(),
-        ]);
+        const data = await listPosts("published", {
+          limit: PAGE_SIZE,
+          offset: (page - 1) * PAGE_SIZE,
+        });
         if (cancelled) return;
+        const maxPage = Math.max(1, Math.ceil(data.total / PAGE_SIZE));
+        if (page > maxPage) {
+          setPage(maxPage);
+          return;
+        }
         setItems(data.items);
         setTotal(data.total);
-        setFeatured(pinned);
         setLoadState("ready");
         setError(null);
       } catch (e) {
@@ -53,24 +61,23 @@ export function PublishedClient() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [page]);
 
-  const loadMore = useCallback(async () => {
-    if (loadingMore) return;
-    setLoadingMore(true);
-    try {
-      const data = await listPosts("published", {
-        limit: PAGE_SIZE,
-        offset: items.length,
-      });
-      setItems((prev) => [...prev, ...data.items]);
-      setTotal(data.total);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load more");
-    } finally {
-      setLoadingMore(false);
-    }
-  }, [items.length, loadingMore]);
+  // The pinned post — fetched once (independent of the paged list).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const pinned = await getFeaturedPost();
+        if (!cancelled) setFeatured(pinned);
+      } catch {
+        // Non-fatal — the spotlight just shows its empty state.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleFeature = useCallback(async (post: PostListItem) => {
     setBusyId(post.id);
@@ -109,8 +116,6 @@ export function PublishedClient() {
     }
   }, []);
 
-  const hasMore = items.length < total;
-
   return (
     <div className="flex h-full flex-col gap-8">
       {loadState === "loading" && (
@@ -128,9 +133,9 @@ export function PublishedClient() {
         </p>
       )}
 
-      {loadState === "ready" && items.length === 0 && <PublishedEmptyState />}
+      {loadState === "ready" && total === 0 && <PublishedEmptyState />}
 
-      {loadState === "ready" && items.length > 0 && (
+      {loadState === "ready" && total > 0 && (
         <>
           {/* Featured: the post currently driving the homepage ★ band.
               Pinned — stays put while the list below scrolls in place. */}
@@ -155,11 +160,11 @@ export function PublishedClient() {
             )}
           </section>
 
-          {/* All Published: header stays pinned; only this list scrolls. */}
+          {/* All Published: header + pagination stay pinned; the list scrolls. */}
           <section className="flex min-h-0 flex-1 flex-col gap-4">
             <SectionHeader index="02" label="All Published" />
             <div className="min-h-0 flex-1 overflow-y-auto">
-              <ul className="flex flex-col gap-4">
+              <ul className="flex flex-col gap-2.5">
                 {items.map((post) => (
                   <li key={post.id}>
                     <PublishedRow
@@ -175,23 +180,8 @@ export function PublishedClient() {
                   </li>
                 ))}
               </ul>
-
-              {hasMore && (
-                <div className="flex justify-center pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      void loadMore();
-                    }}
-                    disabled={loadingMore}
-                    className="border border-border px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-muted uppercase transition-colors hover:text-fg disabled:opacity-50"
-                    data-testid="published-load-more"
-                  >
-                    {loadingMore ? "Loading…" : `Load more (${total - items.length} left)`}
-                  </button>
-                </div>
-              )}
             </div>
+            <Pagination page={page} pageCount={pageCount} onPageChange={setPage} />
           </section>
         </>
       )}

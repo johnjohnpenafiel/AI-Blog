@@ -31,13 +31,13 @@ The reference feeling: a premium engineering publication crossed with a fighter-
 | `--surface-raised` | `#181818` | Hover state on cards. Elevated further. |
 | `--border` | `#222222` | Default solid borders. Never dashed. |
 | `--border-dim` | `#1a1a1a` | Subtle dividers — section separators, internal table rules. |
-| `--text-primary` | `#f0f0f0` | Headings, body text, primary values. |
-| `--text-secondary` | `#555555` | Metadata, dates, inactive nav, muted labels. |
-| `--text-dim` | `#333333` | Lowest-emphasis chrome — corner markers, fine print. |
-| `--accent` | `#ff6a00` | The only accent. Active states, CTAs, chamfer cut lines, glow. |
-| `--accent-dim` | `#cc5500` | Hover on orange elements. |
-| `--accent-glow` | `rgba(255, 106, 0, 0.12)` | Soft orange tint behind active nav items and hero atmosphere. |
-| `--accent-structural` | `rgba(255, 106, 0, 0.60)` | Tier 1 structural borders (sidebar, main shell). |
+| `--text-primary` | `#f9f9f9` | Headings, body text, primary values. Mirrors public `--tg-ink`. |
+| `--text-secondary` | `#a7a7a7` | Metadata, dates, inactive nav, muted labels. Mirrors public `--tg-mute`. |
+| `--text-dim` | `#646464` | Lowest-emphasis chrome — keys/labels, corner markers, fine print. Mirrors public `--tg-faint`. |
+| `--accent` | `#e85002` | The only accent. Active states, CTAs, chamfer cut lines, glow. Matches public `--tg-orange`. |
+| `--accent-dim` | `#c24302` | Hover on orange elements. |
+| `--accent-glow` | `rgba(232, 80, 2, 0.12)` | Soft orange tint behind active nav items and hero atmosphere. |
+| `--accent-structural` | `rgba(232, 80, 2, 0.60)` | Tier 1 structural borders (sidebar, main shell). |
 | `--grid` | `#141414` | Body grid overlay color. 48px cells. Near-blend gray — chassis texture without orange tint. |
 
 **Semantic colors** (use sparingly — only for state, never decoration):
@@ -164,10 +164,10 @@ Keep values concise: `MON MAY 18`, `IN 2 DAYS`, `08:00`. Never fill a slot with 
 | Chamfered corners via `clip-path` (real cuts) | Rounded corners (`border-radius`) anywhere |
 | True 45° angles — equal H + V offset | Painted orange lines over hidden corners |
 | Single dark theme — no light mode, no toggle | Unequal chamfer offsets (steep slashes) |
-| Orange `#FF6A00` as the only accent | Cut lines extending past `clip-path` edges |
+| Orange `#E85002` as the only accent | Cut lines extending past `clip-path` edges |
 | Chakra Petch 700 for all display titles | Circular or oval shapes |
 | JetBrains Mono for all UI chrome | Gradients (exception: subtle orange glow) |
-| Inter 400 for body text only | Any accent color other than `#FF6A00` |
+| Inter 400 for body text only | Any accent color other than `#E85002` |
 | Body grid: orange @ 6%, 48px cell | Photography or images in the UI |
 | Sidebar + main shell: pure `#000` (recessed) | Serif fonts |
 | Cards: `#111` (lifted above shell) | Inter for display titles (use Chakra Petch) |
@@ -535,7 +535,7 @@ clip-path: polygon(
               fill="none" stroke="#222" stroke-width="1"
               vector-effect="non-scaling-stroke"/>
     <line x1="0" y1="16" x2="16" y2="0"
-          stroke="#ff6a00" stroke-width="2"
+          stroke="#e85002" stroke-width="2"
           vector-effect="non-scaling-stroke"/>
   </svg>
 </div>
@@ -581,7 +581,7 @@ Used only on `/` and `/about` heroes. Not in the dashboard.
 
 - All button and label text: JetBrains Mono, all-caps, 0.2em letter-spacing minimum.
 - Article body text: never monospaced — Inter 400 at 18px / 1.7 line height.
-- Orange `#FF6A00` used only for: active states, primary CTAs, links, chamfer cut lines, structural borders, glow.
+- Orange `#E85002` used only for: active states, primary CTAs, links, chamfer cut lines, structural borders, glow.
 - Solid borders only — no dashed borders anywhere.
 - Top-left bracket marks `⌐` from v1 are **removed.** They are replaced by the chamfer cut + the orange diagonal line on the cut.
 - Mobile: admin sidebar collapses to top nav or hamburger; public blog is fully responsive.

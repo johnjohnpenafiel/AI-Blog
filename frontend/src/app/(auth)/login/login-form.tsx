@@ -4,8 +4,7 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/button";
 
 export function LoginForm() {
   const router = useRouter();
@@ -54,16 +53,16 @@ export function LoginForm() {
           <span className="font-mono text-[0.7rem] tracking-[0.18em] text-muted uppercase">
             Email
           </span>
-          <Input
+          <input
             type="email"
             name="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="admin@delorean.app"
+            placeholder="admin@thegarage.ai"
             autoComplete="username"
             required
             disabled={submitting}
-            className="h-10 rounded-none border-border bg-bg font-mono text-sm text-fg placeholder:text-muted focus-visible:border-accent focus-visible:ring-0"
+            className="h-10 w-full border border-border bg-bg px-3 font-mono text-sm text-fg placeholder:text-muted focus:border-accent focus:outline-none disabled:opacity-50"
           />
         </label>
 
@@ -71,7 +70,7 @@ export function LoginForm() {
           <span className="font-mono text-[0.7rem] tracking-[0.18em] text-muted uppercase">
             Password
           </span>
-          <Input
+          <input
             type="password"
             name="password"
             value={password}
@@ -79,7 +78,7 @@ export function LoginForm() {
             autoComplete="current-password"
             required
             disabled={submitting}
-            className="h-10 rounded-none border-border bg-bg font-mono text-sm text-fg placeholder:text-muted focus-visible:border-accent focus-visible:ring-0"
+            className="h-10 w-full border border-border bg-bg px-3 font-mono text-sm text-fg placeholder:text-muted focus:border-accent focus:outline-none disabled:opacity-50"
           />
         </label>
 
@@ -94,8 +93,9 @@ export function LoginForm() {
 
         <Button
           type="submit"
+          size="lg"
           disabled={submitting}
-          className="mt-2 h-10 w-full rounded-none bg-accent font-mono text-sm tracking-[0.2em] text-white uppercase hover:bg-accent-dim disabled:opacity-60"
+          className="mt-2 w-full text-sm tracking-[0.2em]"
         >
           {submitting ? "Signing in…" : "Sign in"}
         </Button>

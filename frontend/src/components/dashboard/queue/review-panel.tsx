@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { Button } from "@/components/button";
 import { ChamferedPanel } from "@/components/chamfered-panel";
 import { EvalBadge } from "@/components/eval-badge";
 import { TaxonomyMeta } from "@/components/taxonomy-meta";
@@ -114,6 +115,11 @@ export function ReviewPanel({
       aria-modal="true"
       aria-label="Review post"
       data-testid="review-panel"
+      onClick={(e) => {
+        // Backdrop click (outside the panel) closes; clicks inside the panel
+        // bubble up with a different target and are ignored.
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <ChamferedPanel
         tier="structural"
@@ -129,7 +135,7 @@ export function ReviewPanel({
                   ? ` · Attempt ${detail.generation_attempt}`
                   : ""}
               </p>
-              <h2 className="font-display text-[24px] font-bold tracking-[0.02em] text-fg md:text-[28px]">
+              <h2 className="font-editorial text-[24px] font-bold tracking-[0.02em] text-fg md:text-[28px]">
                 {detail?.title ?? "Loading…"}
               </h2>
               {detail && (
@@ -143,7 +149,7 @@ export function ReviewPanel({
               type="button"
               onClick={onClose}
               aria-label="Close review panel"
-              className="font-mono text-[14px] leading-none text-dim hover:text-fg"
+              className="flex size-9 shrink-0 items-center justify-center border border-border text-[15px] leading-none text-muted transition-colors hover:border-accent hover:text-fg"
               data-testid="review-close"
             >
               ✕
@@ -241,57 +247,52 @@ export function ReviewPanel({
               />
             ) : (
               <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
+                <Button
                   disabled={!detail || pending !== null}
                   onClick={() => setAcceptOpen(true)}
-                  className="bg-accent px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-[var(--bg)] uppercase transition-colors hover:bg-[var(--accent-dim)] disabled:opacity-50"
                   data-testid="review-accept"
                 >
                   Accept
-                </button>
+                </Button>
 
                 {confirmReject ? (
                   <>
-                    <button
-                      type="button"
+                    <Button
+                      variant="destructive"
                       disabled={pending !== null}
                       onClick={handleReject}
-                      className="border border-destructive px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-destructive uppercase transition-colors hover:bg-destructive/10 disabled:opacity-50"
                       data-testid="review-reject-confirm"
                     >
                       Confirm reject
-                    </button>
-                    <button
-                      type="button"
+                    </Button>
+                    <Button
+                      variant="link"
+                      size="sm"
                       disabled={pending !== null}
                       onClick={() => setConfirmReject(false)}
-                      className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase hover:text-fg"
                     >
                       Cancel
-                    </button>
+                    </Button>
                   </>
                 ) : (
-                  <button
-                    type="button"
+                  <Button
+                    variant="destructive"
                     disabled={!detail || pending !== null}
                     onClick={() => setConfirmReject(true)}
-                    className="border border-destructive px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-destructive uppercase transition-colors hover:bg-destructive/10 disabled:opacity-50"
                     data-testid="review-reject"
                   >
                     Reject
-                  </button>
+                  </Button>
                 )}
 
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
                   disabled={!detail || pending !== null}
                   onClick={() => setRegenerateOpen(true)}
-                  className="border border-border px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-muted uppercase transition-colors hover:text-fg disabled:opacity-50"
                   data-testid="review-regenerate"
                 >
                   Regenerate
-                </button>
+                </Button>
               </div>
             )}
           </footer>

@@ -44,12 +44,14 @@ afterEach(() => {
 });
 
 describe("QueueCard", () => {
-  it("renders title, summary, and tags", () => {
+  it("renders title and minimal index (no summary or tags)", () => {
     render(<QueueCard post={POST} onOpen={() => {}} />);
     expect(screen.getByText(POST.title)).toBeInTheDocument();
-    expect(screen.getByText(POST.summary)).toBeInTheDocument();
-    expect(screen.getByText("Voice AI")).toBeInTheDocument();
-    expect(screen.getByText("CRM")).toBeInTheDocument();
+    // Minimal triage index (section · format); summary + tags live behind Review →.
+    expect(screen.getByText("Customer Experience")).toBeInTheDocument();
+    expect(screen.getByText("Deep Dive")).toBeInTheDocument();
+    expect(screen.queryByText(POST.summary)).not.toBeInTheDocument();
+    expect(screen.queryByText("Voice AI")).not.toBeInTheDocument();
   });
 
   it("invokes onOpen with the post id when clicked", () => {

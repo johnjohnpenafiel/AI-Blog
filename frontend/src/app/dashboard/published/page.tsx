@@ -3,7 +3,7 @@ import { PublishedClient } from "@/components/dashboard/published/published-clie
 
 export default function PublishedPage() {
   return (
-    <DashboardPageShell section="// 04 — Published" title="Published Posts">
+    <DashboardPageShell title="Published Posts">
       <PublishedClient />
     </DashboardPageShell>
   );

@@ -47,7 +47,7 @@ The audience is dealership operators, automotive tech executives, and industry o
 
 ### Components
 
-- **Frontend** (`frontend/`): Next.js 16 (App Router) + React 19 + Tailwind CSS v4 + shadcn/ui. Source layout is `src/app/`. Two route groups: `(public)` for The Garage AI blog (homepage, post pages, about) and `dashboard/` for the admin UI (overview, queue, scheduled, published, settings). NextAuth handles credential-based login for the admin only.
+- **Frontend** (`frontend/`): Next.js 16 (App Router) + React 19 + Tailwind CSS v4. Source layout is `src/app/`. Two route groups: `(public)` for The Garage AI blog (homepage, post pages, about) and `dashboard/` for the admin UI (overview, queue, scheduled, published, settings). NextAuth handles credential-based login for the admin only. No component library — UI is hand-built against the design tokens, with one shared `Button` (`components/button.tsx`).
 - **Backend** (`backend/`): Python + FastAPI. Routers: `auth.py`, `posts.py` (admin), `public.py` (public read-only), `pipeline.py`, `settings.py`. Services: `news_fetcher.py` (Perplexity, open-canvas sourcing), `content_classifier.py` (Haiku promo-vs-news + importance classifier), `blog_writer.py` (Claude, format-aware generation + Roundup), `pipeline.py` (`run_pipeline` + `run_roundup` orchestrators), `publisher.py` (status routing + `publish_due_posts` bulk-publisher), `evals.py` (in-loop generation-quality judge). Canonical category vocabulary lives in `taxonomy.py`. `scheduler.py` runs APScheduler in-process for the **Mon / Thu / Fri** cron — each day mapped to a format (Mon → Brief, Thu → Deep Dive, Fri → Roundup) — AND a 1-minute interval job (`scheduled-publisher`) that flips accepted posts whose `scheduled_at` has passed to `published`.
 - **Database**: PostgreSQL. Schema managed by SQLAlchemy models + Alembic migrations.
 - **External services**:
@@ -76,9 +76,8 @@ The audience is dealership operators, automotive tech executives, and industry o
 │   │   │   │   └── settings/              # System settings
 │   │   │   ├── globals.css                # Tailwind v4 + design tokens via @theme
 │   │   │   └── layout.tsx
-│   │   ├── components/
+│   │   ├── components/                    # incl. button.tsx (the one shared Button)
 │   │   └── lib/
-│   └── components.json                    # shadcn/ui config
 │
 ├── backend/                   # FastAPI app
 │   ├── main.py
@@ -98,7 +97,7 @@ The audience is dealership operators, automotive tech executives, and industry o
 
 ## Stack decisions
 
-- **Next.js 16 (App Router) + React 19 + Tailwind v4**: Server components fit the public-blog use case (mostly read, SEO-sensitive); App Router lets us co-locate route groups for the public surface and admin dashboard cleanly. Tailwind v4 is CSS-first — design tokens are declared with `@theme {}` in `globals.css`, not in a `tailwind.config.ts`. shadcn/ui chosen because we own the component code and can theme it freely; initialized at scaffold time but components are added on demand by features that need them.
+- **Next.js 16 (App Router) + React 19 + Tailwind v4**: Server components fit the public-blog use case (mostly read, SEO-sensitive); App Router lets us co-locate route groups for the public surface and admin dashboard cleanly. Tailwind v4 is CSS-first — design tokens are declared with `@theme {}` in `globals.css`, not in a `tailwind.config.ts`. **No component library** — shadcn/ui was scaffolded early but removed once the custom design language (sharp chamfer/rectangle, mono, accent) made its rounded defaults a fight rather than a help. UI is hand-built against the tokens; the only shared primitive is `components/button.tsx` (variants: primary / outline / ghost / destructive / link). See the 2026-06-09 decision-log entry.
 - **Python + FastAPI**: The pipeline does heavy lifting against two LLM/AI APIs — Python's ecosystem (Anthropic SDK, `passlib`, APScheduler) is the path of least resistance. FastAPI gives us typed routers and Pydantic validation cheaply.
 - **PostgreSQL 17**: Standard, well-supported on Railway/Render. Postgres array column type fits the `tags VARCHAR[]` field without a join table. Pinned to `postgres:17-alpine` in local Docker — matches the developer's host Homebrew client (17.7), so client/server versions stay aligned. The `db` service exposes host port **5433** (not 5432) to avoid a bind conflict with the host's local Postgres install.
 - **SQLAlchemy + Alembic**: Mature combo; Alembic gives us migration history, which matters because schema changes flow through the architecture-change gate (see CLAUDE.md).

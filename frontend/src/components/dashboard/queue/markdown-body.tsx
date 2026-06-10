@@ -9,22 +9,22 @@ interface MarkdownBodyProps {
 
 export function MarkdownBody({ source }: MarkdownBodyProps) {
   return (
-    <div className="flex flex-col gap-4 text-[15px] leading-[1.7] text-fg">
+    <div className="flex flex-col gap-4 font-editorial text-[15px] leading-[1.7] text-fg">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
           h1: ({ children }) => (
-            <h1 className="font-display text-[28px] font-bold tracking-[0.02em] text-fg">
+            <h1 className="font-editorial text-[28px] font-bold tracking-[0.02em] text-fg">
               {children}
             </h1>
           ),
           h2: ({ children }) => (
-            <h2 className="mt-4 font-display text-[22px] font-bold tracking-[0.02em] text-fg">
+            <h2 className="mt-4 font-editorial text-[22px] font-bold tracking-[0.02em] text-fg">
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="mt-3 font-display text-[18px] font-semibold tracking-[0.02em] text-fg">
+            <h3 className="mt-3 font-editorial text-[18px] font-semibold tracking-[0.02em] text-fg">
               {children}
             </h3>
           ),
