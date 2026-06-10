@@ -1,30 +1,13 @@
 import type { Metadata } from "next";
-import { Archivo, DM_Mono, Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { Archivo, DM_Mono, IBM_Plex_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "800", "900"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-});
-
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
 
 // ── Public-surface fonts (The Garage AI redesign) ──────────────────────────
 // Archivo is the editorial display + body voice, run EXTENDED — load the
 // `wdth` axis so `font-stretch` works. DM Mono is the "console" chrome voice
-// (non-variable, so weights are explicit). These are additive: the dashboard
-// keeps Inter / JetBrains Mono / Fraunces untouched.
+// (non-variable, so weights are explicit). Archivo also doubles as the
+// dashboard's editorial voice for post content (see --font-editorial).
 const archivo = Archivo({
   variable: "--font-archivo",
   subsets: ["latin"],
@@ -35,6 +18,18 @@ const dmMono = DM_Mono({
   variable: "--font-dm-mono",
   subsets: ["latin"],
   weight: ["300", "400", "500"],
+});
+
+// ── Dashboard chrome font ───────────────────────────────────────────────────
+// IBM Plex Mono is the admin surface's "command-console" voice — it carries all
+// dashboard chrome (nav, labels, stats, buttons, page titles). The only
+// exception is post content (card titles/summaries + the review preview), which
+// uses the public editorial voice (Archivo) so it reads as the published work
+// it represents. The public surface is unaffected (it uses its own --tg-* tokens).
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -50,7 +45,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable} ${fraunces.variable} ${archivo.variable} ${dmMono.variable} h-full antialiased`}
+      className={`${archivo.variable} ${dmMono.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-bg bg-fixed font-sans text-fg">
         <Providers>{children}</Providers>

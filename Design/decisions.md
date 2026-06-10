@@ -6,6 +6,51 @@
 
 New entries at the top.
 
+### 2026-06-09 — Dashboard color ramp: adopt the public surface's exact text + accent values
+
+**Context**: The dashboard's low-emphasis text bottomed out too dark — `--text-secondary #555555` and especially `--text-dim #333333` were nearly invisible against the dark chassis, so keys/labels (e.g. the Status readout's `POSTS PUBLISHED`, `MODE`, …) blended into the background. The public surface already ships a well-tuned neutral ramp (`--tg-ink` / `--tg-mute` / `--tg-faint`) and a brand orange (`--tg-orange`); running two slightly different palettes across the two surfaces was also a needless inconsistency.
+
+**Decision**: Repoint the dashboard's **text and accent token *values*** to the public surface's exact colors, while keeping the dashboard's **structural usage** (its dark chassis) unchanged:
+- `--text-primary` `#f0f0f0 → #f9f9f9` (public `--tg-ink`)
+- `--text-secondary` `#555555 → #a7a7a7` (public `--tg-mute`)
+- `--text-dim` `#333333 → #646464` (public `--tg-faint`)
+- `--accent` `#ff6a00 → #e85002` (public `--tg-orange`); `--accent-dim → #c24302`; `--accent-glow`/`--accent-structural` re-based on `232 80 2`. The `pulse-glow` keyframe (sidebar status dot) was updated to match.
+- **Unchanged**: backgrounds and structure (`--bg #0a0a0a`, `--structural #000`, `--surface #111`, `--surface-raised`, `--border`, `--border-dim`, `--grid`) stay on the dashboard's dark values — the public surface uses *gray* backgrounds, the dashboard stays *black*. Same colors, different roles. Semantic state colors (`--success`/`--warning`/`--destructive`) also unchanged.
+
+**Rationale**:
+- **Legibility** — the faint ramp now clears the chassis (on the darker dashboard the same grays carry *more* contrast than they do on the public gray), so keys/labels read at a glance.
+- **One palette, two surfaces** — the brand orange and the text grays are now byte-identical across public and admin; only the background role differs (gray vs black), which is the intended distinction between the two surfaces.
+- **Token-level fix** — done in `:root`, so every dashboard label/value/border that references the tokens updates at once; no per-component patching (a grep confirmed no dashboard component hardcodes the old hexes).
+
+**Tradeoffs**:
+- **The signature accent shifted** from `#ff6a00` to the slightly redder/darker `#e85002`. Subtle, but it touches every orange element (CTAs, active nav, chamfer cut lines, glow). Deliberate, for cross-surface parity.
+- **Values are copied, not referenced** — the public tokens are scoped to `.tg-surface`, so the dashboard can't `var()` them; the hexes are duplicated in `:root` with comments naming their public counterparts. If the public ramp changes, the dashboard must be updated in step.
+
+**References**: `frontend/src/app/globals.css` (`:root` text + accent tokens, `pulse-glow` keyframe), `frontend/src/app/(public)/public-theme.css` (`--tg-*` source values), `Design/README.md` (color token table + accent prose).
+
+### 2026-06-09 — Dashboard typeface split: IBM Plex Mono chrome, Archivo for post content
+
+**Context**: The dashboard chrome ran on JetBrains Mono (mono) + Fraunces (display) + Inter (body). The operator wanted the admin surface to read more like a command console, and to draw a clear line between *the tool* and *the content the tool manages*: a post in the queue is the same editorial artifact that will live on the public site, so it should look like it — while everything that is dashboard machinery should read as machinery.
+
+**Decision**: Two voices on the dashboard, by what the text *is*:
+- **IBM Plex Mono — all dashboard chrome.** Nav, labels, stat values, page titles, buttons, dates, eval badges, taxonomy/tags, settings. The global Tailwind tokens `--font-sans` / `--font-mono` / `--font-display` all resolve to IBM Plex Mono (`globals.css` `@theme inline`), so chrome is IBM Plex by default with no per-component opt-in.
+- **Archivo (`--font-editorial`) — post content only.** Card titles + summaries (queue, published, scheduled, featured spotlight), plus the review-panel post title and the rendered markdown preview. This is the public site's display/body grotesque, so a post reads the same in the queue as it will once published.
+
+Code `dropped` JetBrains Mono, Fraunces, and Inter entirely — after the repoint nothing referenced them (the public surface uses its own `--tg-*` Archivo/DM Mono tokens), so they were unused webfont loads.
+
+**Rationale**:
+- **Type encodes provenance.** The chrome/content split is the same idea as the color/depth hierarchy — the operator can tell at a glance what belongs to the product vs. what belongs to the public site. Monospace chrome + grotesque content makes that legible without a label.
+- **IBM Plex Mono is the "operations console" read** — colder and more systems-flavored than JetBrains Mono's friendlier terminals, fitting the fighter-jet-HUD/command-center direction for the admin surface.
+- **Default-by-token, not per-component.** Repointing the theme tokens means chrome is correct everywhere automatically; only post content carries the explicit `font-editorial` class. Fewer places to drift.
+- **The public surface is untouched** — it lives inside `.tg-surface` and uses inline `--tg-*` tokens (zero Tailwind `font-*` utilities), so repointing the global tokens can't reach it.
+
+**Tradeoffs**:
+- **Body prose on the dashboard is now monospace** (settings descriptions, empty states) — deliberate per "everything else is chrome," but long sentences in mono read more technical/less warm. Acceptable for a single-operator console; revisit if a prose-heavy surface appears.
+- **Archivo runs at normal width here**, not the EXTENDED (`wdth`) treatment the public hero uses — extended titles would overflow/awkwardly wrap in the compact card rows. So "same font," not "identical treatment," as the public surface.
+- **`Design/README.md`'s Typography section is now doubly stale** — it still names Chakra Petch / JetBrains Mono / Inter, which predates *both* the public Archivo/DM Mono redesign and this change. A full reconciliation of that section is still outstanding.
+
+**References**: `frontend/src/app/globals.css` (`--font-editorial`, repointed `--font-sans/mono/display`), `frontend/src/app/layout.tsx` (IBM Plex Mono load; Inter/Fraunces/JetBrains removed), card components (`queue-card`, `published-row`, `scheduled-card`, `featured-spotlight`), `review-panel.tsx`, `markdown-body.tsx`.
+
 ### 2026-06-06 — Public index filter: browse by Section, data-driven pills (was: legacy tag list)
 
 **Context**: The homepage filter shipped as a hardcoded list of the legacy 7 tags (`Voice AI`, `CRM`, `Merchandising`, `Industry Move`, …), filtering by `post.tags`. After the v2 taxonomy landed, this drifted: `Industry Move` became a `story_type` (not a tag), the fine tags were never meant to be navigation, and the list was a static thing to maintain. The v2 taxonomy explicitly says readers should **browse at the Section level**, and warns against shipping empty/fine-grained filter buckets at low post volume.

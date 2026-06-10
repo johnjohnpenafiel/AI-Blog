@@ -112,9 +112,9 @@ export function Sidebar() {
         >
           <nav
             aria-label="Dashboard"
-            className="flex h-full flex-col px-5 pt-20 pb-12"
+            className="flex h-full flex-col px-5 pt-12 pb-12"
           >
-            <div className="mb-10 flex items-start justify-end md:hidden">
+            <div className="mb-4 flex items-start justify-end md:hidden">
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
@@ -123,6 +123,16 @@ export function Sidebar() {
               >
                 ✕
               </button>
+            </div>
+
+            {/* Wordmark — the admin surface's lockup. */}
+            <div className="mb-10 px-1 md:px-3">
+              <p className="font-mono text-[14px] leading-tight font-bold tracking-[0.12em] text-fg uppercase">
+                The Garage AI
+              </p>
+              <p className="mt-1.5 font-mono text-[9px] tracking-[0.45em] text-dim uppercase">
+                Admin
+              </p>
             </div>
 
             <ul className="flex flex-col gap-1">

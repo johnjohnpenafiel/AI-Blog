@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { Button } from "@/components/button";
 import { ChamferedPanel } from "@/components/chamfered-panel";
 import { EvalBadge } from "@/components/eval-badge";
 import { Tag } from "@/components/tag";
@@ -82,13 +83,13 @@ export function ScheduledCard({ post, onMutated }: ScheduledCardProps) {
           </div>
         </div>
 
-        <h3 className="mt-3 font-display text-[20px] font-bold tracking-[0.02em] text-fg">
+        <h3 className="mt-3 font-editorial text-[20px] font-bold tracking-[0.02em] text-fg">
           {post.title}
         </h3>
 
         <TaxonomyMeta post={post} className="mt-2" />
 
-        <p className="mt-2 text-sm leading-relaxed text-muted">
+        <p className="mt-2 font-editorial text-sm leading-relaxed text-muted">
           {post.summary}
         </p>
 
@@ -103,84 +104,77 @@ export function ScheduledCard({ post, onMutated }: ScheduledCardProps) {
         )}
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button
-            type="button"
+          <Button
+            variant="outline"
             disabled={busy}
             onClick={() => setEditOpen((v) => !v)}
-            className="border border-accent px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-accent uppercase transition-colors hover:bg-[var(--accent-glow)] disabled:opacity-50"
             data-testid="scheduled-edit-toggle"
           >
             Edit schedule
-          </button>
+          </Button>
 
           {confirmPublish ? (
             <>
-              <button
-                type="button"
+              <Button
                 disabled={busy}
                 onClick={handlePublish}
-                className="bg-accent px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-[var(--bg)] uppercase transition-colors hover:bg-[var(--accent-dim)] disabled:opacity-50"
                 data-testid="scheduled-publish-confirm"
               >
                 Confirm publish
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="link"
+                size="sm"
                 disabled={busy}
                 onClick={() => setConfirmPublish(false)}
-                className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase hover:text-fg"
               >
                 Cancel
-              </button>
+              </Button>
             </>
           ) : (
-            <button
-              type="button"
+            <Button
               disabled={busy}
               onClick={() => {
                 setConfirmUnschedule(false);
                 setConfirmPublish(true);
               }}
-              className="bg-accent px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-[var(--bg)] uppercase transition-colors hover:bg-[var(--accent-dim)] disabled:opacity-50"
               data-testid="scheduled-publish"
             >
               Publish now
-            </button>
+            </Button>
           )}
 
           {confirmUnschedule ? (
             <>
-              <button
-                type="button"
+              <Button
+                variant="ghost"
                 disabled={busy}
                 onClick={handleUnschedule}
-                className="border border-border px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-muted uppercase transition-colors hover:text-fg disabled:opacity-50"
                 data-testid="scheduled-unschedule-confirm"
               >
                 Confirm back to queue
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="link"
+                size="sm"
                 disabled={busy}
                 onClick={() => setConfirmUnschedule(false)}
-                className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase hover:text-fg"
               >
                 Cancel
-              </button>
+              </Button>
             </>
           ) : (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
               disabled={busy}
               onClick={() => {
                 setConfirmPublish(false);
                 setConfirmUnschedule(true);
               }}
-              className="border border-border px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-muted uppercase transition-colors hover:text-fg disabled:opacity-50"
               data-testid="scheduled-unschedule"
             >
               Back to queue
-            </button>
+            </Button>
           )}
         </div>
 

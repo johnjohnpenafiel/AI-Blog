@@ -57,32 +57,31 @@ describe("PublishedClient", () => {
     });
   });
 
-  it("renders rows and load-more when total > items", async () => {
-    const firstPage = Array.from({ length: 20 }, (_, i) => makePost(i));
-    const secondPage = [makePost(20), makePost(21)];
+  it("paginates 10 per page and fetches the next page on click", async () => {
+    const firstPage = Array.from({ length: 10 }, (_, i) => makePost(i));
+    const secondPage = [makePost(10), makePost(11)];
 
     const spy = vi
       .spyOn(api, "listPosts")
-      .mockResolvedValueOnce({ items: firstPage, total: 22 })
-      .mockResolvedValueOnce({ items: secondPage, total: 22 });
+      .mockResolvedValueOnce({ items: firstPage, total: 12 })
+      .mockResolvedValueOnce({ items: secondPage, total: 12 });
 
     render(<PublishedClient />);
     await waitFor(() => {
-      expect(screen.getAllByTestId("published-row")).toHaveLength(20);
+      expect(screen.getAllByTestId("published-row")).toHaveLength(10);
     });
 
-    const loadMore = screen.getByTestId("published-load-more");
-    expect(loadMore).toBeInTheDocument();
-    fireEvent.click(loadMore);
+    // Two pages → a pagination control with a "Page 2" button.
+    const pageTwo = screen.getByRole("button", { name: "Page 2" });
+    fireEvent.click(pageTwo);
 
     await waitFor(() => {
-      expect(screen.getAllByTestId("published-row")).toHaveLength(22);
-      expect(screen.queryByTestId("published-load-more")).not.toBeInTheDocument();
+      expect(screen.getAllByTestId("published-row")).toHaveLength(2);
     });
 
     expect(spy).toHaveBeenCalledTimes(2);
-    expect(spy.mock.calls[0][1]).toEqual({ limit: 20, offset: 0 });
-    expect(spy.mock.calls[1][1]).toEqual({ limit: 20, offset: 20 });
+    expect(spy.mock.calls[0][1]).toEqual({ limit: 10, offset: 0 });
+    expect(spy.mock.calls[1][1]).toEqual({ limit: 10, offset: 10 });
   });
 
   it("renders error state on fetch failure", async () => {

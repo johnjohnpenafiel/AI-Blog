@@ -8,19 +8,20 @@ import { SectionHeader } from "@/components/dashboard/section-header";
 import {
   getFeaturedPost,
   getPipelineStatus,
+  getSettings,
   listPosts,
   type PipelineStatus,
   type PostListItem,
+  type PublishingMode,
 } from "@/lib/api";
 import {
   formatRelative,
-  formatRelativeFuture,
   formatTimeOfDay,
   formatWeekdayDateUpper,
 } from "@/lib/utils";
 
 import { GoToQueueButton } from "./go-to-queue-button";
-import { StatCard } from "./stat-card";
+import { StatusList } from "./status-list";
 import { TriggerPipelineButton } from "./trigger-pipeline-button";
 
 type LoadState = "loading" | "ready" | "error";
@@ -41,6 +42,7 @@ export function OverviewClient() {
   const [pipeline, setPipeline] = useState<PipelineStatus | null>(null);
   const [publishedCount, setPublishedCount] = useState<number | null>(null);
   const [featured, setFeatured] = useState<PostListItem | null>(null);
+  const [mode, setMode] = useState<PublishingMode | null>(null);
 
   const prevStateRef = useRef<PipelineStatus["state"] | null>(null);
 
@@ -104,6 +106,23 @@ export function OverviewClient() {
     };
   }, [refreshPending]);
 
+  // Publishing mode — fetched on its own, non-fatal: a settings hiccup just
+  // leaves the Mode card showing "—" rather than blanking the whole overview.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const settings = await getSettings();
+        if (!cancelled) setMode(settings.publishing_mode);
+      } catch {
+        // Non-fatal — Mode card falls back to "—".
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handlePipelineStarted = useCallback(() => {
     setPipeline((p) =>
       p
@@ -159,67 +178,69 @@ export function OverviewClient() {
 
   return (
     <div className="flex min-h-full flex-col gap-10">
-      <section className="flex flex-col gap-5">
-        <SectionHeader index="01" label="Status" />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            label="Posts Published"
-            value={published}
-            testId="stat-posts-published"
+      {/* Status + Quick Actions share the top row on desktop — the status
+          readout only needs ~half the width, so the actions fill the rest.
+          They stack below lg. */}
+      <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-12">
+        <section className="flex flex-col gap-5 lg:w-[28rem] lg:shrink-0">
+          <SectionHeader index="01" label="Status" />
+          <StatusList
+            items={[
+            {
+              label: "Posts Published",
+              value: published,
+              testId: "stat-posts-published",
+            },
+            {
+              label: "Pending Review",
+              value: pending,
+              activated: pending > 0,
+              testId: "stat-pending-review",
+            },
+            {
+              label: "Mode",
+              value: mode
+                ? mode === "auto"
+                  ? "Auto"
+                  : "Approve Only"
+                : "—",
+              testId: "stat-mode",
+            },
+            {
+              label: "Last Run",
+              value: formatRelative(lastRunAt),
+              testId: "stat-last-run",
+            },
+            {
+              label: "Next Run",
+              value: nextRunAt
+                ? `${formatWeekdayDateUpper(nextRunAt)} · ${formatTimeOfDay(nextRunAt)}`
+                : "—",
+              testId: "stat-next-run",
+            },
+            ]}
           />
-          <StatCard
-            label="Pending Review"
-            value={pending}
-            activated={pending > 0}
-            subLine="Awaiting operator"
-            testId="stat-pending-review"
-          />
-          <StatCard
-            label="Last Run"
-            value={formatRelative(lastRunAt)}
-            valueClassName="font-display text-[24px] font-bold"
-            subLine={
-              lastRunAt
-                ? `${formatWeekdayDateUpper(lastRunAt)} · ${formatTimeOfDay(lastRunAt)}`
-                : null
-            }
-            testId="stat-last-run"
-          />
-          <StatCard
-            label="Next Run"
-            value={formatWeekdayDateUpper(nextRunAt)}
-            valueClassName="font-display text-[24px] font-bold"
-            subLine={
-              nextRunAt ? (
-                <span className="text-accent">
-                  {formatTimeOfDay(nextRunAt)} · {formatRelativeFuture(nextRunAt)}
-                </span>
-              ) : null
-            }
-            footer={<>Cadence — Mon · Thu · Fri · 08:00</>}
-            testId="stat-next-run"
-          />
-        </div>
-      </section>
+        </section>
+
+        <section className="flex flex-col gap-5 lg:flex-1">
+          <SectionHeader index="02" label="Quick Actions" />
+          <div className="flex flex-wrap items-start gap-3">
+            <TriggerPipelineButton
+              onStarted={handlePipelineStarted}
+              onCompleted={handlePipelineCompleted}
+            />
+            <GoToQueueButton dim={pending === 0} />
+          </div>
+        </section>
+      </div>
 
       <section className="flex flex-col gap-5">
-        <SectionHeader index="02" label="Featured" />
+        <SectionHeader index="03" label="Featured" />
         <FeaturedSpotlight post={featured} />
       </section>
 
-      <section className="flex flex-col gap-5">
-        <SectionHeader index="03" label="Quick Actions" />
-        <div className="flex flex-wrap items-start gap-3">
-          <TriggerPipelineButton
-            onStarted={handlePipelineStarted}
-            onCompleted={handlePipelineCompleted}
-          />
-          <GoToQueueButton dim={pending === 0} />
-        </div>
-      </section>
-
       <footer className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-border-dim pt-5 font-mono text-[10px] tracking-[0.25em] text-dim uppercase">
-        <span>Delorean v1</span>
+        <span>The Garage AI v2</span>
         <span>Built by John John</span>
       </footer>
     </div>

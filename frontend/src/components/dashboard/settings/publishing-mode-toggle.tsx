@@ -1,6 +1,6 @@
 "use client";
 
-import { ChamferedPanel } from "@/components/chamfered-panel";
+import { Button } from "@/components/button";
 import type { PublishingMode } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -29,38 +29,20 @@ export function PublishingModeToggle({
       {OPTIONS.map((option) => {
         const isActive = value === option.value;
         return (
-          <ChamferedPanel
+          <Button
             key={option.value}
-            tier="component"
-            size="button"
-            cut="dual"
-            background={
-              isActive ? "var(--accent)" : "var(--surface)"
-            }
-            perimeterStroke={
-              isActive ? "var(--accent)" : "var(--border)"
-            }
+            variant={isActive ? "primary" : "ghost"}
+            role="radio"
+            aria-checked={isActive}
+            disabled={disabled}
+            onClick={() => {
+              if (!isActive && !disabled) onChange(option.value);
+            }}
+            className={cn("w-full py-3", !isActive && "bg-surface")}
+            data-testid={`publishing-mode-${option.value}`}
           >
-            <button
-              type="button"
-              role="radio"
-              aria-checked={isActive}
-              disabled={disabled}
-              onClick={() => {
-                if (!isActive && !disabled) onChange(option.value);
-              }}
-              className={cn(
-                "block w-full px-4 py-3 font-mono text-[11px] tracking-[0.25em] uppercase transition-opacity",
-                isActive
-                  ? "text-[var(--bg)]"
-                  : "text-muted hover:text-fg",
-                disabled && "cursor-not-allowed opacity-50",
-              )}
-              data-testid={`publishing-mode-${option.value}`}
-            >
-              {option.label}
-            </button>
-          </ChamferedPanel>
+            {option.label}
+          </Button>
         );
       })}
     </div>

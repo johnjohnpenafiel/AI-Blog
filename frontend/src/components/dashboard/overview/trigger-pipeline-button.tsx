@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 
-import { ChamferedPanel } from "@/components/chamfered-panel";
+import { Button } from "@/components/button";
+import { usePipelineStatus } from "@/components/dashboard/pipeline-status-context";
+import {
+  runResultToast,
+  useToast,
+} from "@/components/dashboard/toast-context";
 import {
   PipelineConflictError,
   triggerPipelineRun,
@@ -21,14 +26,18 @@ export function TriggerPipelineButton({
 }: TriggerPipelineButtonProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { markStarted, markFinished } = usePipelineStatus();
+  const toast = useToast();
 
   async function handleClick() {
     setPending(true);
     setError(null);
+    markStarted();
     onStarted?.();
     try {
       const result = await triggerPipelineRun();
       onCompleted?.(result);
+      toast(runResultToast(result));
     } catch (e) {
       if (e instanceof PipelineConflictError) {
         setError("Pipeline already running");
@@ -37,32 +46,24 @@ export function TriggerPipelineButton({
       }
     } finally {
       setPending(false);
+      markFinished();
     }
   }
 
   return (
     <div className="flex flex-col gap-2">
-      <ChamferedPanel
-        tier="component"
-        size="button"
-        cut="dual"
-        background={pending ? "var(--accent-dim)" : "var(--accent)"}
-        perimeterStroke="var(--accent)"
-        className="self-start"
+      <Button
+        size="lg"
+        disabled={pending}
+        onClick={handleClick}
+        className={cn(
+          "self-start",
+          pending && "cursor-wait bg-[var(--accent-dim)] disabled:opacity-90",
+        )}
+        data-testid="overview-trigger-pipeline"
       >
-        <button
-          type="button"
-          disabled={pending}
-          onClick={handleClick}
-          className={cn(
-            "block px-5 py-3 font-mono text-[11px] tracking-[0.25em] text-[var(--bg)] uppercase transition-opacity",
-            pending && "cursor-wait opacity-80",
-          )}
-          data-testid="overview-trigger-pipeline"
-        >
-          {pending ? "Running…" : "Trigger Pipeline"}
-        </button>
-      </ChamferedPanel>
+        {pending ? "Running…" : "Trigger Pipeline"}
+      </Button>
       {error && (
         <p
           role="alert"

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { useQueueCount } from "@/components/dashboard/queue-count-context";
+import { SectionHeader } from "@/components/dashboard/section-header";
 import { listPosts, type PostListItem } from "@/lib/api";
 
 import { ScheduledCard } from "./scheduled-card";
@@ -57,6 +58,8 @@ export function ScheduledClient() {
 
   return (
     <div className="flex flex-col gap-4">
+      <SectionHeader index="01" label="Scheduled" />
+
       {loadState === "loading" && (
         <p className="font-mono text-xs tracking-[0.2em] text-muted uppercase">
           Loading scheduled…

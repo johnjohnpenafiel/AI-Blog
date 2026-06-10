@@ -66,12 +66,16 @@ afterEach(() => {
 });
 
 describe("PublishedRow", () => {
-  it("renders title, summary, tags, and PUBLISHED marker", () => {
+  it("renders title, summary, and minimal index (no tags or status)", () => {
     renderRow();
     expect(screen.getByText(POST.title)).toBeInTheDocument();
     expect(screen.getByText(POST.summary)).toBeInTheDocument();
-    expect(screen.getByText("Voice AI")).toBeInTheDocument();
-    expect(screen.getByText(/Published/i)).toBeInTheDocument();
+    // Minimal index (section · format); tags are intentionally not shown.
+    expect(screen.getByText("Customer Experience")).toBeInTheDocument();
+    expect(screen.getByText("Deep Dive")).toBeInTheDocument();
+    expect(screen.queryByText("Voice AI")).not.toBeInTheDocument();
+    // Status badge removed — implied by the Published tab.
+    expect(screen.queryByText(/Published/i)).not.toBeInTheDocument();
   });
 
   it("links View post to /blog/{slug} opening in a new tab", () => {

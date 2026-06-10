@@ -12,16 +12,21 @@
   --border: #222222;
   --border-dim: #1a1a1a;
 
-  /* Text */
-  --text-primary: #f0f0f0;
-  --text-secondary: #555555;
-  --text-dim: #333333;
+  /* Text — mirrors the public surface's text ramp (--tg-ink / --tg-mute /
+     --tg-faint) so both surfaces share the same legible grays. The old ramp
+     (#f0f0f0 / #555 / #333) bottomed out too dark — low-emphasis labels blended
+     into the chassis. These read clearly on the dark dashboard (more contrast
+     than on the public gray, since the chassis is darker). */
+  --text-primary: #f9f9f9; /* public --tg-ink */
+  --text-secondary: #a7a7a7; /* public --tg-mute */
+  --text-dim: #646464; /* public --tg-faint */
 
-  /* Accent — orange #ff6a00 is the only accent in the system */
-  --accent: #ff6a00;
-  --accent-dim: #cc5500;
-  --accent-glow: rgb(255 106 0 / 0.12);
-  --accent-structural: rgb(255 106 0 / 0.6);
+  /* Accent — burnt orange, the only accent. Matches the public --tg-orange so
+     the brand reads identically across both surfaces. */
+  --accent: #e85002; /* public --tg-orange */
+  --accent-dim: #c24302;
+  --accent-glow: rgb(232 80 2 / 0.12);
+  --accent-structural: rgb(232 80 2 / 0.6);
 
   /* Grid overlay — near-blend gray, 48px cells, applied to <body> below */
   --grid: #141414;
@@ -53,10 +58,6 @@
  *   --success            → text-success / bg-success
  *   --warning            → text-warning / bg-warning
  *   --destructive        → text-destructive / bg-destructive
- *
- * shadcn/ui alias names (components reference these internally — keep mapped to project tokens):
- *   --color-background, --color-foreground, --color-primary, --color-secondary,
- *   --color-muted-foreground, --color-input, --color-ring, --color-destructive.
  */
 @theme inline {
   --color-bg: var(--bg);
@@ -76,40 +77,43 @@
   --color-warning: var(--warning);
   --color-destructive: var(--destructive);
 
-  /* shadcn aliases */
-  --color-background: var(--bg);
-  --color-foreground: var(--text-primary);
-  --color-primary: var(--accent);
-  --color-primary-foreground: #0a0a0a;
-  --color-secondary: var(--surface);
-  --color-secondary-foreground: var(--text-primary);
-  --color-muted-foreground: var(--text-secondary);
-  --color-input: var(--border);
-  --color-ring: var(--accent);
-  --color-destructive-foreground: #ffffff;
+  /* The admin/dashboard surface speaks IBM Plex Mono across the board — sans,
+     mono, and display all resolve to it (a "command-console" voice). Post
+     content (card titles/summaries + the review preview) opts out via
+     font-editorial below. The public surface is insulated: it lives inside
+     .tg-surface and uses its own --tg-* tokens, so it never reads these. */
+  --font-sans: var(--font-ibm-plex-mono);
+  --font-mono: var(--font-ibm-plex-mono);
+  --font-display: var(--font-ibm-plex-mono);
 
-  --font-sans: var(--font-inter);
-  --font-mono: var(--font-jetbrains-mono);
-  --font-display: var(--font-fraunces);
+  /* Editorial voice — the public site's display/body grotesque (Archivo).
+     Used on the dashboard ONLY for post content (the work that "belongs" to
+     the public site), so a post reads the same in the queue as it will live. */
+  --font-editorial: var(--font-archivo);
 }
 
-/* Running pipeline status dot — slow, calm "breathing" pulse.
-   Combines a glow expansion with a subtle opacity dip so the dot itself
-   pulses softly without flicker. */
-@keyframes pulse-glow {
-  0%, 40% {
-    background-color: #3d2a15;
-    box-shadow: none;
-  }
-  50%, 90% {
-    background-color: #ff6a00;
-    box-shadow:
-      0 0 10px rgb(255 106 0 / 0.9),
-      0 0 20px rgb(255 106 0 / 0.5);
-  }
+/* Pipeline status dot — calm "breathing" glow. Color-agnostic: the dot sets
+   --status-glow to its state color (amber while preparing, green while running)
+   and this animates only the glow so the dot stays solid. */
+@keyframes status-pulse {
+  0%,
   100% {
-    background-color: #3d2a15;
-    box-shadow: none;
+    box-shadow: 0 0 3px 0 var(--status-glow, transparent);
+  }
+  50% {
+    box-shadow: 0 0 10px 2px var(--status-glow, transparent);
+  }
+}
+
+/* Toast entrance — slide up + fade in. */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -174,11 +178,11 @@ body {
 @keyframes hero-title-glow-pulse {
   0%,
   100% {
-    filter: drop-shadow(0 0 6px rgba(255, 106, 0, 0.95))
-      drop-shadow(0 0 18px rgba(255, 106, 0, 0.55));
+    filter: drop-shadow(0 0 6px rgba(232, 80, 2, 0.95))
+      drop-shadow(0 0 18px rgba(232, 80, 2, 0.55));
   }
   50% {
-    filter: drop-shadow(0 0 10px rgba(255, 106, 0, 1))
-      drop-shadow(0 0 28px rgba(255, 106, 0, 0.8));
+    filter: drop-shadow(0 0 10px rgba(232, 80, 2, 1))
+      drop-shadow(0 0 28px rgba(232, 80, 2, 0.8));
   }
 }

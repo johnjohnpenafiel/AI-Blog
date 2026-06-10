@@ -1,13 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 
+import { PipelineStatusProvider } from "@/components/dashboard/pipeline-status-context";
 import { QueueCountProvider } from "@/components/dashboard/queue-count-context";
 import { Sidebar } from "@/components/dashboard/sidebar";
 
 function renderSidebar() {
   return render(
     <QueueCountProvider>
-      <Sidebar />
+      <PipelineStatusProvider>
+        <Sidebar />
+      </PipelineStatusProvider>
     </QueueCountProvider>,
   );
 }

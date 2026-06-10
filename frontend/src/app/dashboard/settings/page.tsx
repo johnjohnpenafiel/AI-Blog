@@ -3,7 +3,7 @@ import { SettingsClient } from "@/components/dashboard/settings/settings-client"
 
 export default function SettingsPage() {
   return (
-    <DashboardPageShell section="// 05 — Settings" title="Settings">
+    <DashboardPageShell title="Settings">
       <SettingsClient />
     </DashboardPageShell>
   );

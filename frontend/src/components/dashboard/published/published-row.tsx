@@ -1,9 +1,8 @@
 "use client";
 
+import { Button, buttonClasses } from "@/components/button";
 import { ChamferedPanel } from "@/components/chamfered-panel";
 import { EvalBadge } from "@/components/eval-badge";
-import { Tag } from "@/components/tag";
-import { TaxonomyMeta } from "@/components/taxonomy-meta";
 import type { PostListItem } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 
@@ -23,69 +22,75 @@ export function PublishedRow({
   onUnfeature,
   busy,
 }: PublishedRowProps) {
+  // Minimal index — topic + kind of post. Story-type and tags are intentionally
+  // omitted from the glance; the full record is one click into the post.
+  const taxonomy = [post.section, post.format].filter(Boolean);
+
   return (
     <ChamferedPanel tier="component" size="card" className="w-full">
-      <div className="px-5 py-5" data-testid="published-row">
-        <div className="flex items-center justify-end gap-3">
-          <EvalBadge post={post} />
-          <span className="flex items-center gap-2 font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
-            <span
-              aria-hidden="true"
-              className="inline-block size-[7px] bg-[var(--success)]"
-            />
-            Published
-            {post.published_at && <span>· {formatDate(post.published_at)}</span>}
-          </span>
+      <div data-testid="published-row">
+        <div className="px-5 pt-4 pb-3">
+          {/* Index — topic + kind of post. (Status omitted: this is the Published
+              tab, so "published" is implied.) */}
+          {taxonomy.length > 0 && (
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10px] tracking-[0.2em] text-dim uppercase">
+              {taxonomy.map((part, i) => (
+                <span key={part} className="flex items-center gap-2">
+                  {i > 0 && <span aria-hidden>·</span>}
+                  <span>{part}</span>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <h3 className="mt-3 font-editorial text-[19px] leading-tight font-bold tracking-[0.01em] text-fg">
+            {post.title}
+          </h3>
+
+          <p className="mt-2 line-clamp-2 font-editorial text-sm leading-relaxed text-muted">
+            {post.summary}
+          </p>
         </div>
 
-        <h3 className="mt-3 font-display text-[20px] font-bold tracking-[0.02em] text-fg">
-          {post.title}
-        </h3>
-
-        <TaxonomyMeta post={post} className="mt-2" />
-
-        <p className="mt-2 text-sm leading-relaxed text-muted">
-          {post.summary}
-        </p>
-
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2">
-            {post.tags.map((tag) => (
-              <Tag key={tag} label={tag} />
-            ))}
+        {/* Footer band — lighter surface (--surface-raised) + hairline divider
+            to set the date · eval / action strip apart from the content. */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-dim bg-surface-raised px-5 py-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[10px] tracking-[0.2em] text-muted uppercase">
+            {post.published_at && <span>{formatDate(post.published_at)}</span>}
+            <EvalBadge post={post} />
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+
+          <div className="flex shrink-0 items-center gap-2">
             {post.is_featured ? (
-              <button
-                type="button"
+              <Button
+                variant="outline"
                 onClick={() => onUnfeature(post)}
                 disabled={busy}
                 aria-pressed="true"
-                className="border border-accent bg-[var(--accent-glow)] px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-accent uppercase transition-colors hover:bg-transparent disabled:opacity-50"
+                className="bg-[var(--accent-glow)] hover:bg-transparent"
                 data-testid="published-feature-toggle"
               >
                 ★ Featured
-              </button>
+              </Button>
             ) : (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
                 onClick={() => onFeature(post)}
                 disabled={busy}
                 aria-pressed="false"
-                className="border border-border px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-muted uppercase transition-colors hover:text-fg disabled:opacity-50"
                 data-testid="published-feature-toggle"
               >
                 ★ Feature
-              </button>
+              </Button>
             )}
             <a
               href={`/blog/${post.slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="border border-accent px-4 py-2 font-mono text-[11px] tracking-[0.25em] text-accent uppercase transition-colors hover:bg-[var(--accent-glow)]"
+              className={buttonClasses("outline", "md")}
               data-testid="published-view-link"
             >
-              View post →
+              View →
             </a>
           </div>
         </div>
