@@ -129,7 +129,11 @@ def start_scheduler() -> None:
     )
     scheduler.add_job(
         _publish_scheduled_job,
-        IntervalTrigger(minutes=1),
+        # 30-min interval (not 1-min) so Neon's serverless Postgres can
+        # autosuspend between ticks. A 1-min poll kept the DB awake 24/7,
+        # burning the free-tier compute allowance in ~16 days. Scheduled
+        # posts going live within 30 min of their time is fine at our cadence.
+        IntervalTrigger(minutes=30),
         id="scheduled-publisher",
         replace_existing=True,
         coalesce=True,
