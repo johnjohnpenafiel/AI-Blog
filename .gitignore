@@ -81,3 +81,6 @@ notes/
 # Ignore the heavy bundle subdir (videos/screenshots) but keep the dir itself
 # trackable so the redesign REVIEW log travels with the branch.
 design-handoff/the-garage-ai/
+
+# Local dev tooling — throwaway scratch (e.g. material-tuner bake-off app), not part of the app
+tools/
