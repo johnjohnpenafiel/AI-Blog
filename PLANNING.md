@@ -121,7 +121,7 @@ Production deployment splits across three vendors, each picked for what it does 
 Notes:
 - Render Starter is required (not Free) because APScheduler runs in-process and must stay resident to fire the cron — Render's free tier spins down after 15 min of idle.
 - Pin Render and Neon to the same US region to keep backend↔DB latency in the single-digit-ms range.
-- Neon's free tier autosuspends on inactivity; first query after idle has a small wake-up cost (~500 ms–2 s). Invisible at this traffic level.
+- Neon's free tier autosuspends on inactivity; first query after idle has a small wake-up cost (~500 ms–2 s). Invisible at this traffic level. **A suspend also kills server-side connections**, so the SQLAlchemy engine runs with `pool_pre_ping=True` (`backend/database.py`) — without it, the first DB call after a wake-up fails on a dead pooled connection (this silently killed every scheduled run Jun 18–Jul 2, 2026; see the 2026-07-03 decision-log entry).
 - The choice of vendor for each layer is independent of the architecture — swapping any one (e.g. Render → Fly.io for backend, Neon → Supabase for DB) is a deployment-config change, not a code change.
 
 ## Data model

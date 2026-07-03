@@ -95,6 +95,7 @@ A "feature" is net-new user-facing functionality. Bugs, hotfixes, dependency upg
 
 - The single admin user is created via `backend/scripts/seed_admin.py`, not through any UI. There is no registration flow. There is no password-reset script or UI yet — `seed_admin.py` is find-or-create and won't update an existing user's password (delete the `users` row and re-seed with a new `ADMIN_PASSWORD`, or update the row directly).
 - APScheduler must run inside the FastAPI process — if you split the backend across workers, only one worker should own the scheduler, or jobs will fire multiple times.
+- The DB engine must keep `pool_pre_ping=True` (`backend/database.py`) — Neon autosuspends on idle and kills connections; without the ping, the first DB call after a wake-up (usually the 8 AM cron) fails silently. This caused the Jun 18–Jul 2, 2026 outage (2026-07-03 decision-log entry).
 - The pipeline (`POST /pipeline/run`) requires both `ANTHROPIC_API_KEY` and `PERPLEXITY_API_KEY` set in `.env`. A run with fewer than 3 qualifying articles from Perplexity skips the run entirely (logged, not retried).
 - `publishing_mode` is snapshotted onto the post at generation time — changing the global setting later does NOT retroactively change posts already in the queue.
 - NextAuth session expiry is 2 hours; do not extend without confirming with the user.
