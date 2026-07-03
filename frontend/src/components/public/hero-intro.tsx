@@ -60,13 +60,12 @@ export function HeroIntro({
         <source src="/hero.mp4" type="video/mp4" />
       </video>
       <div
+        className="tg-hero-shade"
         style={{
           position: "absolute",
           inset: 0,
           zIndex: 0,
           pointerEvents: "none",
-          background:
-            "linear-gradient(90deg, rgba(10,10,10,0.62) 0%, rgba(10,10,10,0.24) 48%, rgba(10,10,10,0.0) 100%)",
         }}
       />
 
@@ -162,7 +161,15 @@ export function HeroIntro({
             </Link>
           </div>
           {/* stats */}
-          <div className="tg-fade-up" style={{ display: "flex", gap: 48, animationDelay: "0.22s" }}>
+          <div
+            className="tg-fade-up"
+            style={{
+              display: "flex",
+              gap: "28px 48px",
+              flexWrap: "wrap",
+              animationDelay: "0.22s",
+            }}
+          >
             {stats.map(([num, label]) => (
               <div key={label}>
                 <div
