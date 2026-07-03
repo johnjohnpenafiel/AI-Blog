@@ -44,6 +44,7 @@ function band(
 ) {
   return (
     <div
+      key={marker}
       style={{
         display: "grid",
         gridTemplateColumns: "var(--tg-gutter) 1fr",

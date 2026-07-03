@@ -46,7 +46,7 @@ export function DispatchHeader({ post }: { post: PublicPostDetail }) {
           background: "var(--tg-band)",
         }}
       >
-        <div style={{ paddingLeft: 24, padding: "16px 0 16px 24px" }}>
+        <div style={{ padding: "16px 0 16px 24px" }}>
           <span
             style={{
               fontFamily: "var(--tg-font-mono)",
@@ -60,8 +60,7 @@ export function DispatchHeader({ post }: { post: PublicPostDetail }) {
         </div>
         <div
           style={{
-            paddingRight: "var(--tg-content-pad)",
-            padding: "16px 0",
+            padding: "16px var(--tg-content-pad) 16px 0",
             display: "flex",
             alignItems: "center",
             gap: 10,
@@ -130,7 +129,7 @@ export function DispatchHeader({ post }: { post: PublicPostDetail }) {
             (*)
           </span>
         </div>
-        <div style={{ paddingRight: "var(--tg-content-pad)", padding: "44px 0 48px" }}>
+        <div style={{ padding: "44px var(--tg-content-pad) 48px 0" }}>
           <div
             style={{
               display: "flex",
@@ -226,8 +225,7 @@ export function DispatchHeader({ post }: { post: PublicPostDetail }) {
         </div>
         <div
           style={{
-            paddingRight: "var(--tg-content-pad)",
-            padding: "26px 0 28px",
+            padding: "26px var(--tg-content-pad) 28px 0",
             display: "flex",
             gap: 48,
             flexWrap: "wrap",

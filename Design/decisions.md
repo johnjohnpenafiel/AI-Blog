@@ -6,6 +6,26 @@
 
 New entries at the top.
 
+### 2026-07-03 — Public stage: locked viewport on desktop, natural document scroll on mobile
+
+**Context**: The public surface shipped as the handoff's locked-viewport stage — a `100dvh` frame with the masthead pinned and content scrolling *inside* the frame. That's the design's signature on desktop, but on mobile it costs real UX: the browser URL bar can't auto-hide (the document never scrolls), scroll momentum feels stiff, and anchors / find-in-page / tap-status-bar-to-scroll-to-top all assume document scroll. These feed second-order into SEO ranking. Deferred to Phase 4 on Trello; built now on `feature/mobile-optimization`.
+
+**Decision**: A media-query split, implemented as `.tg-stage` / `.tg-stage-frame` / `.tg-stage-scroll` classes in `public-theme.css` (the layout's inline stage styles moved into the stylesheet):
+- **> 768px** — unchanged: `100dvh` stage, `overflow: hidden`, masthead pinned, `.tg-stage-scroll` is the scroller.
+- **≤ 768px** — the stage becomes `min-height: 100dvh` with no overflow clipping; the document scrolls natively and the masthead scrolls away with it. The fixed bottom nav (Home/About) remains the persistent navigation.
+
+**Companion mobile fixes in the same change**:
+- `viewport` export (`viewportFit: "cover"`) in the root layout + `env(safe-area-inset-bottom)` padding on the bottom nav and the scroll region, so the nav clears the iPhone home indicator.
+- The hero's text-protection gradient became `.tg-hero-shade`: left-to-right on desktop (text column left, video visible right), flipped to a darker top-to-bottom wash at ≤860px where the hero stacks into one full-width column.
+- Tap targets on coarse pointers (`@media (pointer: coarse)`): share chips 34→42px, filter chips taller, bottom-nav links get padding-extended hit areas.
+- Bug fix: three style objects in `dispatch-header.tsx` set `paddingRight` *before* a `padding` shorthand, which silently zeroed the right padding — post breadcrumb/title/meta ran flush into the frame edge on mobile.
+
+**Tradeoffs**:
+- On mobile the masthead (wordmark + ticker) scrolls away rather than staying pinned — chosen over a sticky masthead because the fit-to-width wordmark + ticker cost too much vertical space on a phone; the bottom nav already provides persistent navigation.
+- Two scroll models to keep in mind when adding public UI: anything that assumes "the scroller is `.tg-stage-scroll`" (e.g. scroll-position JS, scroll-linked effects) must handle the document being the scroller on mobile. Nothing in the current codebase does.
+
+**References**: `frontend/src/app/(public)/layout.tsx`, `frontend/src/app/(public)/public-theme.css` (stage split, hero shade, touch ergonomics), `frontend/src/app/layout.tsx` (viewport export), `frontend/src/components/public/bottom-nav.tsx`, `frontend/src/components/public/hero-intro.tsx`, `frontend/src/components/public/dispatch-header.tsx`.
+
 ### 2026-06-09 — Dashboard color ramp: adopt the public surface's exact text + accent values
 
 **Context**: The dashboard's low-emphasis text bottomed out too dark — `--text-secondary #555555` and especially `--text-dim #333333` were nearly invisible against the dark chassis, so keys/labels (e.g. the Status readout's `POSTS PUBLISHED`, `MODE`, …) blended into the background. The public surface already ships a well-tuned neutral ramp (`--tg-ink` / `--tg-mute` / `--tg-faint`) and a brand orange (`--tg-orange`); running two slightly different palettes across the two surfaces was also a needless inconsistency.
