@@ -106,10 +106,18 @@
     min-height: 100dvh;
   }
   /* Full-bleed on mobile: the stage frame's gray outline + inset are a
-     desktop stage piece — on a phone they just cost content width. */
+     desktop stage piece — on a phone they just cost content width. The one
+     exception is the masthead brand block ("THE GARAGE AI"), which keeps a
+     boxed outline: the frame no longer supplies its top/sides, so add them
+     here (its bottom border already exists inline). */
   .tg-stage-frame {
     margin: 0;
     border: none;
+  }
+  .tg-masthead-brand {
+    border-top: 3px solid var(--tg-frame);
+    border-left: 3px solid var(--tg-frame);
+    border-right: 3px solid var(--tg-frame);
   }
   .tg-stage-scroll {
     overflow-x: hidden;
