@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo, DM_Mono, IBM_Plex_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
@@ -35,6 +35,15 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "The Garage AI",
   description: "AI and operational technology in the automotive industry.",
+};
+
+// viewportFit: "cover" lets the page extend under the iPhone home-indicator
+// area, which makes env(safe-area-inset-*) report real values — the public
+// surface's fixed bottom nav pads itself with them.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

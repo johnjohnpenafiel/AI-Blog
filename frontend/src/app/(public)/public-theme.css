@@ -71,6 +71,47 @@
   position: relative;
 }
 
+/* ── Stage scroll model — the desktop/mobile split ────────────────────────────
+   Desktop (>768px): the handoff's locked-viewport stage — 100dvh, masthead
+   pinned, content scrolls INSIDE the frame. The design's signature.
+   Mobile (≤768px): natural document scroll — the browser URL bar can auto-hide,
+   momentum is native, and anchors / find-in-page / "scroll to top" tap all work.
+   Decision + rationale: Trello / PLANNING (deferred-to-Phase-4 mobile note). */
+.tg-stage {
+  position: relative;
+}
+
+@media (min-width: 769px) {
+  .tg-stage {
+    height: 100dvh;
+    overflow: hidden;
+  }
+  .tg-stage-frame {
+    height: calc(100dvh - var(--tg-frame-pad));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .tg-stage-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 76px; /* clearance for the floating bottom nav */
+  }
+}
+
+@media (max-width: 768px) {
+  .tg-stage {
+    min-height: 100dvh;
+  }
+  .tg-stage-scroll {
+    overflow-x: hidden;
+    /* bottom-nav clearance + iPhone home-indicator safe area */
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* keep all frame children above the scanline texture */
 .tg-frame > *:not(.tg-scanline) {
   position: relative;
@@ -502,6 +543,29 @@
   }
 }
 
+/* ── Hero text-protection shade over the video ────────────────────────────────
+   Desktop: left-to-right (identity column sits left, video shows through
+   right). Mobile: the hero stacks into one full-width column, so the shade
+   flips vertical and darkens overall to keep type legible over the video. */
+.tg-hero-shade {
+  background: linear-gradient(
+    90deg,
+    rgba(10, 10, 10, 0.62) 0%,
+    rgba(10, 10, 10, 0.24) 48%,
+    rgba(10, 10, 10, 0) 100%
+  );
+}
+@media (max-width: 860px) {
+  .tg-hero-shade {
+    background: linear-gradient(
+      180deg,
+      rgba(10, 10, 10, 0.6) 0%,
+      rgba(10, 10, 10, 0.48) 55%,
+      rgba(10, 10, 10, 0.66) 100%
+    );
+  }
+}
+
 /* ── Two-column bands collapse on narrow viewports ────────────────────────── */
 @media (max-width: 860px) {
   .tg-hero-grid {
@@ -511,6 +575,20 @@
 @media (max-width: 760px) {
   .tg-featured-grid {
     grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ── Touch ergonomics — comfortable tap targets on coarse pointers ────────── */
+@media (pointer: coarse) {
+  .tg-surface .tg-share-chip {
+    width: 42px;
+    height: 42px;
+  }
+  .tg-surface .tg-chip {
+    padding: 12px 12px 12px 14px;
+  }
+  .tg-surface .tg-nav-link {
+    padding: 8px 2px; /* grows the hit area; visual size unchanged */
   }
 }
 
