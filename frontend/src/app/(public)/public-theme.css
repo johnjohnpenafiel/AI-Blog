@@ -105,6 +105,12 @@
   .tg-stage {
     min-height: 100dvh;
   }
+  /* Full-bleed on mobile: the stage frame's gray outline + inset are a
+     desktop stage piece — on a phone they just cost content width. */
+  .tg-stage-frame {
+    margin: 0;
+    border: none;
+  }
   .tg-stage-scroll {
     overflow-x: hidden;
     /* bottom-nav clearance + iPhone home-indicator safe area */

@@ -12,7 +12,7 @@ New entries at the top.
 
 **Decision**: A media-query split, implemented as `.tg-stage` / `.tg-stage-frame` / `.tg-stage-scroll` classes in `public-theme.css` (the layout's inline stage styles moved into the stylesheet):
 - **> 768px** — unchanged: `100dvh` stage, `overflow: hidden`, masthead pinned, `.tg-stage-scroll` is the scroller.
-- **≤ 768px** — the stage becomes `min-height: 100dvh` with no overflow clipping; the document scrolls natively and the masthead scrolls away with it. The fixed bottom nav (Home/About) remains the persistent navigation.
+- **≤ 768px** — the stage becomes `min-height: 100dvh` with no overflow clipping; the document scrolls natively and the masthead scrolls away with it. The fixed bottom nav (Home/About) remains the persistent navigation. The stage frame also goes **full-bleed**: the 3px gray outline and the `--tg-frame-pad` inset are removed (`margin: 0; border: none`) — on a phone the frame is a stage piece that only costs content width; internal band separators (masthead rule, ticker border) stay.
 
 **Companion mobile fixes in the same change**:
 - `viewport` export (`viewportFit: "cover"`) in the root layout + `env(safe-area-inset-bottom)` padding on the bottom nav and the scroll region, so the nav clears the iPhone home indicator.
