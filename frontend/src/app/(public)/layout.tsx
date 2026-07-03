@@ -40,13 +40,7 @@ export default async function PublicLayout({ children }: { children: ReactNode }
 
         {/* Masthead: wordmark + ticker (pinned on desktop, in-flow on mobile) */}
         <header style={{ background: "var(--tg-bg)", flexShrink: 0 }}>
-          <div
-            className="tg-masthead-brand"
-            style={{
-              padding: "20px 24px 24px",
-              borderBottom: "3px solid var(--tg-frame)",
-            }}
-          >
+          <div className="tg-masthead-brand" style={{ padding: "20px 24px 24px" }}>
             <Wordmark />
           </div>
           <Ticker items={tickerItems} />

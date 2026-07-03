@@ -106,18 +106,17 @@
     min-height: 100dvh;
   }
   /* Full-bleed on mobile: the stage frame's gray outline + inset are a
-     desktop stage piece — on a phone they just cost content width. The one
-     exception is the masthead brand block ("THE GARAGE AI"), which keeps a
-     boxed outline: the frame no longer supplies its top/sides, so add them
-     here (its bottom border already exists inline). */
+     desktop stage piece — on a phone they just cost content width. */
   .tg-stage-frame {
     margin: 0;
     border: none;
   }
+  /* The frame no longer supplies the masthead's top edge — add a top border so
+     the wordmark keeps a framed top. Its bottom rule is dropped: the ticker
+     band below already carries its own border, so the extra line reads heavy. */
   .tg-masthead-brand {
     border-top: 3px solid var(--tg-frame);
-    border-left: 3px solid var(--tg-frame);
-    border-right: 3px solid var(--tg-frame);
+    border-bottom: none;
   }
   .tg-stage-scroll {
     overflow-x: hidden;
@@ -130,6 +129,12 @@
 .tg-frame > *:not(.tg-scanline) {
   position: relative;
   z-index: 1;
+}
+
+/* Masthead brand block ("THE GARAGE AI"). Its bottom rule separates the
+   wordmark from the ticker band (desktop; the mobile query below overrides). */
+.tg-masthead-brand {
+  border-bottom: 3px solid var(--tg-frame);
 }
 
 .tg-scanline {
