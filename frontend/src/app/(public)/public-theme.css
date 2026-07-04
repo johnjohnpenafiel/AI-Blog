@@ -123,10 +123,17 @@
      the wordmark keeps a framed top. Its bottom rule is dropped: the ticker
      band below already carries its own border, so the extra line reads heavy.
      No side borders here — .tg-stage-frame now supplies them for the whole
-     page, so a duplicate on just this block would double the line. */
+     page, so a duplicate on just this block would double the line. Weight
+     matches the stage frame's 2px side border (the desktop 3px is a stage
+     piece, not a mobile one). */
   .tg-masthead-brand {
-    border-top: 3px solid var(--tg-frame);
+    border-top: 2px solid var(--tg-frame);
     border-bottom: none;
+  }
+  /* Ticker band's own border-bottom is a global (desktop+mobile) rule at 3px
+     — thin it to match the masthead top + stage side borders on mobile only. */
+  .tg-ticker {
+    border-bottom: 2px solid var(--tg-frame);
   }
   .tg-stage-scroll {
     overflow-x: hidden;

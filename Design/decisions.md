@@ -6,6 +6,14 @@
 
 New entries at the top.
 
+### 2026-07-03 — Mobile: masthead top border + ticker border matched to the page side border weight
+
+**Context**: The page side border was thickened 1px → 2px (prior entry, further below). That left the masthead's top border and the ticker band's bottom border — both still at the desktop-inherited 3px — visibly heavier than the 2px side border they meet at the same corners, so the "frame" read as two different weights.
+
+**Decision**: On mobile only (`≤768px`), thinned both to 2px to match: `.tg-masthead-brand` top border 3px → 2px, and a new mobile-only override on `.tg-ticker`'s `border-bottom` (3px → 2px; its base rule is shared with desktop, so the override is scoped to the same media query as the other mobile border rules rather than changed globally). Desktop keeps 3px on both — untouched.
+
+**References**: `frontend/src/app/(public)/public-theme.css` (`.tg-masthead-brand`, `.tg-ticker` mobile overrides).
+
 ### 2026-07-03 — Mobile: thin side border runs the full page, not just the masthead
 
 **Context**: The prior entry (below) added thin 1px side borders to just the mobile masthead's wordmark block, on top of the desktop stage frame's 3px left/right/top outline being dropped entirely on mobile for full-bleed (the "Public stage" entry, further below). Operator feedback: bring the outline back down the *whole page*, like the original desktop frame — just thin instead of 3px, so it doesn't cost the content width that full-bleed was solving for.
