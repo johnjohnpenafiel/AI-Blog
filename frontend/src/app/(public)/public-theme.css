@@ -107,7 +107,7 @@
   }
   /* Full-bleed on mobile: the desktop stage frame's 3px outline + inset cost
      real content width on a phone, so the heavy version is dropped. A thin
-     1px version of the same outline runs the full page instead — down the
+     2px version of the same outline runs the full page instead — down the
      left/right edges of the stage (spans the whole document, since mobile
      scrolls natively and .tg-stage-frame has no fixed height here) — so the
      page still reads as framed without the width tax. No bottom border: the
@@ -116,8 +116,8 @@
   .tg-stage-frame {
     margin: 0;
     border: none;
-    border-left: 1px solid var(--tg-frame);
-    border-right: 1px solid var(--tg-frame);
+    border-left: 2px solid var(--tg-frame);
+    border-right: 2px solid var(--tg-frame);
   }
   /* The frame's own top edge was dropped for full-bleed — add a top border so
      the wordmark keeps a framed top. Its bottom rule is dropped: the ticker
