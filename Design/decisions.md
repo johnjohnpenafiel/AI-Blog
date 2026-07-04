@@ -6,11 +6,19 @@
 
 New entries at the top.
 
+### 2026-07-03 — Mobile: thin side border runs the full page, not just the masthead
+
+**Context**: The prior entry (below) added thin 1px side borders to just the mobile masthead's wordmark block, on top of the desktop stage frame's 3px left/right/top outline being dropped entirely on mobile for full-bleed (the "Public stage" entry, further below). Operator feedback: bring the outline back down the *whole page*, like the original desktop frame — just thin instead of 3px, so it doesn't cost the content width that full-bleed was solving for.
+
+**Decision**: Moved the side border from `.tg-masthead-brand` up to `.tg-stage-frame` itself (still inside the `≤768px` query, alongside the existing `margin: 0; border: none`): `border-left`/`border-right: 1px solid var(--tg-frame)`. Since `.tg-stage-frame` has no explicit height on mobile (natural document scroll — see the "Public stage" entry) and wraps the masthead, every band, and the footer, the border now spans the entire document height as one continuous line, not just the masthead block. The masthead's own side-border rule was removed (the parent now supplies it at the same pixel edge; keeping both would have doubled the line). No bottom border — matches the desktop frame's own omission; the floating bottom nav is the visual close, not a border.
+
+**References**: `frontend/src/app/(public)/public-theme.css` (`.tg-stage-frame` / `.tg-masthead-brand` mobile overrides).
+
 ### 2026-07-03 — Mobile masthead: thin side borders on the wordmark block
 
 **Context**: The mobile masthead (`.tg-masthead-brand`, ≤720px) carries a 3px top border only (see the border-treatment entry below). Operator feedback: the wordmark block reads as unboxed on the sides — add side borders, but visibly thinner than the 3px top rule so they read as a frame detail, not a repeat of the heavy top edge.
 
-**Decision**: `border-left`/`border-right: 1px solid var(--tg-frame)` added to the mobile `.tg-masthead-brand` rule, alongside the existing 3px top border and `border-bottom: none`. Desktop is untouched (the rule lives inside the `≤720px` media query only).
+**Decision**: `border-left`/`border-right: 1px solid var(--tg-frame)` added to the mobile `.tg-masthead-brand` rule, alongside the existing 3px top border and `border-bottom: none`. Desktop is untouched (the rule lives inside the `≤720px` media query only). **Superseded by the entry above** — the side border now lives on `.tg-stage-frame` and runs the whole page.
 
 **References**: `frontend/src/app/(public)/public-theme.css` (`.tg-masthead-brand` mobile override).
 

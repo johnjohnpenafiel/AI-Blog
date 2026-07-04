@@ -105,20 +105,28 @@
   .tg-stage {
     min-height: 100dvh;
   }
-  /* Full-bleed on mobile: the stage frame's gray outline + inset are a
-     desktop stage piece — on a phone they just cost content width. */
+  /* Full-bleed on mobile: the desktop stage frame's 3px outline + inset cost
+     real content width on a phone, so the heavy version is dropped. A thin
+     1px version of the same outline runs the full page instead — down the
+     left/right edges of the stage (spans the whole document, since mobile
+     scrolls natively and .tg-stage-frame has no fixed height here) — so the
+     page still reads as framed without the width tax. No bottom border: the
+     floating bottom nav sits below the last band, same as the desktop frame
+     omits one (the nav is the visual close). */
   .tg-stage-frame {
     margin: 0;
     border: none;
+    border-left: 1px solid var(--tg-frame);
+    border-right: 1px solid var(--tg-frame);
   }
-  /* The frame no longer supplies the masthead's top edge — add a top border so
+  /* The frame's own top edge was dropped for full-bleed — add a top border so
      the wordmark keeps a framed top. Its bottom rule is dropped: the ticker
-     band below already carries its own border, so the extra line reads heavy. */
+     band below already carries its own border, so the extra line reads heavy.
+     No side borders here — .tg-stage-frame now supplies them for the whole
+     page, so a duplicate on just this block would double the line. */
   .tg-masthead-brand {
     border-top: 3px solid var(--tg-frame);
     border-bottom: none;
-    border-left: 1px solid var(--tg-frame);
-    border-right: 1px solid var(--tg-frame);
   }
   .tg-stage-scroll {
     overflow-x: hidden;
