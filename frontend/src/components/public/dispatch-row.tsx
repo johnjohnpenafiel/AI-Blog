@@ -30,7 +30,7 @@ export function DispatchRow({
         borderBottom: last ? "none" : "1px solid var(--tg-frame-hair)",
       }}
     >
-      <div style={{ paddingLeft: 24 }}>
+      <div className="tg-band-marker" style={{ paddingLeft: 24 }}>
         <span
           className="tg-dispatch-index"
           style={{
@@ -43,7 +43,7 @@ export function DispatchRow({
         </span>
       </div>
 
-      <div style={{ paddingRight: 32, maxWidth: 1020 }}>
+      <div className="tg-band-content" style={{ paddingRight: 32, maxWidth: 1020 }}>
         <div
           style={{
             display: "flex",
@@ -53,6 +53,17 @@ export function DispatchRow({
             flexWrap: "wrap",
           }}
         >
+          {/* on mobile the gutter is collapsed — the index joins the meta line */}
+          <span
+            className="tg-dispatch-index tg-m-only"
+            style={{
+              fontFamily: "var(--tg-font-mono)",
+              fontSize: 11,
+              letterSpacing: "0.1em",
+            }}
+          >
+            ({String(index + 1).padStart(2, "0")})
+          </span>
           <span
             style={{
               fontFamily: "var(--tg-font-mono)",

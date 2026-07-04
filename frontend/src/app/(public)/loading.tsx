@@ -7,13 +7,14 @@
 export default function PublicLoading() {
   return (
     <div
+      className="tg-band"
       style={{
         display: "grid",
         gridTemplateColumns: "var(--tg-gutter) 1fr",
         minHeight: "60vh",
       }}
     >
-      <div style={{ paddingLeft: 24, paddingTop: 44 }}>
+      <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 44 }}>
         <span
           style={{
             fontFamily: "var(--tg-font-mono)",
@@ -25,7 +26,10 @@ export default function PublicLoading() {
           (··)
         </span>
       </div>
-      <div style={{ padding: "44px var(--tg-content-pad) 48px 0" }}>
+      <div
+        className="tg-band-content"
+        style={{ padding: "44px var(--tg-content-pad) 48px 0" }}
+      >
         <span
           className="tg-kicker tg-pulse"
           style={{ display: "inline-block" }}

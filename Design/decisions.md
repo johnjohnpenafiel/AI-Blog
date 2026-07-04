@@ -6,6 +6,65 @@
 
 New entries at the top.
 
+### 2026-07-03 — Mobile: masthead top border + ticker border matched to the page side border weight
+
+**Context**: The page side border was thickened 1px → 2px (prior entry, further below). That left the masthead's top border and the ticker band's bottom border — both still at the desktop-inherited 3px — visibly heavier than the 2px side border they meet at the same corners, so the "frame" read as two different weights.
+
+**Decision**: On mobile only (`≤768px`), thinned both to 2px to match: `.tg-masthead-brand` top border 3px → 2px, and a new mobile-only override on `.tg-ticker`'s `border-bottom` (3px → 2px; its base rule is shared with desktop, so the override is scoped to the same media query as the other mobile border rules rather than changed globally). Desktop keeps 3px on both — untouched.
+
+**References**: `frontend/src/app/(public)/public-theme.css` (`.tg-masthead-brand`, `.tg-ticker` mobile overrides).
+
+### 2026-07-03 — Mobile: thin side border runs the full page, not just the masthead
+
+**Context**: The prior entry (below) added thin 1px side borders to just the mobile masthead's wordmark block, on top of the desktop stage frame's 3px left/right/top outline being dropped entirely on mobile for full-bleed (the "Public stage" entry, further below). Operator feedback: bring the outline back down the *whole page*, like the original desktop frame — just thin instead of 3px, so it doesn't cost the content width that full-bleed was solving for.
+
+**Decision**: Moved the side border from `.tg-masthead-brand` up to `.tg-stage-frame` itself (still inside the `≤768px` query, alongside the existing `margin: 0; border: none`): `border-left`/`border-right: 1px solid var(--tg-frame)`. Since `.tg-stage-frame` has no explicit height on mobile (natural document scroll — see the "Public stage" entry) and wraps the masthead, every band, and the footer, the border now spans the entire document height as one continuous line, not just the masthead block. The masthead's own side-border rule was removed (the parent now supplies it at the same pixel edge; keeping both would have doubled the line). No bottom border — matches the desktop frame's own omission; the floating bottom nav is the visual close, not a border.
+
+**References**: `frontend/src/app/(public)/public-theme.css` (`.tg-stage-frame` / `.tg-masthead-brand` mobile overrides).
+
+### 2026-07-03 — Mobile masthead: thin side borders on the wordmark block
+
+**Context**: The mobile masthead (`.tg-masthead-brand`, ≤720px) carries a 3px top border only (see the border-treatment entry below). Operator feedback: the wordmark block reads as unboxed on the sides — add side borders, but visibly thinner than the 3px top rule so they read as a frame detail, not a repeat of the heavy top edge.
+
+**Decision**: `border-left`/`border-right: 1px solid var(--tg-frame)` added to the mobile `.tg-masthead-brand` rule, alongside the existing 3px top border and `border-bottom: none`. Desktop is untouched (the rule lives inside the `≤720px` media query only). **Superseded by the entry above** — the side border now lives on `.tg-stage-frame` and runs the whole page.
+
+**References**: `frontend/src/app/(public)/public-theme.css` (`.tg-masthead-brand` mobile override).
+
+### 2026-07-03 — Mobile: bands drop the gutter, dense sections get mobile-native layouts
+
+**Context**: After the scroll-model split (entry below), the public surface still rendered the *desktop composition* at phone width: every band kept its decorative marker gutter (64px) + right padding (~25% of a 390px screen), the "How do you want to read?" band stacked its four tall preference cards into a full-viewport column (selecting a mode showed no visible result without scrolling), section filter chips wrapped into a tall block, the hero carried a duplicate CTA card, and the empty IMAGE placeholder slots burned whole screens of nothing.
+
+**Decision**: A ≤720px "mobile band collapse" layer in `public-theme.css`, wired through three reusable classes on every gutter-row grid (`.tg-band` / `.tg-band-marker` / `.tg-band-content`): the marker column disappears and content runs flat 20px side padding. Markers that carry meaning re-enter inline via a `.tg-m-only` utility (the dispatch row's `(01)` index joins its meta line); purely decorative ones ((*), (★), (src), the footer LogoMark — the bottom nav already shows it) just go. On top of that, per-section mobile layouts:
+- **Reading modes** — the 4-card column becomes a compact 2×2 selector (label + cadence; description and tag are desktop detail, hidden), with hairline separators between the cells (1px grid gap over the frame color; cards get opaque backgrounds on mobile so the line doesn't bleed through their overlay tints). The point: the selector and the posts it filters share one screen. The mode-post grid caps at 2 cards on phones (`nth-child(n+3)` hidden).
+- **Section filter chips** — one `nowrap` swipeable row (hidden scrollbar, bleeds to the screen edge so a cut-off chip advertises the scroll) instead of a wrapped block.
+- **Hero** — the "latest dispatch" card is hidden on phones (it duplicated the CTA button above it and the `(01)` index row below); stat values 44→32px.
+- **Empty IMAGE placeholders** — hidden on mobile (post-card headers, the featured band's 16:9 slot, the article's whole FIG.0 band via `.tg-fig0-band`). They're desktop set-dressing until per-post image generation ships real assets — **revisit these rules when it does**.
+- **Article page** — title floor 36→30px (`.tg-post-title`, long headlines were 7+ lines); meta strip gaps tightened.
+
+**Tradeoffs**: The indexed-gutter identity is desktop-only now — accepted; on a phone the gutter is the single most expensive decoration on screen. Mobile hides real content (mode descriptions, 2 of 4 mode posts, the hero card) — deliberate: mobile shows less, better, and the full index is one scroll away. Components keep inline styles for the desktop composition; the mobile layer overrides via classed CSS `!important` rules — the established pattern in this stylesheet.
+
+**References**: `public-theme.css` (mobile band collapse section), `hero-intro.tsx`, `reading-modes.tsx`, `featured-story.tsx`, `dispatch-index.tsx`, `dispatch-row.tsx`, `dispatch-header.tsx`, `sources-list.tsx`, `related-dispatches.tsx`, `public-footer.tsx`, `(public)/page.tsx`, `blog/[slug]/page.tsx`, `about/page.tsx`, `loading.tsx`.
+
+### 2026-07-03 — Public stage: locked viewport on desktop, natural document scroll on mobile
+
+**Context**: The public surface shipped as the handoff's locked-viewport stage — a `100dvh` frame with the masthead pinned and content scrolling *inside* the frame. That's the design's signature on desktop, but on mobile it costs real UX: the browser URL bar can't auto-hide (the document never scrolls), scroll momentum feels stiff, and anchors / find-in-page / tap-status-bar-to-scroll-to-top all assume document scroll. These feed second-order into SEO ranking. Deferred to Phase 4 on Trello; built now on `feature/mobile-optimization`.
+
+**Decision**: A media-query split, implemented as `.tg-stage` / `.tg-stage-frame` / `.tg-stage-scroll` classes in `public-theme.css` (the layout's inline stage styles moved into the stylesheet):
+- **> 768px** — unchanged: `100dvh` stage, `overflow: hidden`, masthead pinned, `.tg-stage-scroll` is the scroller.
+- **≤ 768px** — the stage becomes `min-height: 100dvh` with no overflow clipping; the document scrolls natively and the masthead scrolls away with it. The fixed bottom nav (Home/About) remains the persistent navigation. The stage frame also goes **full-bleed**: the 3px gray outline and the `--tg-frame-pad` inset are removed (`margin: 0; border: none`) — on a phone the frame is a stage piece that only costs content width; internal band separators (masthead rule, ticker border) stay. **One exception:** the masthead brand block ("THE GARAGE AI") keeps a **top** border on mobile (`.tg-masthead-brand`) so the wordmark still reads as framed at the top of the page. Only the top — no sides (full-bleed) and no bottom: the ticker band directly below carries its own border, so a bottom rule on the wordmark read as a heavy double line; the tonal step from the wordmark's `--tg-bg` to the ticker's `--tg-ink-black` already separates them. The bottom rule was moved from an inline style into `.tg-masthead-brand` (base) so the mobile query can drop it; desktop keeps it.
+
+**Companion mobile fixes in the same change**:
+- `viewport` export (`viewportFit: "cover"`) in the root layout + `env(safe-area-inset-bottom)` padding on the bottom nav and the scroll region, so the nav clears the iPhone home indicator.
+- The hero's text-protection gradient became `.tg-hero-shade`: left-to-right on desktop (text column left, video visible right), flipped to a darker top-to-bottom wash at ≤860px where the hero stacks into one full-width column.
+- Tap targets on coarse pointers (`@media (pointer: coarse)`): share chips 34→42px, filter chips taller, bottom-nav links get padding-extended hit areas.
+- Bug fix: three style objects in `dispatch-header.tsx` set `paddingRight` *before* a `padding` shorthand, which silently zeroed the right padding — post breadcrumb/title/meta ran flush into the frame edge on mobile.
+
+**Tradeoffs**:
+- On mobile the masthead (wordmark + ticker) scrolls away rather than staying pinned — chosen over a sticky masthead because the fit-to-width wordmark + ticker cost too much vertical space on a phone; the bottom nav already provides persistent navigation.
+- Two scroll models to keep in mind when adding public UI: anything that assumes "the scroller is `.tg-stage-scroll`" (e.g. scroll-position JS, scroll-linked effects) must handle the document being the scroller on mobile. Nothing in the current codebase does.
+
+**References**: `frontend/src/app/(public)/layout.tsx`, `frontend/src/app/(public)/public-theme.css` (stage split, hero shade, touch ergonomics), `frontend/src/app/layout.tsx` (viewport export), `frontend/src/components/public/bottom-nav.tsx`, `frontend/src/components/public/hero-intro.tsx`, `frontend/src/components/public/dispatch-header.tsx`.
+
 ### 2026-06-09 — Dashboard color ramp: adopt the public surface's exact text + accent values
 
 **Context**: The dashboard's low-emphasis text bottomed out too dark — `--text-secondary #555555` and especially `--text-dim #333333` were nearly invisible against the dark chassis, so keys/labels (e.g. the Status readout's `POSTS PUBLISHED`, `MODE`, …) blended into the background. The public surface already ships a well-tuned neutral ramp (`--tg-ink` / `--tg-mute` / `--tg-faint`) and a brand orange (`--tg-orange`); running two slightly different palettes across the two surfaces was also a needless inconsistency.

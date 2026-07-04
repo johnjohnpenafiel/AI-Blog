@@ -149,7 +149,12 @@ export function PostCard({
             {points.map((pt) => (
               <div
                 key={pt}
-                style={{ display: "flex", alignItems: "center", gap: 9 }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 9,
+                  minWidth: 0,
+                }}
               >
                 <span
                   style={{
@@ -173,6 +178,9 @@ export function PostCard({
                     padding: "4px 8px",
                     textTransform: "uppercase",
                     whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    maxWidth: "100%",
                   }}
                 >
                   {pt}

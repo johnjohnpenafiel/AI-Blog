@@ -11,6 +11,7 @@ import { longDate } from "@/lib/public-format";
 export function SourcesList({ sources }: { sources: PublicPostSource[] }) {
   return (
     <div
+      className="tg-band"
       style={{
         display: "grid",
         gridTemplateColumns: "var(--tg-gutter) 1fr",
@@ -18,7 +19,7 @@ export function SourcesList({ sources }: { sources: PublicPostSource[] }) {
         background: "var(--tg-band)",
       }}
     >
-      <div style={{ paddingLeft: 24, paddingTop: 34 }}>
+      <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 34 }}>
         <span
           style={{
             fontFamily: "var(--tg-font-mono)",
@@ -30,7 +31,10 @@ export function SourcesList({ sources }: { sources: PublicPostSource[] }) {
           (src)
         </span>
       </div>
-      <div style={{ padding: "34px var(--tg-content-pad) 40px 0" }}>
+      <div
+        className="tg-band-content"
+        style={{ padding: "34px var(--tg-content-pad) 40px 0" }}
+      >
         <div
           style={{
             fontFamily: "var(--tg-font-mono)",

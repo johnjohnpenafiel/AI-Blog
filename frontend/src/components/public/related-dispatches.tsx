@@ -12,13 +12,14 @@ export function RelatedDispatches({ posts }: { posts: PublicPostListItem[] }) {
   if (posts.length === 0) return null;
   return (
     <div
+      className="tg-band"
       style={{
         display: "grid",
         gridTemplateColumns: "var(--tg-gutter) 1fr",
         background: "var(--tg-bg)",
       }}
     >
-      <div style={{ paddingLeft: 24, paddingTop: 32 }}>
+      <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 32 }}>
         <span
           style={{
             fontFamily: "var(--tg-font-mono)",
@@ -30,7 +31,10 @@ export function RelatedDispatches({ posts }: { posts: PublicPostListItem[] }) {
           (rel)
         </span>
       </div>
-      <div style={{ padding: "34px var(--tg-content-pad) 8px 0" }}>
+      <div
+        className="tg-band-content"
+        style={{ padding: "34px var(--tg-content-pad) 8px 0" }}
+      >
         <div
           style={{
             display: "flex",

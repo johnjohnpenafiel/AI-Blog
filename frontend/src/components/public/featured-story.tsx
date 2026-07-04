@@ -13,13 +13,14 @@ export function FeaturedStory({ post }: { post: PublicPostListItem }) {
   const accent = formatAccent(post.format);
   return (
     <div
+      className="tg-band"
       style={{
         display: "grid",
         gridTemplateColumns: "var(--tg-gutter) 1fr",
         borderBottom: "1px solid var(--tg-frame-hair)",
       }}
     >
-      <div style={{ paddingLeft: 24, paddingTop: 44 }}>
+      <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 44 }}>
         <span
           style={{
             fontFamily: "var(--tg-font-mono)",
@@ -32,7 +33,7 @@ export function FeaturedStory({ post }: { post: PublicPostListItem }) {
         </span>
       </div>
       <div
-        className="tg-featured-grid"
+        className="tg-featured-grid tg-band-content"
         style={{
           padding: "44px 32px 48px 0",
           display: "grid",

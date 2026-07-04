@@ -22,12 +22,13 @@ export const metadata: Metadata = {
 function EmptyIndex() {
   return (
     <div
+      className="tg-band"
       style={{
         display: "grid",
         gridTemplateColumns: "var(--tg-gutter) 1fr",
       }}
     >
-      <div style={{ paddingLeft: 24, paddingTop: 48 }}>
+      <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 48 }}>
         <span
           style={{
             fontFamily: "var(--tg-font-mono)",
@@ -39,7 +40,7 @@ function EmptyIndex() {
           (00)
         </span>
       </div>
-      <div style={{ padding: "48px 32px 64px 0" }}>
+      <div className="tg-band-content" style={{ padding: "48px 32px 64px 0" }}>
         <span className="tg-kicker">{"// The Index"}</span>
         <h1
           style={{

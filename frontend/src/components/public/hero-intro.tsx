@@ -33,6 +33,7 @@ export function HeroIntro({
 
   return (
     <div
+      className="tg-band"
       style={{
         position: "relative",
         display: "grid",
@@ -60,17 +61,19 @@ export function HeroIntro({
         <source src="/hero.mp4" type="video/mp4" />
       </video>
       <div
+        className="tg-hero-shade"
         style={{
           position: "absolute",
           inset: 0,
           zIndex: 0,
           pointerEvents: "none",
-          background:
-            "linear-gradient(90deg, rgba(10,10,10,0.62) 0%, rgba(10,10,10,0.24) 48%, rgba(10,10,10,0.0) 100%)",
         }}
       />
 
-      <div style={{ position: "relative", zIndex: 1, paddingLeft: 24, paddingTop: 40 }}>
+      <div
+        className="tg-band-marker"
+        style={{ position: "relative", zIndex: 1, paddingLeft: 24, paddingTop: 40 }}
+      >
         <span
           style={{
             fontFamily: "var(--tg-font-mono)",
@@ -84,7 +87,7 @@ export function HeroIntro({
       </div>
 
       <div
-        className="tg-hero-grid"
+        className="tg-hero-grid tg-band-content"
         style={{
           position: "relative",
           zIndex: 1,
@@ -162,10 +165,19 @@ export function HeroIntro({
             </Link>
           </div>
           {/* stats */}
-          <div className="tg-fade-up" style={{ display: "flex", gap: 48, animationDelay: "0.22s" }}>
+          <div
+            className="tg-fade-up"
+            style={{
+              display: "flex",
+              gap: "28px 48px",
+              flexWrap: "wrap",
+              animationDelay: "0.22s",
+            }}
+          >
             {stats.map(([num, label]) => (
               <div key={label}>
                 <div
+                  className="tg-hero-stat"
                   style={{
                     fontFamily: "var(--tg-font-display)",
                     fontWeight: 800,
@@ -193,10 +205,11 @@ export function HeroIntro({
           </div>
         </div>
 
-        {/* right — latest dispatch card */}
+        {/* right — latest dispatch card (hidden on phones: it duplicates the
+            CTA above and the (01) index row directly below) */}
         <Link
           href={`/blog/${coverPost.slug}`}
-          className="tg-fade-up"
+          className="tg-fade-up tg-hero-card"
           style={{
             border: "1px solid var(--tg-frame)",
             background: "rgba(10,10,10,0.6)",

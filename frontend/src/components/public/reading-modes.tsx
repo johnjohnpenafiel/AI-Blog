@@ -73,6 +73,8 @@ function ModeCard({
   return (
     <button
       type="button"
+      className="tg-mode-card"
+      data-active={active}
       onClick={() => onSelect(mode.id)}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
@@ -119,6 +121,7 @@ function ModeCard({
           }}
         >
           <span
+            className="tg-mode-label"
             style={{
               fontFamily: "var(--tg-font-display)",
               fontWeight: 700,
@@ -132,6 +135,7 @@ function ModeCard({
             {mode.label}
           </span>
           <span
+            className="tg-mode-tag"
             style={{
               fontFamily: "var(--tg-font-mono)",
               fontSize: 8,
@@ -159,6 +163,7 @@ function ModeCard({
           {mode.sub}
         </span>
         <span
+          className="tg-mode-desc"
           style={{
             display: "block",
             fontFamily: "var(--tg-font-display)",
@@ -188,6 +193,7 @@ export function ReadingModes({
 
   return (
     <div
+      className="tg-band"
       style={{
         display: "grid",
         gridTemplateColumns: "var(--tg-gutter) 1fr",
@@ -195,7 +201,7 @@ export function ReadingModes({
         background: "var(--tg-band)",
       }}
     >
-      <div style={{ paddingLeft: 24, paddingTop: 32 }}>
+      <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 32 }}>
         <span
           style={{
             fontFamily: "var(--tg-font-mono)",
@@ -207,7 +213,7 @@ export function ReadingModes({
           (*)
         </span>
       </div>
-      <div style={{ padding: "30px 32px 36px 0" }}>
+      <div className="tg-band-content" style={{ padding: "30px 32px 36px 0" }}>
         <div style={{ marginBottom: 18 }}>
           <span
             style={{
@@ -223,6 +229,7 @@ export function ReadingModes({
         </div>
 
         <div
+          className="tg-mode-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",

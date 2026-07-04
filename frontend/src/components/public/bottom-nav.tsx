@@ -32,7 +32,8 @@ export function BottomNav() {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "16px clamp(20px, 3vw, 44px)",
+        padding:
+          "16px clamp(20px, 3vw, 44px) calc(16px + env(safe-area-inset-bottom, 0px))",
         pointerEvents: "none",
       }}
     >

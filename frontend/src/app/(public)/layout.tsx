@@ -11,16 +11,14 @@ import "./public-theme.css";
 /**
  * The stage frame — the shared shell for every public page.
  *
- * A 3px gray frame insets the whole view; a fixed masthead (fit-to-width
- * wordmark + scrolling ticker) sits at the top; everything below scrolls inside
- * the frame, clipped by it. A faint scanline textures the whole stage, and a
- * fixed bottom nav floats over it.
+ * A 3px gray frame insets the whole view; a masthead (fit-to-width wordmark +
+ * scrolling ticker) sits at the top. A faint scanline textures the whole
+ * stage, and a fixed bottom nav floats over it.
  *
- * NOTE (decision to review — see REVIEW.md): this faithfully recreates the
- * handoff's locked-viewport stage (100dvh, internal scroll). It's the design's
- * signature but trades away native page scroll; for SEO/mobile we may later
- * switch to a sticky masthead over natural document scroll. Isolated here so
- * it's a one-file change.
+ * Scroll model is a media-query split (`.tg-stage*` in public-theme.css):
+ * desktop keeps the handoff's locked-viewport stage (100dvh, internal scroll —
+ * the design's signature); mobile (≤768px) uses natural document scroll so the
+ * URL bar auto-hides, momentum feels native, and anchors / find-in-page work.
  */
 export default async function PublicLayout({ children }: { children: ReactNode }) {
   // Ticker headlines come from real recent dispatches (never fabricated
@@ -36,45 +34,20 @@ export default async function PublicLayout({ children }: { children: ReactNode }
   const tickerItems = buildTickerItems(titles);
 
   return (
-    <div
-      className="tg-surface"
-      style={{ height: "100dvh", overflow: "hidden", position: "relative" }}
-    >
-      <div
-        className="tg-frame"
-        style={{
-          margin: "var(--tg-frame-pad) var(--tg-frame-pad) 0",
-          height: "calc(100dvh - var(--tg-frame-pad))",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
+    <div className="tg-surface tg-stage">
+      <div className="tg-frame tg-stage-frame">
         <div className="tg-scanline" />
 
-        {/* Fixed masthead: wordmark + ticker */}
+        {/* Masthead: wordmark + ticker (pinned on desktop, in-flow on mobile) */}
         <header style={{ background: "var(--tg-bg)", flexShrink: 0 }}>
-          <div
-            style={{
-              padding: "20px 24px 24px",
-              borderBottom: "3px solid var(--tg-frame)",
-            }}
-          >
+          <div className="tg-masthead-brand" style={{ padding: "20px 24px 24px" }}>
             <Wordmark />
           </div>
           <Ticker items={tickerItems} />
         </header>
 
         {/* Scroll region — every page's bands render here, then the footer */}
-        <div
-          style={{
-            flex: 1,
-            minHeight: 0,
-            overflowY: "auto",
-            overflowX: "hidden",
-            paddingBottom: 76,
-          }}
-        >
+        <div className="tg-stage-scroll">
           {children}
           <PublicFooter />
         </div>
