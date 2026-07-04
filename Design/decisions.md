@@ -6,6 +6,14 @@
 
 New entries at the top.
 
+### 2026-07-03 — Mobile masthead: thin side borders on the wordmark block
+
+**Context**: The mobile masthead (`.tg-masthead-brand`, ≤720px) carries a 3px top border only (see the border-treatment entry below). Operator feedback: the wordmark block reads as unboxed on the sides — add side borders, but visibly thinner than the 3px top rule so they read as a frame detail, not a repeat of the heavy top edge.
+
+**Decision**: `border-left`/`border-right: 1px solid var(--tg-frame)` added to the mobile `.tg-masthead-brand` rule, alongside the existing 3px top border and `border-bottom: none`. Desktop is untouched (the rule lives inside the `≤720px` media query only).
+
+**References**: `frontend/src/app/(public)/public-theme.css` (`.tg-masthead-brand` mobile override).
+
 ### 2026-07-03 — Mobile: bands drop the gutter, dense sections get mobile-native layouts
 
 **Context**: After the scroll-model split (entry below), the public surface still rendered the *desktop composition* at phone width: every band kept its decorative marker gutter (64px) + right padding (~25% of a 390px screen), the "How do you want to read?" band stacked its four tall preference cards into a full-viewport column (selecting a mode showed no visible result without scrolling), section filter chips wrapped into a tall block, the hero carried a duplicate CTA card, and the empty IMAGE placeholder slots burned whole screens of nothing.

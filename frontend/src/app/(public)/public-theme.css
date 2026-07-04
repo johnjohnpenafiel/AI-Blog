@@ -117,6 +117,8 @@
   .tg-masthead-brand {
     border-top: 3px solid var(--tg-frame);
     border-bottom: none;
+    border-left: 1px solid var(--tg-frame);
+    border-right: 1px solid var(--tg-frame);
   }
   .tg-stage-scroll {
     overflow-x: hidden;
