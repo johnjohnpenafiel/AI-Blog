@@ -644,10 +644,18 @@
      mobile the point is seeing the selector AND the filtered posts together. */
   .tg-mode-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    /* hairline separators between the 2×2 cells: the frame color shows
+       through 1px gaps, so the cards need opaque backgrounds below */
+    gap: 1px;
+    background: var(--tg-frame);
   }
   .tg-mode-card {
     padding: 12px !important;
     gap: 10px !important;
+    background: var(--tg-band) !important;
+  }
+  .tg-mode-card[data-active="true"] {
+    background: color-mix(in srgb, var(--tg-orange) 8%, var(--tg-band)) !important;
   }
   .tg-mode-label {
     font-size: 13px !important;

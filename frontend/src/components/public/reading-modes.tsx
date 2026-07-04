@@ -74,6 +74,7 @@ function ModeCard({
     <button
       type="button"
       className="tg-mode-card"
+      data-active={active}
       onClick={() => onSelect(mode.id)}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
