@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Design tokens — source of truth: Design/README.md v2.0 (orange + chamfer system) */
+/* Dashboard ("Cockpit") design tokens — source of truth: Design/README.md v3.0 */
 :root {
   /* Depth — inverted layering */
   --bg: #0a0a0a;
@@ -27,10 +27,6 @@
   --accent-dim: #c24302;
   --accent-glow: rgb(232 80 2 / 0.12);
   --accent-structural: rgb(232 80 2 / 0.6);
-
-  /* Grid overlay — near-blend gray, 48px cells, applied to <body> below */
-  --grid: #141414;
-  --grid-size: 48px;
 
   /* Semantic — sparingly, only for state */
   --success: #00c47d;
@@ -117,72 +113,8 @@
   }
 }
 
-/* Body grid overlay — near-blend gray lines, 48px cells. Applies sitewide.
-   The recessed --structural panels (#000) sit on top and naturally hide the
-   grid where they cover the body — the desired effect (the grid is the
-   chassis surface texture; the recesses are cuts into it). */
+/* Dashboard body — flat chassis color. The public surface paints its own
+   background inside .tg-surface. */
 body {
   background-color: var(--bg);
-}
-
-/* Hero title word-stagger reveal — pairs with the background video's
-   ~3s visor scan. Each word fades + lifts in sequence after the scan
-   completes, like the figure is "outputting" the headline. */
-@keyframes hero-title-word-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Skeleton bars shown inside the title box while the figure is "scanning."
-   A diffuse highlight sweeps across each bar (background-position drift)
-   to read as live, working loading state — not just static placeholder. */
-@keyframes hero-skeleton-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-/* Fade-out for the skeleton container — runs at the tail of the 3s scan
-   so the skeleton hands off cleanly to the first word's fade-in.
-   Reused by the binary-decode overlay (same opacity→0 behavior). */
-@keyframes hero-skeleton-out {
-  to {
-    opacity: 0;
-  }
-}
-
-/* Fade-in for the real text that sits underneath each binary overlay —
-   resolves at the 3s mark when the figure's scan completes. */
-@keyframes hero-decode-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Tight orange aura that breathes around the title panel — reinforces the
-   "active output" feel after the figure finishes its scan. Smaller blur
-   radius keeps the glow contained against the panel edge instead of
-   bleeding far into the page. */
-@keyframes hero-title-glow-pulse {
-  0%,
-  100% {
-    filter: drop-shadow(0 0 6px rgba(232, 80, 2, 0.95))
-      drop-shadow(0 0 18px rgba(232, 80, 2, 0.55));
-  }
-  50% {
-    filter: drop-shadow(0 0 10px rgba(232, 80, 2, 1))
-      drop-shadow(0 0 28px rgba(232, 80, 2, 0.8));
-  }
 }
