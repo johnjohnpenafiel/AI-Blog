@@ -33,6 +33,7 @@ export function HeroIntro({
 
   return (
     <div
+      className="tg-band"
       style={{
         position: "relative",
         display: "grid",
@@ -69,7 +70,10 @@ export function HeroIntro({
         }}
       />
 
-      <div style={{ position: "relative", zIndex: 1, paddingLeft: 24, paddingTop: 40 }}>
+      <div
+        className="tg-band-marker"
+        style={{ position: "relative", zIndex: 1, paddingLeft: 24, paddingTop: 40 }}
+      >
         <span
           style={{
             fontFamily: "var(--tg-font-mono)",
@@ -83,7 +87,7 @@ export function HeroIntro({
       </div>
 
       <div
-        className="tg-hero-grid"
+        className="tg-hero-grid tg-band-content"
         style={{
           position: "relative",
           zIndex: 1,
@@ -173,6 +177,7 @@ export function HeroIntro({
             {stats.map(([num, label]) => (
               <div key={label}>
                 <div
+                  className="tg-hero-stat"
                   style={{
                     fontFamily: "var(--tg-font-display)",
                     fontWeight: 800,
@@ -200,10 +205,11 @@ export function HeroIntro({
           </div>
         </div>
 
-        {/* right — latest dispatch card */}
+        {/* right — latest dispatch card (hidden on phones: it duplicates the
+            CTA above and the (01) index row directly below) */}
         <Link
           href={`/blog/${coverPost.slug}`}
-          className="tg-fade-up"
+          className="tg-fade-up tg-hero-card"
           style={{
             border: "1px solid var(--tg-frame)",
             background: "rgba(10,10,10,0.6)",

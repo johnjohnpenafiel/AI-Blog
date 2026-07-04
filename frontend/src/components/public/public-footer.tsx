@@ -9,16 +9,19 @@ export function PublicFooter() {
   return (
     <div
       data-testid="public-footer"
+      className="tg-band"
       style={{
         borderTop: "1px solid var(--tg-frame)",
         display: "grid",
         gridTemplateColumns: "var(--tg-gutter) 1fr",
       }}
     >
-      <div style={{ paddingLeft: 24, paddingTop: 22 }}>
+      {/* logo hidden with the gutter on mobile — the bottom nav carries it */}
+      <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 22 }}>
         <LogoMark size={30} />
       </div>
       <div
+        className="tg-band-content"
         style={{
           padding: "22px var(--tg-content-pad) 24px 0",
           display: "flex",

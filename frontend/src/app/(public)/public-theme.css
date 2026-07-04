@@ -597,6 +597,123 @@
   }
 }
 
+/* ── Mobile band collapse (≤720px) ─────────────────────────────────────────
+   The desktop layout gives every band a decorative marker gutter (64px on
+   small screens) plus right padding — together ~25% of a phone's width. On
+   mobile every band drops the marker column and runs flat 20px side padding.
+   Markers that carry meaning (the dispatch row index) re-appear inline via
+   `.tg-m-only`; purely decorative ones ((*), (★), (src), …) just go. */
+.tg-m-only {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .tg-band {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .tg-band-marker {
+    display: none !important;
+  }
+  .tg-band-content {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+  .tg-m-only {
+    display: inline;
+  }
+
+  /* Dispatch rows: the gutter index moves inline into the meta line; the
+     roomy desktop rhythm tightens so more of the index fits per screen. */
+  .tg-dispatch {
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding: 28px 0 30px !important;
+  }
+
+  /* Hero: the "latest dispatch" card duplicates the CTA button above it and
+     the (01) index row right below — one full-screen of redundancy on a
+     phone. The stats scale down to keep the hero to ~one viewport. */
+  .tg-hero-card {
+    display: none !important;
+  }
+  .tg-hero-stat {
+    font-size: 32px !important;
+  }
+
+  /* Reading modes: the four tall preference cards become a compact 2×2
+     selector — label + cadence only. The description is desktop detail; on
+     mobile the point is seeing the selector AND the filtered posts together. */
+  .tg-mode-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .tg-mode-card {
+    padding: 12px !important;
+    gap: 10px !important;
+  }
+  .tg-mode-label {
+    font-size: 13px !important;
+  }
+  .tg-mode-desc,
+  .tg-mode-tag {
+    display: none !important;
+  }
+
+  /* Section filter chips: one swipeable row instead of a tall wrapped block
+     that pushes the filtered list below the fold. Bleeds to the right edge
+     so the cut-off chip advertises the scroll. */
+  .tg-chip-row {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    margin-right: -20px;
+    padding-right: 20px;
+    scrollbar-width: none;
+  }
+  .tg-chip-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Empty IMAGE placeholder slots are desktop set-dressing — on a phone they
+     cost a full screen of nothing. Reclaim the space; revisit when per-post
+     image generation ships real assets. */
+  .tg-card > .tg-img-slot,
+  .tg-fig0-band {
+    display: none !important;
+  }
+
+  /* Article title: the desktop clamp bottoms out at 36px — a long headline
+     runs 7+ lines on a phone. 30px keeps the editorial scale in ~5. */
+  .tg-post-title {
+    font-size: 30px !important;
+  }
+
+  /* Article meta strip: tighter gaps so Published / By / Read time / Share
+     wrap into a compact block instead of a sparse column. */
+  .tg-meta-strip {
+    gap: 20px 28px !important;
+  }
+  .tg-meta-items {
+    gap: 18px 28px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  /* Featured band collapses to one column — drop the empty image slot and
+     the (now vertical) 56px gap along with it. */
+  .tg-featured-grid {
+    gap: 0 !important;
+  }
+  .tg-featured-grid > .tg-img-slot {
+    display: none !important;
+  }
+}
+
+@media (max-width: 520px) {
+  /* Reading modes: two dispatches per format is the right depth on a phone —
+     the full index lives right below. (This grid is only used there.) */
+  .tg-post-grid > :nth-child(n + 3) {
+    display: none;
+  }
+}
+
 /* ── Touch ergonomics — comfortable tap targets on coarse pointers ────────── */
 @media (pointer: coarse) {
   .tg-surface .tg-share-chip {

@@ -45,6 +45,7 @@ function band(
   return (
     <div
       key={marker}
+      className="tg-band"
       style={{
         display: "grid",
         gridTemplateColumns: "var(--tg-gutter) 1fr",
@@ -53,7 +54,7 @@ function band(
         background: opts.band ? "var(--tg-band)" : "var(--tg-bg)",
       }}
     >
-      <div style={{ paddingLeft: 24, paddingTop: 44 }}>
+      <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 44 }}>
         <span
           style={{
             fontFamily: "var(--tg-font-mono)",
@@ -65,7 +66,12 @@ function band(
           {marker}
         </span>
       </div>
-      <div style={{ padding: "44px var(--tg-content-pad) 48px 0" }}>{children}</div>
+      <div
+        className="tg-band-content"
+        style={{ padding: "44px var(--tg-content-pad) 48px 0" }}
+      >
+        {children}
+      </div>
     </div>
   );
 }

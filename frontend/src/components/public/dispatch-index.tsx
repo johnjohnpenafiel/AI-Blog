@@ -40,6 +40,7 @@ export function DispatchIndex({
     <>
       {/* heading + filter chips */}
       <div
+        className="tg-band"
         style={{
           background: "var(--tg-band)",
           borderTop: "1px solid var(--tg-frame-hair)",
@@ -48,7 +49,7 @@ export function DispatchIndex({
           gridTemplateColumns: "var(--tg-gutter) 1fr",
         }}
       >
-        <div style={{ paddingLeft: 24, paddingTop: 28 }}>
+        <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 28 }}>
           <span
             style={{
               fontFamily: "var(--tg-font-mono)",
@@ -60,7 +61,7 @@ export function DispatchIndex({
             (index)
           </span>
         </div>
-        <div style={{ padding: "26px 32px 22px 0" }}>
+        <div className="tg-band-content" style={{ padding: "26px 32px 22px 0" }}>
           <h3
             style={{
               fontFamily: "var(--tg-font-display)",
@@ -75,7 +76,10 @@ export function DispatchIndex({
           >
             {active === ALL ? "All Dispatches" : active}
           </h3>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div
+            className="tg-chip-row"
+            style={{ display: "flex", gap: 8, flexWrap: "wrap" }}
+          >
             {chips.map((sec) => (
               <button
                 key={sec}
@@ -98,13 +102,15 @@ export function DispatchIndex({
       <div style={{ background: "var(--tg-bg)" }}>
         {filtered.length === 0 ? (
           <div
+            className="tg-band"
             style={{
               display: "grid",
               gridTemplateColumns: "var(--tg-gutter) 1fr",
             }}
           >
-            <div />
+            <div className="tg-band-marker" />
             <div
+              className="tg-band-content"
               style={{
                 padding: "44px 32px",
                 fontFamily: "var(--tg-font-mono)",

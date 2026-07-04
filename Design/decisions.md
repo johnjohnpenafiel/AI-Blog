@@ -6,6 +6,21 @@
 
 New entries at the top.
 
+### 2026-07-03 — Mobile: bands drop the gutter, dense sections get mobile-native layouts
+
+**Context**: After the scroll-model split (entry below), the public surface still rendered the *desktop composition* at phone width: every band kept its decorative marker gutter (64px) + right padding (~25% of a 390px screen), the "How do you want to read?" band stacked its four tall preference cards into a full-viewport column (selecting a mode showed no visible result without scrolling), section filter chips wrapped into a tall block, the hero carried a duplicate CTA card, and the empty IMAGE placeholder slots burned whole screens of nothing.
+
+**Decision**: A ≤720px "mobile band collapse" layer in `public-theme.css`, wired through three reusable classes on every gutter-row grid (`.tg-band` / `.tg-band-marker` / `.tg-band-content`): the marker column disappears and content runs flat 20px side padding. Markers that carry meaning re-enter inline via a `.tg-m-only` utility (the dispatch row's `(01)` index joins its meta line); purely decorative ones ((*), (★), (src), the footer LogoMark — the bottom nav already shows it) just go. On top of that, per-section mobile layouts:
+- **Reading modes** — the 4-card column becomes a compact 2×2 selector (label + cadence; description and tag are desktop detail, hidden). The point: the selector and the posts it filters share one screen. The mode-post grid caps at 2 cards on phones (`nth-child(n+3)` hidden).
+- **Section filter chips** — one `nowrap` swipeable row (hidden scrollbar, bleeds to the screen edge so a cut-off chip advertises the scroll) instead of a wrapped block.
+- **Hero** — the "latest dispatch" card is hidden on phones (it duplicated the CTA button above it and the `(01)` index row below); stat values 44→32px.
+- **Empty IMAGE placeholders** — hidden on mobile (post-card headers, the featured band's 16:9 slot, the article's whole FIG.0 band via `.tg-fig0-band`). They're desktop set-dressing until per-post image generation ships real assets — **revisit these rules when it does**.
+- **Article page** — title floor 36→30px (`.tg-post-title`, long headlines were 7+ lines); meta strip gaps tightened.
+
+**Tradeoffs**: The indexed-gutter identity is desktop-only now — accepted; on a phone the gutter is the single most expensive decoration on screen. Mobile hides real content (mode descriptions, 2 of 4 mode posts, the hero card) — deliberate: mobile shows less, better, and the full index is one scroll away. Components keep inline styles for the desktop composition; the mobile layer overrides via classed CSS `!important` rules — the established pattern in this stylesheet.
+
+**References**: `public-theme.css` (mobile band collapse section), `hero-intro.tsx`, `reading-modes.tsx`, `featured-story.tsx`, `dispatch-index.tsx`, `dispatch-row.tsx`, `dispatch-header.tsx`, `sources-list.tsx`, `related-dispatches.tsx`, `public-footer.tsx`, `(public)/page.tsx`, `blog/[slug]/page.tsx`, `about/page.tsx`, `loading.tsx`.
+
 ### 2026-07-03 — Public stage: locked viewport on desktop, natural document scroll on mobile
 
 **Context**: The public surface shipped as the handoff's locked-viewport stage — a `100dvh` frame with the masthead pinned and content scrolling *inside* the frame. That's the design's signature on desktop, but on mobile it costs real UX: the browser URL bar can't auto-hide (the document never scrolls), scroll momentum feels stiff, and anchors / find-in-page / tap-status-bar-to-scroll-to-top all assume document scroll. These feed second-order into SEO ranking. Deferred to Phase 4 on Trello; built now on `feature/mobile-optimization`.
