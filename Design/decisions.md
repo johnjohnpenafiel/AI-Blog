@@ -1,10 +1,20 @@
-# DeLorean — Design Decision Log
+# The Garage AI — Design Decision Log
 
 > Visual-design decisions with their full context, rationale, and tradeoffs. Separated from `PLANNING-decisions.md` so design concerns stay independent from architecture/product concerns. Read this file when you need to know *why* a past visual choice was made.
 >
-> The current visual spec lives in `Design/README.md` — this file captures *changes* to that spec over time.
+> The current visual spec lives in `Design/README.md` — this file captures *changes* to that spec over time. ("DeLorean" in older entries is the retired MVP-era codename.)
 
 New entries at the top.
+
+### 2026-07-04 — Design/README v3.0: reconciled to the as-built system (two languages, one brand)
+
+**Context**: `Design/README.md` v2.0 (2026-05-17) specified the orange + chamfer + inverted-depth language for **both** surfaces. Reality diverged in two waves it never absorbed: (1) the public surface was completely redesigned from the Claude Design handoff (`design-handoff/`, `feature/public-redesign`) — square corners, `--tg-*` gray ramp, Archivo (extended) + DM Mono, the stage frame / bands / gutter markers / ticker; (2) the dashboard's tokens and typography evolved (accent → `#e85002`, text ramp repointed to the public values, IBM Plex Mono chrome + Archivo editorial split — see the 2026-06-09 entries, one of which explicitly flagged this README reconciliation as outstanding). The stale README was actively misleading: it prescribed Chakra Petch/JetBrains/Inter (all retired), a body grid that was never wired up, chamfers on the public surface (gone), and "no images in the UI" (superseded by the redesign's intentional image slots).
+
+**Decision**: Full rewrite as **v3.0**, structured around the truth that the product runs **two deliberate design languages under one brand**: Surface 1 "the Stage" (public — documented from `public-theme.css` and the built components) and Surface 2 "the Cockpit" (dashboard — the surviving chamfer system with as-built tokens/typography). Documented the shared brand constants (orange `#e85002`, the text ramp, dark-only, mono-chrome/editorial-content split) and the hard scoping rule (`--tg-*`/`.tg-surface` vs `:root`/Tailwind — values copied, never cross-referenced). Page-by-page UI structure moved out to `Design/site-map/` (kept current via `/sync-site-map`) instead of being duplicated in the brief. As-built refinements captured: utility panels (settings cards, featured spotlight, login card) are plain rectangles — the chamfer means "chassis or post". Two pieces of drift found during the audit were cleaned up in the same pass rather than documented: the v2.0 body-grid chassis texture was never actually rendered (only its `--grid`/`--grid-size` tokens existed — removed; the dashboard body is flat `--bg`, and reviving a texture is a new decision, not a revert), and five dead `hero-*` keyframes in `globals.css` (leftovers from a pre-redesign homepage hero; nothing referenced them — verified before deleting, `status-pulse`/`toast-in` are live and stayed).
+
+**Tradeoffs**: The brief no longer contains per-page layout detail — that now lives in `site-map/` (two files to keep current instead of one, mitigated by the `/sync-site-map` skill). The "one visual identity across both surfaces" rationale from the v2.0 entry is formally superseded: the surfaces intentionally diverge in language and converge only on brand constants.
+
+**References**: `Design/README.md` (v3.0), `Design/site-map/`, `design-handoff/REVIEW.md`, `frontend/src/app/(public)/public-theme.css`, `frontend/src/app/globals.css`, `frontend/src/app/layout.tsx`.
 
 ### 2026-07-03 — Mobile: masthead top border + ticker border matched to the page side border weight
 

@@ -4,19 +4,16 @@ import type { PublicPostListItem } from "@/lib/public-api";
 import { formatAccent, longDate, readLabel } from "@/lib/public-format";
 
 /**
- * Editorial dispatch row — the index list item. Running index in the gutter,
- * meta line (date · ◆ section · format · read · LIVE), an extended-Archivo
- * headline, the summary, and the "Read dispatch →" affordance. Hover states are
- * pure CSS (`.tg-dispatch*`).
+ * Editorial dispatch row — the index list item: meta line (date · ◆ section ·
+ * format · read · LIVE), an extended-Archivo headline, the summary, and the
+ * "Read dispatch →" affordance. Hover states are pure CSS (`.tg-dispatch*`).
  */
 export function DispatchRow({
   post,
-  index,
   hot = false,
   last = false,
 }: {
   post: PublicPostListItem;
-  index: number;
   hot?: boolean;
   last?: boolean;
 }) {
@@ -30,19 +27,6 @@ export function DispatchRow({
         borderBottom: last ? "none" : "1px solid var(--tg-frame-hair)",
       }}
     >
-      <div className="tg-band-marker" style={{ paddingLeft: 24 }}>
-        <span
-          className="tg-dispatch-index"
-          style={{
-            fontFamily: "var(--tg-font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.1em",
-          }}
-        >
-          ({String(index + 1).padStart(2, "0")})
-        </span>
-      </div>
-
       <div className="tg-band-content" style={{ paddingRight: 32, maxWidth: 1020 }}>
         <div
           style={{
@@ -53,17 +37,6 @@ export function DispatchRow({
             flexWrap: "wrap",
           }}
         >
-          {/* on mobile the gutter is collapsed — the index joins the meta line */}
-          <span
-            className="tg-dispatch-index tg-m-only"
-            style={{
-              fontFamily: "var(--tg-font-mono)",
-              fontSize: 11,
-              letterSpacing: "0.1em",
-            }}
-          >
-            ({String(index + 1).padStart(2, "0")})
-          </span>
           <span
             style={{
               fontFamily: "var(--tg-font-mono)",

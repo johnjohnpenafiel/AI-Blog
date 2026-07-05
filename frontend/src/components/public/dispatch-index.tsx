@@ -40,27 +40,15 @@ export function DispatchIndex({
     <>
       {/* heading + filter chips */}
       <div
+        id="dispatch-index"
         className="tg-band"
         style={{
-          background: "var(--tg-band)",
+          background: "var(--tg-bg)",
           borderTop: "1px solid var(--tg-frame-hair)",
           borderBottom: "1px solid var(--tg-frame-hair)",
-          display: "grid",
-          gridTemplateColumns: "var(--tg-gutter) 1fr",
+          scrollMarginTop: 24,
         }}
       >
-        <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 28 }}>
-          <span
-            style={{
-              fontFamily: "var(--tg-font-mono)",
-              fontSize: 11,
-              letterSpacing: "0.1em",
-              color: "var(--tg-faint)",
-            }}
-          >
-            (index)
-          </span>
-        </div>
         <div className="tg-band-content" style={{ padding: "26px 32px 22px 0" }}>
           <h3
             style={{
@@ -101,14 +89,7 @@ export function DispatchIndex({
       {/* dispatch rows */}
       <div style={{ background: "var(--tg-bg)" }}>
         {filtered.length === 0 ? (
-          <div
-            className="tg-band"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "var(--tg-gutter) 1fr",
-            }}
-          >
-            <div className="tg-band-marker" />
+          <div className="tg-band">
             <div
               className="tg-band-content"
               style={{
@@ -128,7 +109,6 @@ export function DispatchIndex({
             <DispatchRow
               key={p.slug}
               post={p}
-              index={i}
               hot={p.slug === hotSlug}
               last={i === filtered.length - 1}
             />

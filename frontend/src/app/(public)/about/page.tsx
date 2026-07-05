@@ -47,25 +47,11 @@ function band(
       key={marker}
       className="tg-band"
       style={{
-        display: "grid",
-        gridTemplateColumns: "var(--tg-gutter) 1fr",
         borderBottom: "1px solid var(--tg-frame-hair)",
         borderTop: opts.topRule ? "1px solid var(--tg-frame-hair)" : undefined,
         background: opts.band ? "var(--tg-band)" : "var(--tg-bg)",
       }}
     >
-      <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 44 }}>
-        <span
-          style={{
-            fontFamily: "var(--tg-font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.1em",
-            color: "var(--tg-faint)",
-          }}
-        >
-          {marker}
-        </span>
-      </div>
       <div
         className="tg-band-content"
         style={{ padding: "44px var(--tg-content-pad) 48px 0" }}

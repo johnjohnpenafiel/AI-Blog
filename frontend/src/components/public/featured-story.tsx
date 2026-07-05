@@ -15,23 +15,10 @@ export function FeaturedStory({ post }: { post: PublicPostListItem }) {
     <div
       className="tg-band"
       style={{
-        display: "grid",
-        gridTemplateColumns: "var(--tg-gutter) 1fr",
         borderBottom: "1px solid var(--tg-frame-hair)",
+        background: "var(--tg-band)",
       }}
     >
-      <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 44 }}>
-        <span
-          style={{
-            fontFamily: "var(--tg-font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.1em",
-            color: "var(--tg-orange)",
-          }}
-        >
-          (★)
-        </span>
-      </div>
       <div
         className="tg-featured-grid tg-band-content"
         style={{
@@ -112,8 +99,8 @@ export function FeaturedStory({ post }: { post: PublicPostListItem }) {
           <p
             style={{
               fontFamily: "var(--tg-font-mono)",
-              fontSize: 12,
-              lineHeight: 1.75,
+              fontSize: 14,
+              lineHeight: 1.7,
               color: "var(--tg-mute)",
               margin: "0 0 28px",
             }}
