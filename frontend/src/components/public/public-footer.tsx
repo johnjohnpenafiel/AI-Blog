@@ -1,25 +1,15 @@
-import { LogoMark } from "./logo-mark";
-
 /**
  * Inner footer line — the last band inside the scroll region on every public
- * page. LogoMark in the gutter, copyright + the brand thesis (sand) in the
- * content column.
+ * page. Copyright + the brand thesis (sand) run full-width; the brand mark
+ * itself lives in the persistent bottom nav.
  */
 export function PublicFooter() {
   return (
     <div
       data-testid="public-footer"
       className="tg-band"
-      style={{
-        borderTop: "1px solid var(--tg-frame)",
-        display: "grid",
-        gridTemplateColumns: "var(--tg-gutter) 1fr",
-      }}
+      style={{ borderTop: "1px solid var(--tg-frame)" }}
     >
-      {/* logo hidden with the gutter on mobile — the bottom nav carries it */}
-      <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 22 }}>
-        <LogoMark size={30} />
-      </div>
       <div
         className="tg-band-content"
         style={{

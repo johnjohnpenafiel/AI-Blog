@@ -13,24 +13,10 @@ export function SourcesList({ sources }: { sources: PublicPostSource[] }) {
     <div
       className="tg-band"
       style={{
-        display: "grid",
-        gridTemplateColumns: "var(--tg-gutter) 1fr",
         borderTop: "1px solid var(--tg-frame-hair)",
         background: "var(--tg-band)",
       }}
     >
-      <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 34 }}>
-        <span
-          style={{
-            fontFamily: "var(--tg-font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.1em",
-            color: "var(--tg-faint)",
-          }}
-        >
-          (src)
-        </span>
-      </div>
       <div
         className="tg-band-content"
         style={{ padding: "34px var(--tg-content-pad) 40px 0" }}
