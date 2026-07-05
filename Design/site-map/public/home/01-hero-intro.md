@@ -1,54 +1,32 @@
 # Home · Section 1 — Hero Intro
 
-The index hero: video background, positioning statement on the left, two stacked cards on the right — "Up Next" on top, the animated pipeline readout on the bottom.
+The index hero: solid dark background, positioning statement on the left. The right-side card stack ("Up Next" + the animated pipeline readout) is currently **parked/hidden** (see below) — the band runs full-width in the meantime.
 
 - **Source:** `frontend/src/components/public/hero-intro.tsx`
-- **Layout:** the band splits into two near-equal halves (`1.08fr 0.92fr` — the left column is slightly wider, which nudges the right half's boundary right). The identity column owns the left region; the card stack (`.tg-hero-cards`, `clamp(340px, 82%, 560px)` wide) **centers itself inside the right region** both horizontally (`justifySelf: center`) and vertically (`alignSelf: center`) — it no longer forces full band height. Wrapper right padding is `--tg-edge`. Collapses to one full-width stacked column ≤860px, cards keep their own borders.
-- **Two independent cards, not one strip.** Each card (`.tg-hero-card`) is fully bordered (`--tg-frame`) on all four sides with padding all around (`26px 28px 28px`), separated by a `20px` gap — a "grid column" look, each with room to breathe, rather than one continuous architectural strip running edge to edge. The card-stack wrapper also carries `20px` top/bottom padding, matching the inter-card gap, so spacing is even: top of stack → card → gap → card → bottom of stack.
-- **Legibility over the video:** each card's fill is near-opaque (`rgba(10,10,10,0.85)` + blur) — the video reads only as a whisper behind it — and `.tg-hero-shade` protects **both** ends of the band (heavy left for the headline, moderate right so the video's bright edge doesn't clash with the cards).
+- **Background:** solid `var(--tg-bg)` — the video background (`/hero.mp4`) was pulled; revisit later if wanted back.
+- **Current layout (cards hidden):** single column (`minmax(0, 1fr)`), no right padding — the identity column runs the band's full width.
 
-## Elements
+## Elements (current state)
 
 ```
-Hero Intro band
-├── Hero Video            ← /hero.mp4, autoplaying background
-├── Hero Shade             ← dual-ended protection gradient over the video
-├── Identity Column (left, carries its own 40/44px vertical padding)
-│   ├── Kicker             ← "Operator-First · Proof-Over-Hype" (sand)
-│   ├── Headline           ← "AI is remaking / the dealership." (display, 2 lines)
-│   ├── Subline            ← one-sentence positioning paragraph
-│   └── CTA Row            ← Primary "Read the latest →" (.tg-btn) + Ghost "Browse the index ↓"
-│                             (ghost CTA anchors to #dispatch-index)
-└── Card Stack (right, .tg-hero-cards — flex column, 20px gap, vertically centered)
-    ├── Card 1 — Up Next (top)        ← plain type stack: "Up Next" label (orange
-    │                                    mono) → next drop's format name LARGE in
-    │                                    extended Archivo (28–38px) → "MONDAY · 08:00"
-    │                                    (format accent). Live from
-    │                                    computeWeekSchedule: first upcoming slot this
-    │                                    week, else next Monday's Brief
-    │                                    ("Up Next · Next Week").
-    └── Card 2 — The Pipeline (bottom) ← "The Pipeline" label (sand mono), then the
-                                          animated diagram (.tg-pipe): vertical spine,
-                                          four diamond stage nodes (Scan → Filter →
-                                          Write → Drop), mono title (11px) + one-line
-                                          description (10px mute) per stage.
+Hero Intro band (background: var(--tg-bg))
+└── Identity Column (full width, carries its own 40/44px vertical padding)
+    ├── Kicker             ← "Operator-First · Proof-Over-Hype" (sand)
+    ├── Headline           ← "AI is remaking / the dealership." (display, 2 lines)
+    ├── Subline            ← one-sentence positioning paragraph
+    └── CTA Row            ← Primary "Read the latest →" (.tg-btn) + Ghost "Browse the index ↓"
+                               (ghost CTA anchors to #dispatch-index)
 ```
 
-## The pipeline animation
+## Parked: the card stack (`SHOW_HERO_CARDS = false`)
 
-One synchronized 9-second cycle (all keyframes share a single timeline — no `animation-delay`):
+The two-card right column — "Up Next" (live drop tracker) on top, "The Pipeline" (animated Scan → Filter → Write → Drop readout) on the bottom — still exists in the code, gated behind a `SHOW_HERO_CARDS` constant at the top of `hero-intro.tsx`. It is **not deleted**, just not rendered, so it can come back with a one-line flip:
 
-1. An orange **spark** (`.tg-pipe-runner`, rotated square) descends the spine, with a lit **trail** (`.tg-pipe-trail`) growing in lockstep behind it — the trail animates `scaleY` (not `height`) so it interpolates reliably and the spark never detaches from it.
-2. Each stage **node flares** (solid orange + glow) as the spark passes — pass-by at ~2% / 29% / 58% / 83% of the cycle — then settles to a warm translucent-orange "**visited**" state.
-3. Stage **titles brighten** mute → ink in the same rhythm (title inherits the stage container's animated color; descriptions stay mute).
-4. At 92% the spark reaches bottom; by 100% everything resets and the run begins again.
+- Flipping `SHOW_HERO_CARDS` to `true` restores: the two-column grid (`1.08fr 0.92fr`, `--tg-edge` right padding), the centered card stack (`.tg-hero-cards`), both cards (`.tg-hero-card`, frame-bordered, `rgba(10,10,10,0.85)` + blur fill), and the full pipeline animation (`.tg-pipe*` — spark + trail + diamond stage nodes, synchronized 9s cycle, `prefers-reduced-motion`-aware). None of that CSS or markup was removed.
+- Nothing else in this file changed structurally beyond that gate — the identity column, its copy, and the CTAs are unchanged.
 
-Per-stage keyframes live in `public-theme.css` (`tg-pipe-stage-a…d`, `tg-pipe-node-a…d`). Under `prefers-reduced-motion` the spark and trail are removed and nodes/titles rest statically in the visited/lit state. The spine/trail height is driven by the pipeline card's actual content height (no forced full-height stretch), since the card now sizes to its content rather than filling a strip.
+See the git history for this file (prior to the "park the hero cards" commit) for the full card/animation anatomy and rationale if picking this back up.
 
 Notes:
-- **Deliberately plain inside each card:** no stretching hairlines after labels, no dotted leaders, no heat gradients, no sign-off marks — earlier drafts stacked those and read as clutter over the busy video.
-- Pipeline stage nodes are **diamonds** (rotated squares) — echoing the ◆ section-diamond idiom and keeping the no-circles rule.
-- Up Next is not a link (the post doesn't exist yet).
-- Elements animate in with staggered `.tg-fade-up`.
 - The **cover post** (linked from the primary CTA) is always the newest published post, independent of the Featured pin. It is deliberately not re-displayed inside the hero band — the Featured Story band and the top of the Dispatch Index already surface it.
 - No gutter marker: the band, like all public bands, runs full-width since the rail was removed sitewide.

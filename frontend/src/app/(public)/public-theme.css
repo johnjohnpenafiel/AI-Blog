@@ -368,10 +368,11 @@
   border-color: var(--tg-orange);
 }
 
-/* ── Image placeholder slot (hero.mp4 is the only real asset; everything else
-      is a clearly-marked empty slot the operator fills later). NOTE: the old
-      "no images in the UI" constraint is an authorized deviation for the
-      redesign — these slots are intentional. ───────────────────────────────── */
+/* ── Image placeholder slot (everything here is a clearly-marked empty slot
+      the operator fills later — the hero video asset was pulled, so there is
+      no real asset live right now). NOTE: the old "no images in the UI"
+      constraint is an authorized deviation for the redesign — these slots
+      are intentional. ─────────────────────────────────────────────────── */
 .tg-img-slot {
   position: relative;
   background: var(--tg-halftone-field);
@@ -401,6 +402,17 @@
   background: rgba(255, 213, 0, 0.1);
   border: 1px dashed #ffd500;
   padding: 2px 7px;
+}
+
+/* ── Featured story frame (the cover dispatch, framed as a distinct artifact
+   rather than a bigger post-card) ──────────────────────────────────────── */
+.tg-featured-frame {
+  padding: 36px 40px 40px;
+}
+@media (max-width: 720px) {
+  .tg-featured-frame {
+    padding: 28px 24px 30px;
+  }
 }
 
 /* ── Themed article prose (markdown body → design's editorial voice) ──────── */
@@ -535,32 +547,58 @@
 }
 
 /* ── Reading-modes horizontal carousel ───────────────────────────────────────
-   Vertical filter list (left, given real width for balance) + a sideways
-   scroll-snap carousel of PORTRAIT post cards (right). Card width + symmetric
-   side padding (so the first/last card can center) are CSS-only, so the JS can
-   navigate with scrollIntoView and stay responsive. */
+   One bordered console (.tg-rm-console) houses both halves — a vertical filter
+   list (left) and a sideways scroll-snap carousel of PORTRAIT post cards
+   (right) — divided by a single hairline rather than two independently
+   bordered chunks floating apart. Card width + symmetric side padding (so the
+   first/last card can center) are CSS-only, so the JS can navigate with
+   scrollIntoView and stay responsive. */
+.tg-rm-console {
+  border: 1px solid var(--tg-frame);
+}
 .tg-rm-layout {
   display: grid;
-  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
-  gap: 44px;
-  align-items: start;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  align-items: stretch;
 }
 .tg-rm-filters {
   display: flex;
   flex-direction: column;
   gap: 1px; /* frame color shows through as hairline dividers */
   background: var(--tg-frame);
-  border: 1px solid var(--tg-frame);
+  border-right: 1px solid var(--tg-frame);
+}
+.tg-mode-card {
+  /* The console's height is CONSTANT (the stage block is fully deterministic —
+     fixed card height, always-reserved controls row, empty state sized to the
+     same block; see --rm-card-h below). Because the target height never moves,
+     the four cards can safely grow to share it: they render identical in every
+     state (0 / 1 / many carousel posts) and no leftover strip is ever exposed. */
+  flex: 1 1 auto;
 }
 .tg-rm-stage {
   min-width: 0;
+  padding: 30px 32px;
   /* the carousel's card width — also the unit for the side padding below */
   --rm-card-w: min(300px, 78vw);
+  /* the carousel card's FIXED height — the height authority for the whole
+     console. Post content never changes it (internal clamps + overflow:hidden
+     absorb variance), so the stage block is the same height with 1 card or 5. */
+  --rm-card-h: 450px;
 }
 .tg-rm-carousel {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+/* Empty state occupies exactly the carousel block's footprint
+   (12px viewport padding + card + 20px gap + 32px controls row),
+   so a format with zero posts renders the console at the same height. */
+.tg-rm-empty {
+  height: calc(var(--rm-card-h) + 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .tg-rm-viewport {
   display: flex;
@@ -594,6 +632,7 @@
 .tg-rm-card {
   flex: 0 0 var(--rm-card-w);
   width: var(--rm-card-w);
+  height: var(--rm-card-h); /* fixed — post content must never drive height */
   scroll-snap-align: center;
   display: flex;
   flex-direction: column;
@@ -729,33 +768,6 @@
   .tg-rm-card {
     transition: opacity 0.001s, border-color 0.001s;
     transform: none !important;
-  }
-}
-
-/* ── Hero text-protection shade over the video ────────────────────────────────
-   Desktop: left-to-right (identity column sits left, video shows through
-   right). Mobile: the hero stacks into one full-width column, so the shade
-   flips vertical and darkens overall to keep type legible over the video. */
-.tg-hero-shade {
-  /* protects BOTH ends: heavy on the left for the headline, moderate on the
-     right so the video's bright edge doesn't clash with the strip and the
-     band-edge gap beside it */
-  background: linear-gradient(
-    90deg,
-    rgba(10, 10, 10, 0.62) 0%,
-    rgba(10, 10, 10, 0.24) 48%,
-    rgba(10, 10, 10, 0.2) 68%,
-    rgba(10, 10, 10, 0.6) 100%
-  );
-}
-@media (max-width: 860px) {
-  .tg-hero-shade {
-    background: linear-gradient(
-      180deg,
-      rgba(10, 10, 10, 0.6) 0%,
-      rgba(10, 10, 10, 0.48) 55%,
-      rgba(10, 10, 10, 0.66) 100%
-    );
   }
 }
 
@@ -999,9 +1011,9 @@
     padding-right: 20px !important;
   }
 
-  /* Dispatch rows tighten the roomy desktop rhythm so more of the index fits. */
+  /* Dispatch rows tighten further on mobile so more of the index fits. */
   .tg-dispatch {
-    padding: 28px 0 30px !important;
+    padding: 22px 0 24px !important;
   }
 
   /* Hero: the strip (up next + pipeline) is genuine identity content, not a
@@ -1009,27 +1021,29 @@
      the identity column (top hairline set in the ≤860 block). */
 
   /* Reading modes: the two-column desktop layout (vertical filters | carousel)
-     stacks. The filters become one swipeable horizontal row of compact cards
-     (label + cadence only — the description is desktop detail); the carousel
-     sits full-width below it. */
+     stacks inside the same console. The filters become a compact 2×2 grid
+     (label + one-line description only; this is the original pre-carousel
+     mobile treatment, unchanged by the carousel redesign); the carousel sits
+     full-width below it, separated by a horizontal rule instead of the
+     desktop's vertical one. */
   .tg-rm-layout {
     grid-template-columns: minmax(0, 1fr) !important;
-    gap: 20px !important;
   }
   .tg-rm-filters {
-    flex-direction: row;
-    overflow-x: auto;
-    scrollbar-width: none;
-    margin-right: -20px; /* bleed to the frame edge; advertises the scroll */
-    padding-right: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* hairline separators between the 2×2 cells: the frame color shows
+       through 1px gaps, so the cards need opaque backgrounds below */
+    gap: 1px;
+    background: var(--tg-frame);
+    border-right: none;
+    border-bottom: 1px solid var(--tg-frame);
   }
-  .tg-rm-filters::-webkit-scrollbar {
-    display: none;
+  .tg-rm-stage {
+    padding: 24px 20px;
   }
   .tg-mode-card {
-    flex: 0 0 auto;
-    min-width: 152px;
-    padding: 12px !important;
+    padding: 14px !important;
     gap: 10px !important;
     background: var(--tg-band) !important;
   }
@@ -1037,10 +1051,9 @@
     background: color-mix(in srgb, var(--tg-orange) 8%, var(--tg-band)) !important;
   }
   .tg-mode-label {
-    font-size: 13px !important;
+    font-size: 14px !important;
   }
-  .tg-mode-desc,
-  .tg-mode-tag {
+  .tg-mode-desc {
     display: none !important;
   }
 
