@@ -7,6 +7,7 @@ import { ReadingModes } from "@/components/public/reading-modes";
 import {
   getFeaturedPost,
   listPublicPosts,
+  type PublicFeaturedPost,
   type PublicPostListItem,
 } from "@/lib/public-api";
 import { computeWeekSchedule } from "@/lib/week-schedule";
@@ -73,7 +74,12 @@ export default async function HomePage() {
   if (posts.length === 0) return <EmptyIndex />;
 
   const coverPost = posts[0];
-  const featuredPost = featured ?? coverPost;
+  // Keep the shape consistent (always a real PublicFeaturedPost) so the band
+  // can tell an actual editor's pin apart from the recency fallback.
+  const featuredPost: PublicFeaturedPost = featured ?? {
+    ...coverPost,
+    is_featured: false,
+  };
 
   // group by format for the reading-modes band
   const byFormat: Record<string, PublicPostListItem[]> = {};

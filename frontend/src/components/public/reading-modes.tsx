@@ -10,6 +10,13 @@ import { readLabel, shortDate } from "@/lib/public-format";
  * Reading-modes band — "How do you want to read?" The four formats as
  * selectable preference cards stacked VERTICALLY on the left; picking one drives
  * a HORIZONTAL (sideways-scrolling) CAROUSEL of PORTRAIT cards on the right.
+ * Both halves live inside one bordered console (`.tg-rm-console`), divided by
+ * a single hairline, so it reads as one module rather than two floating parts.
+ *
+ * Deliberately just two facts per format card — the name and what it's for.
+ * Publishing-schedule details (which day it drops) don't belong on a "how do
+ * you want to read" choice; that's process info, not a reading preference —
+ * it lives on /about instead.
  *
  * The carousel is native CSS scroll-snap (`.tg-rm-viewport`, `scroll-snap-type:
  * x mandatory`): trackpad / touch swiping comes for free and stays smooth, no
@@ -20,24 +27,19 @@ import { readLabel, shortDate } from "@/lib/public-format";
  * scroll (`centerCard`, never `scrollIntoView` — that could scroll the whole
  * page to the band). It opens on card #2 so a card peeks on both sides. Mode
  * change remounts it.
- *
- * Mode copy maps to our real cadence: Brief = Monday, Deep Dive = Thursday,
- * Roundup = Friday. Explainer is evergreen (deferred).
  */
 interface Mode {
   id: string; // matches Post.format
   label: string;
-  sub: string;
   desc: string;
   accent: string;
-  tag: string;
+  tag: string; // short technical name — used only in the empty-state copy
 }
 
 const MODES: Mode[] = [
   {
     id: "Brief",
     label: "2-Minute Intel",
-    sub: "Monday drops",
     desc: "The signal, stripped down. What changed, why it matters — nothing else.",
     accent: "var(--tg-orange)",
     tag: "BRIEF",
@@ -45,7 +47,6 @@ const MODES: Mode[] = [
   {
     id: "Deep Dive",
     label: "Go Further",
-    sub: "Thursday deep dives",
     desc: "Multi-source synthesis on the stories worth your full attention.",
     accent: "var(--tg-sand)",
     tag: "DEEP DIVE",
@@ -53,7 +54,6 @@ const MODES: Mode[] = [
   {
     id: "Roundup",
     label: "The Week",
-    sub: "Friday roundup",
     desc: "Everything that moved the needle — wrapped in one read before the weekend.",
     accent: "var(--tg-orange-bright)",
     tag: "ROUNDUP",
@@ -61,7 +61,6 @@ const MODES: Mode[] = [
   {
     id: "Explainer",
     label: "Start Here",
-    sub: "Evergreen guides",
     desc: "Understand the technology before the news. Fundamentals that don't expire.",
     accent: "var(--tg-orange)",
     tag: "EXPLAINER",
@@ -94,17 +93,14 @@ function ModeCard({
       onMouseLeave={() => setHov(false)}
       style={{
         textAlign: "left",
-        padding: "16px 18px",
-        border: `1px solid ${
-          active ? mode.accent : hov ? "rgba(232,80,20,0.32)" : "transparent"
-        }`,
+        padding: "18px 20px",
         background: active
           ? "color-mix(in srgb, var(--tg-orange) 8%, var(--tg-band))"
           : hov
             ? "color-mix(in srgb, var(--tg-orange) 4%, var(--tg-band))"
             : "var(--tg-band)",
         cursor: "pointer",
-        transition: "all 0.18s",
+        transition: "background 0.18s",
         display: "flex",
         gap: 14,
         alignItems: "flex-start",
@@ -121,55 +117,20 @@ function ModeCard({
       />
       <span style={{ flex: 1, minWidth: 0 }}>
         <span
-          style={{
-            display: "flex",
-            alignItems: "baseline",
-            justifyContent: "space-between",
-            gap: 8,
-            marginBottom: 6,
-          }}
-        >
-          <span
-            className="tg-mode-label"
-            style={{
-              fontFamily: "var(--tg-font-display)",
-              fontWeight: 700,
-              fontStretch: "112%",
-              fontSize: 16,
-              letterSpacing: "0.01em",
-              color: lit ? "var(--tg-ink)" : "#c8c4be",
-              transition: "color 0.18s",
-            }}
-          >
-            {mode.label}
-          </span>
-          <span
-            className="tg-mode-tag"
-            style={{
-              fontFamily: "var(--tg-font-mono)",
-              fontSize: 8,
-              letterSpacing: "0.14em",
-              color: mode.accent,
-              textTransform: "uppercase",
-              flexShrink: 0,
-            }}
-          >
-            {active ? "● " : ""}
-            {mode.tag}
-          </span>
-        </span>
-        <span
+          className="tg-mode-label"
           style={{
             display: "block",
-            fontFamily: "var(--tg-font-mono)",
-            fontSize: 9,
-            color: "var(--tg-faint)",
-            letterSpacing: "0.08em",
-            marginBottom: 7,
-            textTransform: "uppercase",
+            fontFamily: "var(--tg-font-display)",
+            fontWeight: 700,
+            fontStretch: "112%",
+            fontSize: 16,
+            letterSpacing: "0.01em",
+            color: lit ? "var(--tg-ink)" : "#c8c4be",
+            marginBottom: 6,
+            transition: "color 0.18s",
           }}
         >
-          {mode.sub}
+          {mode.label}
         </span>
         <span
           className="tg-mode-desc"
@@ -203,7 +164,10 @@ function CarouselCard({
   index: number;
   active: boolean;
 }) {
-  const points = post.tags.slice(0, 3);
+  // Max 2 tags: the card height is FIXED (--rm-card-h) so the console never
+  // resizes with content — 2 is the most that fits the worst case (3-line
+  // title + 3-line summary) without clipping.
+  const points = post.tags.slice(0, 2);
   return (
     <Link
       href={`/blog/${post.slug}`}
@@ -339,41 +303,46 @@ function Carousel({ posts, accent }: { posts: PublicPostListItem[]; accent: stri
         ))}
       </div>
 
-      {!single && (
-        <div className="tg-rm-controls">
-          <button
-            type="button"
-            className="tg-rm-nav"
-            aria-label="Previous dispatch"
-            disabled={active === 0}
-            onClick={() => goTo(active - 1)}
-          >
-            ‹
-          </button>
-          <div className="tg-rm-dots">
-            {posts.map((post, i) => (
-              <button
-                key={post.slug}
-                type="button"
-                className="tg-rm-dot"
-                aria-label={`Go to dispatch ${i + 1}`}
-                data-active={i === active}
-                onClick={() => goTo(i)}
-                style={{ background: i === active ? accent : undefined }}
-              />
-            ))}
-          </div>
-          <button
-            type="button"
-            className="tg-rm-nav"
-            aria-label="Next dispatch"
-            disabled={active === posts.length - 1}
-            onClick={() => goTo(active + 1)}
-          >
-            ›
-          </button>
+      {/* Always rendered — hidden (not removed) when there's nothing to
+          navigate, so the stage block keeps the exact same height with one
+          card as with five. The console must never resize with post count. */}
+      <div
+        className="tg-rm-controls"
+        style={{ visibility: single ? "hidden" : undefined }}
+        aria-hidden={single}
+      >
+        <button
+          type="button"
+          className="tg-rm-nav"
+          aria-label="Previous dispatch"
+          disabled={active === 0}
+          onClick={() => goTo(active - 1)}
+        >
+          ‹
+        </button>
+        <div className="tg-rm-dots">
+          {posts.map((post, i) => (
+            <button
+              key={post.slug}
+              type="button"
+              className="tg-rm-dot"
+              aria-label={`Go to dispatch ${i + 1}`}
+              data-active={i === active}
+              onClick={() => goTo(i)}
+              style={{ background: i === active ? accent : undefined }}
+            />
+          ))}
         </div>
-      )}
+        <button
+          type="button"
+          className="tg-rm-nav"
+          aria-label="Next dispatch"
+          disabled={active === posts.length - 1}
+          onClick={() => goTo(active + 1)}
+        >
+          ›
+        </button>
+      </div>
     </div>
   );
 }
@@ -410,83 +379,88 @@ export function ReadingModes({
           </span>
         </div>
 
-        <div className="tg-rm-layout">
-          {/* left: vertical filter list */}
-          <div className="tg-rm-filters">
-            {MODES.map((mode) => (
-              <ModeCard
-                key={mode.id}
-                mode={mode}
-                active={activeId === mode.id}
-                onSelect={setActiveId}
-              />
-            ))}
-          </div>
-
-          {/* right: header + vertical carousel */}
-          <div className="tg-rm-stage">
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                marginBottom: 16,
-                flexWrap: "wrap",
-              }}
-            >
-              <span
-                className="tg-pulse"
-                style={{ width: 6, height: 6, background: activeMode.accent }}
-              />
-              <span
-                style={{
-                  fontFamily: "var(--tg-font-mono)",
-                  fontSize: 11,
-                  letterSpacing: "0.16em",
-                  color: "var(--tg-ink)",
-                  textTransform: "uppercase",
-                }}
-              >
-                Latest in {activeMode.label}
-              </span>
-              <span
-                style={{
-                  flex: 1,
-                  height: 1,
-                  background: "var(--tg-frame-hair)",
-                  minWidth: 20,
-                }}
-              />
-              <span
-                style={{
-                  fontFamily: "var(--tg-font-mono)",
-                  fontSize: 9,
-                  letterSpacing: "0.14em",
-                  color: "var(--tg-faint)",
-                  textTransform: "uppercase",
-                }}
-              >
-                {String(modePosts.length).padStart(2, "0")} {activeMode.tag} ·{" "}
-                {activeMode.sub}
-              </span>
+        <div className="tg-rm-console">
+          <div className="tg-rm-layout">
+            {/* left: vertical filter list */}
+            <div className="tg-rm-filters">
+              {MODES.map((mode) => (
+                <ModeCard
+                  key={mode.id}
+                  mode={mode}
+                  active={activeId === mode.id}
+                  onSelect={setActiveId}
+                />
+              ))}
             </div>
 
-            {modePosts.length === 0 ? (
+            {/* right: header + vertical carousel */}
+            <div className="tg-rm-stage">
               <div
                 style={{
-                  fontFamily: "var(--tg-font-mono)",
-                  fontSize: 11,
-                  letterSpacing: "0.14em",
-                  color: "var(--tg-faint)",
-                  textTransform: "uppercase",
-                  padding: "20px 0",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  marginBottom: 16,
+                  flexWrap: "wrap",
                 }}
               >
-                {`// No ${activeMode.tag} dispatches yet`}
+                <span
+                  className="tg-pulse"
+                  style={{ width: 6, height: 6, background: activeMode.accent }}
+                />
+                <span
+                  style={{
+                    fontFamily: "var(--tg-font-mono)",
+                    fontSize: 11,
+                    letterSpacing: "0.16em",
+                    color: "var(--tg-ink)",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Latest in {activeMode.label}
+                </span>
+                <span
+                  style={{
+                    flex: 1,
+                    height: 1,
+                    background: "var(--tg-frame-hair)",
+                    minWidth: 20,
+                  }}
+                />
+                <span
+                  style={{
+                    fontFamily: "var(--tg-font-mono)",
+                    fontSize: 9,
+                    letterSpacing: "0.08em",
+                    color: "var(--tg-faint)",
+                    border: "1px solid var(--tg-frame-hair)",
+                    padding: "2px 7px",
+                  }}
+                >
+                  {String(modePosts.length).padStart(2, "0")}
+                </span>
               </div>
-            ) : (
-              <Carousel key={activeId} posts={modePosts} accent={activeMode.accent} />
-            )}
+
+              {modePosts.length === 0 ? (
+                /* .tg-rm-empty is sized to the carousel block's exact
+                   footprint — a format with zero posts renders the console
+                   at the same height as one with five. */
+                <div
+                  className="tg-rm-empty"
+                  style={{
+                    fontFamily: "var(--tg-font-mono)",
+                    fontSize: 11,
+                    letterSpacing: "0.14em",
+                    color: "var(--tg-faint)",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {`// No ${activeMode.tag} dispatches yet`}
+                </div>
+              ) : (
+                <Carousel key={activeId} posts={modePosts} accent={activeMode.accent} />
+              )}
+            </div>
           </div>
         </div>
       </div>

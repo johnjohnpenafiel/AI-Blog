@@ -5,12 +5,12 @@ import { formatAccent } from "@/lib/public-format";
 import type { WeekSchedule } from "@/lib/week-schedule";
 
 /**
- * Intro band — the index hero. The real hero.mp4 plays as the background
- * (darkened under a left-to-right protection gradient so type stays legible).
- * The left column is the publication's positioning statement. The right side is
- * two independent cards stacked vertically (a "grid column" of cards, not one
- * continuous architectural strip) — each fully bordered with padding on all
- * sides, separated by a gap so both have room to breathe:
+ * Intro band — the index hero. Solid dark background (the video background
+ * was pulled for now — revisit later). The left column is the publication's
+ * positioning statement.
+ *
+ * The right side (Up Next + The Pipeline animation, a two-card stack) is
+ * PARKED, not deleted — flip `SHOW_HERO_CARDS` to bring it back:
  *   1. UP NEXT (top) — the next scheduled drop (live from
  *      `computeWeekSchedule`): label, format name large in extended Archivo,
  *      day · time.
@@ -24,6 +24,9 @@ import type { WeekSchedule } from "@/lib/week-schedule";
  * The hero deliberately does NOT re-show the latest post (that headlines the
  * Featured band and tops the Dispatch Index below).
  */
+
+/** Parked for now (video background removed, cards hidden) — flip to restore. */
+const SHOW_HERO_CARDS = false;
 
 /** The automated pipeline, one line per stage — the strip's moving diagram. */
 const PIPELINE = [
@@ -58,46 +61,24 @@ export function HeroIntro({
       className="tg-band"
       style={{
         position: "relative",
+        background: "var(--tg-bg)",
         borderBottom: "1px solid var(--tg-frame-hair)",
         overflow: "hidden",
       }}
     >
-      {/* real hero video background */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          zIndex: 0,
-        }}
-      >
-        <source src="/hero.mp4" type="video/mp4" />
-      </video>
-      <div
-        className="tg-hero-shade"
-        style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}
-      />
-
-      {/* no vertical padding on the wrapper — the strip must run the band's
-          full height; the left column carries its own breathing room. The band
-          splits into two equal halves and the strip CENTERS itself inside the
-          right half (justifySelf) — equal breathing room on both of its sides
-          instead of hugging the frame edge. */}
+      {/* no vertical padding on the wrapper — the left column carries its own
+          breathing room. The card stack (when shown) centers itself in the
+          right half; hidden, the identity column just runs full width. */}
       <div
         className="tg-hero-grid tg-band-content"
         style={{
           position: "relative",
           zIndex: 1,
-          paddingRight: "var(--tg-edge)",
+          paddingRight: SHOW_HERO_CARDS ? "var(--tg-edge)" : undefined,
           display: "grid",
-          gridTemplateColumns: "1.08fr 0.92fr",
+          gridTemplateColumns: SHOW_HERO_CARDS
+            ? "1.08fr 0.92fr"
+            : "minmax(0, 1fr)",
         }}
       >
         {/* ── left: positioning statement ─────────────────────────────────── */}
@@ -171,7 +152,8 @@ export function HeroIntro({
           </div>
         </div>
 
-        {/* ── right: two stacked cards, breathing room between them ───────── */}
+        {/* ── right: two stacked cards, parked for now — SHOW_HERO_CARDS ──── */}
+        {SHOW_HERO_CARDS && (
         <div
           className="tg-fade-up tg-hero-cards"
           style={{
@@ -305,6 +287,7 @@ export function HeroIntro({
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
