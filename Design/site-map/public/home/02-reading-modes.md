@@ -23,9 +23,6 @@ Reading Modes band
         │       │                   identifying text; no format-token badge
         │       └── Mode Desc    ← one-sentence description (hidden on mobile)
         └── Stage (right, .tg-rm-stage)
-            ├── Results Rule Header ← pulse dot · "LATEST IN {mode}" · hairline ·
-            │                          boxed count token (echoes the filter-chip
-            │                          count idiom elsewhere on the site)
             ├── Carousel (.tg-rm-carousel — viewport + control row)
             │   ├── Viewport (.tg-rm-viewport) ← sideways scroll-snap row of PORTRAIT
             │   │     cards; centered card emphasized, left/right neighbors peek + dim;
@@ -42,6 +39,8 @@ Reading Modes band
 ## What was cut, and why
 
 The original build carried publishing-schedule detail on each filter card ("Monday drops", "Thursday deep dives", …) and repeated it a second time in the carousel's results header ("03 BRIEF · Monday drops"). That's process information — which day a format drops — not a reading preference; a reader choosing "how do I want to read this" doesn't need to know the cadence, and the site's `/about` page already covers it. Also cut: the mode card's top-right format-token badge (e.g. "● BRIEF") and its active-state "●" dot, which duplicated a selection signal the card's border/background/spine already gave — and the card's border itself, since background tint + spine is a cleaner single signal than border + tint + spine stacked together.
+
+A later pass removed the results header entirely (pulse dot · "Latest in {mode}" · hairline · count token) — it was pure style with no function: the mode card immediately to its left already names the active format, and the count added nothing a reader needed. The carousel now starts directly at the top of `.tg-rm-stage`.
 
 What each filter card carries now: **the name, and one sentence on what it's for.** Nothing else.
 
