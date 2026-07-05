@@ -352,7 +352,11 @@ export function ReadingModes({
 }: {
   postsByFormat: Record<string, PublicPostListItem[]>;
 }) {
-  const [activeId, setActiveId] = useState("Brief");
+  // Defaults to Deep Dive ("Go Further") — temporary, while most published
+  // posts happen to be that format, so the carousel looks full on first load
+  // instead of possibly landing on a sparser format. Revisit once posts are
+  // more evenly distributed across formats.
+  const [activeId, setActiveId] = useState("Deep Dive");
   const activeMode = MODES.find((m) => m.id === activeId) ?? MODES[0];
   const modePosts = (postsByFormat[activeId] ?? []).slice(0, 5);
 
