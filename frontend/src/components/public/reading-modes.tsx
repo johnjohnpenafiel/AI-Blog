@@ -397,54 +397,8 @@ export function ReadingModes({
               ))}
             </div>
 
-            {/* right: header + vertical carousel */}
+            {/* right: vertical carousel */}
             <div className="tg-rm-stage">
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  marginBottom: 16,
-                  flexWrap: "wrap",
-                }}
-              >
-                <span
-                  className="tg-pulse"
-                  style={{ width: 6, height: 6, background: activeMode.accent }}
-                />
-                <span
-                  style={{
-                    fontFamily: "var(--tg-font-mono)",
-                    fontSize: 11,
-                    letterSpacing: "0.16em",
-                    color: "var(--tg-ink)",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Latest in {activeMode.label}
-                </span>
-                <span
-                  style={{
-                    flex: 1,
-                    height: 1,
-                    background: "var(--tg-frame-hair)",
-                    minWidth: 20,
-                  }}
-                />
-                <span
-                  style={{
-                    fontFamily: "var(--tg-font-mono)",
-                    fontSize: 9,
-                    letterSpacing: "0.08em",
-                    color: "var(--tg-faint)",
-                    border: "1px solid var(--tg-frame-hair)",
-                    padding: "2px 7px",
-                  }}
-                >
-                  {String(modePosts.length).padStart(2, "0")}
-                </span>
-              </div>
-
               {modePosts.length === 0 ? (
                 /* .tg-rm-empty is sized to the carousel block's exact
                    footprint — a format with zero posts renders the console
