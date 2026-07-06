@@ -41,24 +41,10 @@ export function DispatchHeader({ post }: { post: PublicPostDetail }) {
       <div
         className="tg-band"
         style={{
-          display: "grid",
-          gridTemplateColumns: "var(--tg-gutter) 1fr",
           borderBottom: "1px solid var(--tg-frame-hair)",
           background: "var(--tg-band)",
         }}
       >
-        <div className="tg-band-marker" style={{ padding: "16px 0 16px 24px" }}>
-          <span
-            style={{
-              fontFamily: "var(--tg-font-mono)",
-              fontSize: 11,
-              letterSpacing: "0.1em",
-              color: "var(--tg-faint)",
-            }}
-          >
-            (↩)
-          </span>
-        </div>
         <div
           className="tg-band-content"
           style={{
@@ -115,23 +101,9 @@ export function DispatchHeader({ post }: { post: PublicPostDetail }) {
       <div
         className="tg-band"
         style={{
-          display: "grid",
-          gridTemplateColumns: "var(--tg-gutter) 1fr",
           borderBottom: "1px solid var(--tg-frame-hair)",
         }}
       >
-        <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 48 }}>
-          <span
-            style={{
-              fontFamily: "var(--tg-font-mono)",
-              fontSize: 11,
-              letterSpacing: "0.1em",
-              color: "var(--tg-orange)",
-            }}
-          >
-            (*)
-          </span>
-        </div>
         <div
           className="tg-band-content"
           style={{ padding: "44px var(--tg-content-pad) 48px 0" }}
@@ -213,24 +185,10 @@ export function DispatchHeader({ post }: { post: PublicPostDetail }) {
       <div
         className="tg-band"
         style={{
-          display: "grid",
-          gridTemplateColumns: "var(--tg-gutter) 1fr",
           borderBottom: "1px solid var(--tg-frame-hair)",
           background: "var(--tg-band)",
         }}
       >
-        <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 28 }}>
-          <span
-            style={{
-              fontFamily: "var(--tg-font-mono)",
-              fontSize: 11,
-              letterSpacing: "0.1em",
-              color: "var(--tg-faint)",
-            }}
-          >
-            (meta)
-          </span>
-        </div>
         <div
           className="tg-band-content tg-meta-strip"
           style={{
@@ -282,26 +240,11 @@ export function DispatchHeader({ post }: { post: PublicPostDetail }) {
       {/* lead image placeholder — hidden on mobile until real images ship */}
       <div
         className="tg-band tg-fig0-band"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "var(--tg-gutter) 1fr",
-          borderBottom: "1px solid var(--tg-frame-hair)",
-        }}
+        style={{ borderBottom: "1px solid var(--tg-frame-hair)" }}
       >
-        <div style={{ paddingLeft: 24, paddingTop: 40 }}>
-          <span
-            style={{
-              fontFamily: "var(--tg-font-mono)",
-              fontSize: 11,
-              letterSpacing: "0.1em",
-              color: "var(--tg-faint)",
-            }}
-          >
-            (fig.0)
-          </span>
-        </div>
         <div
           style={{
+            paddingLeft: "var(--tg-edge)",
             paddingRight: "var(--tg-content-pad)",
             paddingTop: 40,
             paddingBottom: 44,

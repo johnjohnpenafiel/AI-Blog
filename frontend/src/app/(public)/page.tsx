@@ -7,8 +7,10 @@ import { ReadingModes } from "@/components/public/reading-modes";
 import {
   getFeaturedPost,
   listPublicPosts,
+  type PublicFeaturedPost,
   type PublicPostListItem,
 } from "@/lib/public-api";
+import { computeWeekSchedule } from "@/lib/week-schedule";
 
 export const dynamic = "force-dynamic";
 
@@ -23,25 +25,10 @@ function EmptyIndex() {
   return (
     <div
       className="tg-band"
-      style={{
-        display: "grid",
-        gridTemplateColumns: "var(--tg-gutter) 1fr",
-      }}
+      style={{}}
     >
-      <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 48 }}>
-        <span
-          style={{
-            fontFamily: "var(--tg-font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.1em",
-            color: "var(--tg-faint)",
-          }}
-        >
-          (00)
-        </span>
-      </div>
       <div className="tg-band-content" style={{ padding: "48px 32px 64px 0" }}>
-        <span className="tg-kicker">{"// The Index"}</span>
+        <span className="tg-kicker">{"Operator-First · Proof-Over-Hype"}</span>
         <h1
           style={{
             fontFamily: "var(--tg-font-display)",
@@ -54,9 +41,9 @@ function EmptyIndex() {
             margin: "16px 0 24px",
           }}
         >
-          Latest
+          AI is remaking
           <br />
-          Dispatches
+          the dealership.
         </h1>
         <p
           style={{
@@ -79,7 +66,7 @@ export default async function HomePage() {
   // featured band is fetched alongside: it resolves the editor's-choice pin
   // (or the most-recent fallback) independently of the index window, so a
   // pinned older post still headlines the band. Hero + index stay newest-first.
-  const [{ items: posts, total }, featured] = await Promise.all([
+  const [{ items: posts }, featured] = await Promise.all([
     listPublicPosts({ limit: 50 }),
     getFeaturedPost(),
   ]);
@@ -87,7 +74,12 @@ export default async function HomePage() {
   if (posts.length === 0) return <EmptyIndex />;
 
   const coverPost = posts[0];
-  const featuredPost = featured ?? coverPost;
+  // Keep the shape consistent (always a real PublicFeaturedPost) so the band
+  // can tell an actual editor's pin apart from the recency fallback.
+  const featuredPost: PublicFeaturedPost = featured ?? {
+    ...coverPost,
+    is_featured: false,
+  };
 
   // group by format for the reading-modes band
   const byFormat: Record<string, PublicPostListItem[]> = {};
@@ -95,19 +87,13 @@ export default async function HomePage() {
     if (p.format) (byFormat[p.format] ??= []).push(p);
   }
 
-  const sectionsCount = new Set(
-    posts.map((p) => p.section).filter(Boolean),
-  ).size;
-  const formatsCount = new Set(posts.map((p) => p.format).filter(Boolean)).size;
+  // Live weekly cadence for the hero masthead — which of this week's
+  // Mon/Thu/Fri drops have landed, are upcoming, or passed without a post.
+  const weekSchedule = computeWeekSchedule(posts);
 
   return (
     <>
-      <HeroIntro
-        coverPost={coverPost}
-        totalCount={total}
-        sectionsCount={sectionsCount}
-        formatsCount={formatsCount}
-      />
+      <HeroIntro coverPost={coverPost} weekSchedule={weekSchedule} />
       <ReadingModes postsByFormat={byFormat} />
       <FeaturedStory post={featuredPost} />
       <DispatchIndex posts={posts} hotSlug={coverPost.slug} />

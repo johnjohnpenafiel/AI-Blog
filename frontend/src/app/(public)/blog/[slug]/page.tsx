@@ -75,26 +75,7 @@ export default async function PostPage({ params }: PostPageProps) {
       <DispatchHeader post={post} />
 
       {/* article body */}
-      <div
-        className="tg-band"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "var(--tg-gutter) 1fr",
-          background: "var(--tg-bg)",
-        }}
-      >
-        <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 44 }}>
-          <span
-            style={{
-              fontFamily: "var(--tg-font-mono)",
-              fontSize: 11,
-              letterSpacing: "0.1em",
-              color: "var(--tg-faint)",
-            }}
-          >
-            (01)
-          </span>
-        </div>
+      <div className="tg-band" style={{ background: "var(--tg-bg)" }}>
         <div
           className="tg-band-content"
           style={{ padding: "44px var(--tg-content-pad) 8px 0" }}

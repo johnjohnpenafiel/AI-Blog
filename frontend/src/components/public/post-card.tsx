@@ -112,8 +112,8 @@ export function PostCard({
           style={{
             fontFamily: "var(--tg-font-mono)",
             fontWeight: 500,
-            fontSize: "13.5px",
-            lineHeight: 1.28,
+            fontSize: "14px",
+            lineHeight: 1.3,
             letterSpacing: "0.005em",
             color: "var(--tg-ink)",
             margin: "0 0 9px",
@@ -126,8 +126,8 @@ export function PostCard({
         <p
           style={{
             fontFamily: "var(--tg-font-mono)",
-            fontSize: 10,
-            lineHeight: 1.6,
+            fontSize: 11,
+            lineHeight: 1.65,
             letterSpacing: "0.02em",
             color: "var(--tg-mute)",
             margin: "0 0 18px",
