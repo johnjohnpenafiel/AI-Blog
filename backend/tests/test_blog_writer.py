@@ -94,7 +94,8 @@ def test_happy_path_returns_validated_post(monkeypatch):
     assert post.sources[0].url == "https://example.com/voice-ai"
 
     create_kwargs = mock_client.messages.create.call_args.kwargs
-    assert create_kwargs["model"] == "claude-sonnet-4-20250514"
+    assert create_kwargs["model"] == "claude-sonnet-5"
+    assert create_kwargs["thinking"] == {"type": "disabled"}
     assert create_kwargs["tools"] == [SUBMIT_POST_TOOL]
     assert create_kwargs["tool_choice"] == {"type": "tool", "name": TOOL_NAME}
 

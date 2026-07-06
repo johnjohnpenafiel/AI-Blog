@@ -41,7 +41,7 @@ The audience is dealership operators, automotive tech executives, and industry o
                                  ▼
                     ┌─────────────────────────┐
                     │   Anthropic Claude API  │
-                    │  (claude-sonnet-4-...)  │
+                    │    (claude-sonnet-5)    │
                     └─────────────────────────┘
 ```
 
@@ -51,7 +51,7 @@ The audience is dealership operators, automotive tech executives, and industry o
 - **Backend** (`backend/`): Python + FastAPI. Routers: `auth.py`, `posts.py` (admin), `public.py` (public read-only), `pipeline.py`, `settings.py`. Services: `news_fetcher.py` (Perplexity, open-canvas sourcing), `content_classifier.py` (Haiku promo-vs-news + importance classifier), `blog_writer.py` (Claude, format-aware generation + Roundup), `pipeline.py` (`run_pipeline` + `run_roundup` orchestrators), `publisher.py` (status routing + `publish_due_posts` bulk-publisher), `evals.py` (in-loop generation-quality judge). Canonical category vocabulary lives in `taxonomy.py`. `scheduler.py` runs APScheduler in-process for the **Mon / Thu / Fri** cron — each day mapped to a format (Mon → Brief, Thu → Deep Dive, Fri → Roundup) — AND a 1-minute interval job (`scheduled-publisher`) that flips accepted posts whose `scheduled_at` has passed to `published`.
 - **Database**: PostgreSQL. Schema managed by SQLAlchemy models + Alembic migrations.
 - **External services**:
-  - Anthropic Claude API (`claude-sonnet-4-20250514`) — blog generation.
+  - Anthropic Claude API (`claude-sonnet-5`) — blog generation.
   - Perplexity Sonar API — news aggregation with intent-based queries.
 - **Auth**: NextAuth.js, credentials provider, single seeded admin user, 2-hour session TTL. Passwords stored as bcrypt hashes via `passlib`.
 - **Environment**: Docker Compose for local dev. Production hosting is split across Vercel (frontend), Render (backend), and Neon (Postgres) — see the Hosting section below.
@@ -103,7 +103,7 @@ The audience is dealership operators, automotive tech executives, and industry o
 - **SQLAlchemy + Alembic**: Mature combo; Alembic gives us migration history, which matters because schema changes flow through the architecture-change gate (see CLAUDE.md).
 - **APScheduler in-process**: Simple deployment — no separate worker process for the cron. Tradeoff: a horizontally scaled backend would need to designate one scheduler-owning worker. Not a concern at current scale (single instance).
 - **NextAuth credentials provider**: Single admin, no SSO, no third-party identity. Credentials provider is the lowest-friction option. 2-hour session TTL chosen to balance convenience against the risk of an unattended laptop with the admin dashboard open.
-- **Anthropic Claude (`claude-sonnet-4-20250514`)**: Sonnet hits the cost/quality balance for 600–900-word posts. Pinned to a specific snapshot ID so generation behavior doesn't drift mid-cycle.
+- **Anthropic Claude (`claude-sonnet-5`)**: Sonnet hits the cost/quality balance for 600–900-word posts. The original pin, `claude-sonnet-4-20250514`, was retired by Anthropic (404s as of 2026-07-06 — see that day's decision-log entry); Sonnet 5 has no dated snapshot, so we pin the bare alias and accept provider-side drift. Thinking is explicitly disabled in `blog_writer.py` to keep generation behavior (and token budget) equivalent to the Sonnet 4 setup.
 - **Perplexity Sonar (`/search` endpoint)**: Replaces a build-our-own news fetcher + relevance filter. Sonar's hybrid semantic + LLM-ranked retrieval understands intent and returns pre-filtered results with source citations, removing a whole layer of curation logic from our codebase. We target the dedicated `/search` endpoint (not `/chat/completions`) — it returns raw retrieved articles without the LLM synthesis step we'd otherwise discard. See the 2026-05-13 decision-log entry for the full rationale.
 
 ## Hosting
@@ -115,7 +115,7 @@ Production deployment splits across three vendors, each picked for what it does 
 | Frontend (Next.js 16) | Vercel | Free | $0 |
 | Backend (FastAPI + APScheduler) | Render | Starter (always-on web service) | $7/mo |
 | Database (Postgres 17) | Neon | Free (3 GB) | $0 |
-| Post generation | Anthropic Claude Sonnet 4 | Pay-per-use | ~$0.50–1.50/mo |
+| Post generation | Anthropic Claude Sonnet 5 | Pay-per-use | ~$0.50–1.50/mo |
 | News fetching | Perplexity Sonar | Pay-per-use | ~$0.50–1.50/mo |
 
 Notes:
@@ -241,7 +241,7 @@ Articles are grouped into section clusters; the **`MIN_ARTICLES = 3` threshold a
 
 ### Step 2 — Blog generation (`backend/services/blog_writer.py`)
 
-Send the winning section's articles to Claude (`claude-sonnet-4-...`) with a **format-aware** prompt. Generation is driven by `FORMAT_SPECS` — **Brief** (200–400w, Smart-Brevity skeleton) and **Deep Dive** (600–900w, multi-source synthesis) — each carrying the **operator-first / proof-over-hype POV** baked into the prompt (replaces the old "authoritative, forward-looking" tone line). Claude returns `title`, `slug`, `summary`, `meta_description`, `body` (Markdown), `tags` (1–2 from the section's vocabulary), and `sources`. The post is attributed to the winning `section` and the run's `format`.
+Send the winning section's articles to Claude (`claude-sonnet-5`) with a **format-aware** prompt. Generation is driven by `FORMAT_SPECS` — **Brief** (200–400w, Smart-Brevity skeleton) and **Deep Dive** (600–900w, multi-source synthesis) — each carrying the **operator-first / proof-over-hype POV** baked into the prompt (replaces the old "authoritative, forward-looking" tone line). Claude returns `title`, `slug`, `summary`, `meta_description`, `body` (Markdown), `tags` (1–2 from the section's vocabulary), and `sources`. The post is attributed to the winning `section` and the run's `format`.
 
 > **`story_type` is a stored column but is not yet populated by generation** — the generator doesn't classify it, so it is currently always NULL. (Captured as a known gap; wiring it is future work.)
 

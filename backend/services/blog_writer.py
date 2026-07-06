@@ -12,8 +12,16 @@ from taxonomy import STORY_TYPES
 
 logger = logging.getLogger(__name__)
 
-MODEL = "claude-sonnet-4-20250514"
+# claude-sonnet-4-20250514 was retired by Anthropic (404 as of 2026-07-06, killed
+# the Mon Jul 6 scheduled run). claude-sonnet-5 is the designated replacement;
+# no dated snapshot exists for it, so we pin the bare alias.
+MODEL = "claude-sonnet-5"
 MAX_TOKENS = 4096
+
+# Sonnet 5 runs adaptive thinking by default when `thinking` is omitted; Sonnet 4
+# ran without thinking. Disable it explicitly so behavior (and the max_tokens
+# budget, which thinking would share) stays what the pipeline was tuned for.
+THINKING = {"type": "disabled"}
 TOOL_NAME = "submit_post"
 
 # Editorial point of view — threads through every post (PLANNING.md → v2 POV).
@@ -171,6 +179,7 @@ def generate_post(
     response = client.messages.create(
         model=MODEL,
         max_tokens=MAX_TOKENS,
+        thinking=THINKING,
         tools=[SUBMIT_POST_TOOL],
         tool_choice={"type": "tool", "name": TOOL_NAME},
         messages=[{"role": "user", "content": prompt}],
@@ -254,6 +263,7 @@ def generate_roundup(posts: list[dict]) -> GeneratedPost:
     response = client.messages.create(
         model=MODEL,
         max_tokens=MAX_TOKENS,
+        thinking=THINKING,
         tools=[SUBMIT_ROUNDUP_TOOL],
         tool_choice={"type": "tool", "name": ROUNDUP_TOOL_NAME},
         messages=[{"role": "user", "content": prompt}],
