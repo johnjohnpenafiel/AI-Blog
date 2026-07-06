@@ -169,6 +169,20 @@ export function ReviewPanel({
               <MarkdownSkeleton />
             ) : (
               <div className="flex flex-col gap-8">
+                {detail.image_url && (
+                  <section className="flex flex-col gap-2" data-testid="review-cover">
+                    <h3 className="font-mono text-[11px] tracking-[0.25em] text-dim uppercase">
+                      Cover Image
+                    </h3>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- patched Next.js, see AGENTS.md */}
+                    <img
+                      src={detail.image_url}
+                      alt={detail.title}
+                      className="w-full border border-border"
+                      style={{ aspectRatio: "16 / 9", objectFit: "cover" }}
+                    />
+                  </section>
+                )}
                 <section>
                   <MarkdownBody source={detail.content} />
                 </section>

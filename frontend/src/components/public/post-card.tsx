@@ -31,6 +31,20 @@ export function PostCard({
         className="tg-img-slot"
         style={{ aspectRatio: "5 / 4", margin: "13px 13px 0" }}
       >
+        {post.image_url && (
+          // eslint-disable-next-line @next/next/no-img-element -- plain <img>: this is a patched Next.js; see AGENTS.md
+          <img
+            src={post.image_url}
+            alt={post.title}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        )}
         {figNumber != null && (
           <span
             style={{

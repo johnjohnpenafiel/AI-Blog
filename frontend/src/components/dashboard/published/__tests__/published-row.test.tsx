@@ -19,6 +19,7 @@ const POST: PostListItem = {
   section: "Customer Experience",
   format: "Deep Dive",
   story_type: "Vendor Launch",
+  image_url: null,
   eval_pov: 2,
   eval_format: 1,
   eval_grounding: 2,
