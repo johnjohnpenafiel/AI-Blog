@@ -95,7 +95,7 @@ def test_happy_path_returns_validated_post(monkeypatch):
 
     create_kwargs = mock_client.messages.create.call_args.kwargs
     assert create_kwargs["model"] == "claude-sonnet-5"
-    assert create_kwargs["thinking"] == {"type": "disabled"}
+    assert create_kwargs["extra_body"] == {"thinking": {"type": "disabled"}}
     assert create_kwargs["tools"] == [SUBMIT_POST_TOOL]
     assert create_kwargs["tool_choice"] == {"type": "tool", "name": TOOL_NAME}
 
@@ -252,3 +252,19 @@ def test_invalid_story_type_raises(monkeypatch):
             generate_post([_article()])
     finally:
         patcher.stop()
+
+
+# --- SDK compatibility ----------------------------------------------------
+
+def test_create_kwargs_exist_on_installed_sdk():
+    """The other tests mock the Anthropic client, which accepts ANY kwarg —
+    so a param the pinned SDK doesn't support (e.g. `thinking` on 0.40.0)
+    passes tests and TypeErrors in production. Pin every kwarg we pass to
+    the real method signature."""
+    import inspect
+
+    import anthropic
+
+    sig = inspect.signature(anthropic.resources.messages.Messages.create)
+    for kwarg in ("model", "max_tokens", "tools", "tool_choice", "messages", "extra_body"):
+        assert kwarg in sig.parameters, f"{kwarg!r} not accepted by installed anthropic SDK"
