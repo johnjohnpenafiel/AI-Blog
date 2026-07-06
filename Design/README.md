@@ -108,7 +108,7 @@ Full anatomy in `site-map/public/_shell.md`; the rules:
 | **Dispatch row** | `.tg-dispatch` — full-width link row; hover washes the row faint-orange and turns index/read affordances orange. |
 | **Share chip** | `.tg-share-chip` — 34px square mono button (`X` / `in` / `↗`); hover inverts to orange. |
 | **Rule header** | pulse dot + mono label + stretching hairline + right-aligned mono count. |
-| **Image slot** | `.tg-img-slot` — framed placeholder on the halftone field with an "IMAGE" watermark. **An authorized deviation from the old "no images" constraint**: the redesign reserves real slots (hero video is the only live asset; per-post image generation will fill the rest). Hidden on mobile until real assets ship. |
+| **Image slot** | `.tg-img-slot` — holds the post's **AI-generated cover** (fal.ai/Recraft, pipeline image step) via `object-fit: cover`, falling back to the framed placeholder + badge when `image_url` is null. Wired in the featured 16:9 and card 5:4 slots and the dashboard review panel. Reverses the old "no images" constraint; hidden on mobile per the redesign. |
 | **Needs-content marker** | `.tg-needs` — loud dashed yellow chip marking intentional content gaps (the one sanctioned dashed border). |
 | **Prose** (`.tg-prose`) | Article markdown: Archivo paragraphs (first paragraph enlarged as the lede), extended-Archivo headings, `>`-marker mono-orange lists, orange-rule blockquote pull quotes, mono code on `--tg-band`. |
 

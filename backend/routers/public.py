@@ -42,6 +42,7 @@ def _to_list_item(post: Post) -> PublicPostListItem:
         tags=list(post.tags),
         section=post.section,
         format=post.format,
+        image_url=post.image_url,
         published_at=post.published_at,
         read_time_minutes=_read_time_minutes(post.content),
     )
@@ -57,6 +58,7 @@ def _to_featured(post: Post, *, is_featured: bool) -> PublicFeaturedPost:
         tags=list(post.tags),
         section=post.section,
         format=post.format,
+        image_url=post.image_url,
         published_at=post.published_at,
         read_time_minutes=_read_time_minutes(post.content),
         is_featured=is_featured,
@@ -131,6 +133,7 @@ def get_public_post(slug: str, db: Session = Depends(get_db)) -> PublicPostDetai
         tags=list(post.tags),
         section=post.section,
         format=post.format,
+        image_url=post.image_url,
         published_at=post.published_at,
         read_time_minutes=_read_time_minutes(post.content),
         sources=[

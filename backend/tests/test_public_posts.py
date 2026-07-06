@@ -165,6 +165,7 @@ def test_list_public_posts_response_shape(
         "tags",
         "section",
         "format",
+        "image_url",
         "published_at",
         "read_time_minutes",
     }
@@ -320,6 +321,7 @@ def test_featured_response_shape(client: TestClient, db: Session) -> None:
         "tags",
         "section",
         "format",
+        "image_url",
         "published_at",
         "read_time_minutes",
         "is_featured",

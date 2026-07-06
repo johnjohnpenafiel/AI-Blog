@@ -96,6 +96,11 @@ class Post(Base):
     format: Mapped[str | None] = mapped_column(String, nullable=True)
     story_type: Mapped[str | None] = mapped_column(String, nullable=True)
 
+    # AI-generated cover image URL (fal.ai/Recraft, set by the pipeline's image
+    # step). Nullable: pre-feature posts and any run where the fail-soft image
+    # step failed stay NULL — the UI renders a placeholder in that case.
+    image_url: Mapped[str | None] = mapped_column(String, nullable=True)
+
     # v2 generation-eval scores (the in-loop Haiku judge). All nullable —
     # NULL means "not scored": pre-eval posts, runs where the fail-soft eval was
     # skipped, and regenerated posts (regen has no source excerpts, so its stale

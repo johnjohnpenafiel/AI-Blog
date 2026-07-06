@@ -17,6 +17,7 @@ from schemas.evals import EvalResult
 from services import publisher
 from services.blog_writer import generate_post, generate_roundup
 from services.evals import evaluate_post
+from services.image_generator import generate_post_image
 from services.news_fetcher import fetch_qualifying_articles
 
 logger = logging.getLogger(__name__)
@@ -210,10 +211,19 @@ def run_pipeline(db: Session, *, format: str = "Deep Dive") -> PipelineResult:
         section=section,
         excerpts_by_url={a.url: a.snippet for a in articles},
     )
+    # Rotation index for the image art director — count of prior posts, so device
+    # and backdrop advance across the run history. Read before persist (which adds
+    # this post) so it's the new post's 0-based index.
+    post_index = db.query(Post).count()
     post = persist_generated_post(
         db, generated, mode=mode, attempt=1, section=section, format=format
     )
     apply_eval(post, eval_result)
+    # Cover image — fail-soft: a failure returns None, leaving image_url NULL and the
+    # run intact. Included in the single commit below (no extra commit needed).
+    post.image_url = generate_post_image(
+        title=post.title, summary=post.summary, section=post.section, index=post_index
+    )
 
     publisher.route_post(post, mode)
     settings.last_run_at = datetime.now(timezone.utc)
@@ -274,10 +284,15 @@ def run_roundup(db: Session) -> PipelineResult:
         section=None,
         excerpts_by_url={f"/blog/{p.slug}": (p.summary or "") for p in week_posts},
     )
+    post_index = db.query(Post).count()
     post = persist_generated_post(
         db, generated, mode=mode, attempt=1, section=None, format="Roundup"
     )
     apply_eval(post, eval_result)
+    # Cover image — fail-soft (see run_pipeline). Roundup has no section (None).
+    post.image_url = generate_post_image(
+        title=post.title, summary=post.summary, section=post.section, index=post_index
+    )
 
     publisher.route_post(post, mode)
     settings.last_run_at = datetime.now(timezone.utc)
