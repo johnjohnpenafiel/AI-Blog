@@ -27,9 +27,6 @@ Fit-to-width "THE GARAGE AI" masthead stage piece (JS-measured font size).
 ### LogoMark (`logo-mark.tsx`)
 The two-ring vector — the only round geometry in the system. Used in the Public Footer and Bottom Nav.
 
-### Ticker (`ticker.tsx`)
-Masthead headline loop. `buildTickerItems` interleaves real post titles ("—") with brand taglines ("◆", accent).
-
 ### Share Chips (`share-chips.tsx`)
 Bare mono share tokens: `X` · `in` · `↗` (copy-link, flashes ✓ in sand).
 

@@ -12,10 +12,8 @@ Stage (.tg-stage)
 └── Stage Frame (.tg-frame .tg-stage-frame)      ← 3px gray frame inset around the viewport
     ├── Scanline (.tg-scanline)                  ← faint texture overlay across the whole stage
     ├── Masthead (header)                        ← pinned on desktop, in-flow on mobile
-    │   ├── Wordmark Block (.tg-masthead-brand)  ← fit-to-width "THE GARAGE AI" (Wordmark)
-    │   └── Ticker (.tg-ticker)                  ← infinite-scroll headline band
-    │       └── Ticker Items                     ← real dispatch headlines ("—") interleaved
-    │                                              with brand taglines ("◆", accent)
+    │   └── Wordmark Block (.tg-masthead-brand)  ← fit-to-width "THE GARAGE AI" (Wordmark);
+    │                                              closes with its own bottom rule (no ticker below it)
     └── Scroll Region (.tg-stage-scroll)
         ├── {page bands}                         ← the page's content (see per-page files)
         └── Public Footer                        ← last band inside the scroll region
@@ -28,7 +26,8 @@ Bottom Nav (fixed, floats over the stage)
 | Element | Notes |
 |---|---|
 | **Wordmark** | `Wordmark` component — Archivo 700 extended, JS-fitted to span the full masthead width, orange. |
-| **Ticker** | `Ticker` component — pure-CSS loop; items built by `buildTickerItems` (recent post titles + taglines). |
+
+The scrolling headline ticker (`Ticker` / `buildTickerItems`) that previously ran under the wordmark was removed — the masthead is wordmark-only now. `layout.tsx` is a plain (non-async) server component again since it no longer needs to fetch posts for ticker content.
 
 ### Public Footer
 - **Source:** `frontend/src/components/public/public-footer.tsx`

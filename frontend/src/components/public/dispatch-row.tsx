@@ -4,19 +4,16 @@ import type { PublicPostListItem } from "@/lib/public-api";
 import { formatAccent, longDate, readLabel } from "@/lib/public-format";
 
 /**
- * Editorial dispatch row — the index list item. Running index in the gutter,
- * meta line (date · ◆ section · format · read · LIVE), an extended-Archivo
- * headline, the summary, and the "Read dispatch →" affordance. Hover states are
- * pure CSS (`.tg-dispatch*`).
+ * Editorial dispatch row — the index list item: meta line (date · ◆ section ·
+ * format · read · LIVE), an extended-Archivo headline, the summary, and the
+ * "Read dispatch →" affordance. Hover states are pure CSS (`.tg-dispatch*`).
  */
 export function DispatchRow({
   post,
-  index,
   hot = false,
   last = false,
 }: {
   post: PublicPostListItem;
-  index: number;
   hot?: boolean;
   last?: boolean;
 }) {
@@ -26,44 +23,20 @@ export function DispatchRow({
       href={`/blog/${post.slug}`}
       className="tg-dispatch"
       style={{
-        padding: "38px 0 40px",
+        padding: "28px 0 30px",
         borderBottom: last ? "none" : "1px solid var(--tg-frame-hair)",
       }}
     >
-      <div className="tg-band-marker" style={{ paddingLeft: 24 }}>
-        <span
-          className="tg-dispatch-index"
-          style={{
-            fontFamily: "var(--tg-font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.1em",
-          }}
-        >
-          ({String(index + 1).padStart(2, "0")})
-        </span>
-      </div>
-
-      <div className="tg-band-content" style={{ paddingRight: 32, maxWidth: 1020 }}>
+      <div className="tg-band-content" style={{ paddingRight: 32, maxWidth: 960 }}>
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 16,
-            marginBottom: 16,
+            gap: 14,
+            marginBottom: 12,
             flexWrap: "wrap",
           }}
         >
-          {/* on mobile the gutter is collapsed — the index joins the meta line */}
-          <span
-            className="tg-dispatch-index tg-m-only"
-            style={{
-              fontFamily: "var(--tg-font-mono)",
-              fontSize: 11,
-              letterSpacing: "0.1em",
-            }}
-          >
-            ({String(index + 1).padStart(2, "0")})
-          </span>
           <span
             style={{
               fontFamily: "var(--tg-font-mono)",
@@ -131,10 +104,10 @@ export function DispatchRow({
             fontFamily: "var(--tg-font-display)",
             fontWeight: 700,
             fontStretch: "112%",
-            fontSize: "clamp(28px, 4vw, 56px)",
-            lineHeight: 1.02,
-            letterSpacing: "-0.015em",
-            margin: "0 0 18px",
+            fontSize: "clamp(22px, 3vw, 38px)",
+            lineHeight: 1.06,
+            letterSpacing: "-0.012em",
+            margin: "0 0 12px",
           }}
         >
           {post.title}
@@ -145,12 +118,12 @@ export function DispatchRow({
             fontFamily: "var(--tg-font-display)",
             fontWeight: 400,
             fontStretch: "110%",
-            fontSize: 17,
+            fontSize: 15,
             lineHeight: 1.5,
             letterSpacing: "0.002em",
             color: "var(--tg-mute)",
-            margin: "0 0 18px",
-            maxWidth: 680,
+            margin: "0 0 14px",
+            maxWidth: 640,
           }}
         >
           {post.summary}

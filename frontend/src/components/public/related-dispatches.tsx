@@ -14,23 +14,9 @@ export function RelatedDispatches({ posts }: { posts: PublicPostListItem[] }) {
     <div
       className="tg-band"
       style={{
-        display: "grid",
-        gridTemplateColumns: "var(--tg-gutter) 1fr",
         background: "var(--tg-bg)",
       }}
     >
-      <div className="tg-band-marker" style={{ paddingLeft: 24, paddingTop: 32 }}>
-        <span
-          style={{
-            fontFamily: "var(--tg-font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.1em",
-            color: "var(--tg-faint)",
-          }}
-        >
-          (rel)
-        </span>
-      </div>
       <div
         className="tg-band-content"
         style={{ padding: "34px var(--tg-content-pad) 8px 0" }}
