@@ -29,27 +29,42 @@ export function PublishedRow({
   return (
     <ChamferedPanel tier="component" size="card" className="w-full">
       <div data-testid="published-row">
-        <div className="px-5 pt-4 pb-3">
-          {/* Index — topic + kind of post. (Status omitted: this is the Published
-              tab, so "published" is implied.) */}
-          {taxonomy.length > 0 && (
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10px] tracking-[0.2em] text-dim uppercase">
-              {taxonomy.map((part, i) => (
-                <span key={part} className="flex items-center gap-2">
-                  {i > 0 && <span aria-hidden>·</span>}
-                  <span>{part}</span>
-                </span>
-              ))}
-            </div>
+        <div className="flex gap-4 px-5 pt-4 pb-3">
+          {/* AI-generated cover thumbnail — omitted (not placeholdered) when a
+              post has no cover, per the design rule against empty image boxes. */}
+          {post.image_url && (
+            // eslint-disable-next-line @next/next/no-img-element -- patched Next.js, see AGENTS.md
+            <img
+              src={post.image_url}
+              alt=""
+              data-testid="published-cover"
+              className="hidden w-[104px] shrink-0 self-start border border-border object-cover sm:block"
+              style={{ aspectRatio: "16 / 9", objectFit: "cover" }}
+            />
           )}
 
-          <h3 className="mt-3 font-editorial text-[19px] leading-tight font-bold tracking-[0.01em] text-fg">
-            {post.title}
-          </h3>
+          <div className="min-w-0 flex-1">
+            {/* Index — topic + kind of post. (Status omitted: this is the
+                Published tab, so "published" is implied.) */}
+            {taxonomy.length > 0 && (
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10px] tracking-[0.2em] text-dim uppercase">
+                {taxonomy.map((part, i) => (
+                  <span key={part} className="flex items-center gap-2">
+                    {i > 0 && <span aria-hidden>·</span>}
+                    <span>{part}</span>
+                  </span>
+                ))}
+              </div>
+            )}
 
-          <p className="mt-2 line-clamp-2 font-editorial text-sm leading-relaxed text-muted">
-            {post.summary}
-          </p>
+            <h3 className="mt-3 font-editorial text-[19px] leading-tight font-bold tracking-[0.01em] text-fg">
+              {post.title}
+            </h3>
+
+            <p className="mt-2 line-clamp-2 font-editorial text-sm leading-relaxed text-muted">
+              {post.summary}
+            </p>
+          </div>
         </div>
 
         {/* Footer band — lighter surface (--surface-raised) + hairline divider

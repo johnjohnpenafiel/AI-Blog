@@ -79,6 +79,16 @@ describe("PublishedRow", () => {
     expect(screen.queryByText(/Published/i)).not.toBeInTheDocument();
   });
 
+  it("renders the cover thumbnail only when the post has an image_url", () => {
+    const { unmount } = renderRow({ image_url: null });
+    expect(screen.queryByTestId("published-cover")).not.toBeInTheDocument();
+    unmount();
+
+    renderRow({ image_url: "https://cdn.example/cover.webp" });
+    const cover = screen.getByTestId("published-cover") as HTMLImageElement;
+    expect(cover).toHaveAttribute("src", "https://cdn.example/cover.webp");
+  });
+
   it("links View post to /blog/{slug} opening in a new tab", () => {
     renderRow();
     const link = screen.getByTestId("published-view-link") as HTMLAnchorElement;
