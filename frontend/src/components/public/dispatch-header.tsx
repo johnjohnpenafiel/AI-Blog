@@ -237,7 +237,8 @@ export function DispatchHeader({ post }: { post: PublicPostDetail }) {
         </div>
       </div>
 
-      {/* lead image placeholder — hidden on mobile until real images ship */}
+      {/* lead image — the post's AI-generated cover (fig.0); falls back to a
+          marked placeholder when no cover was generated. Hidden on mobile. */}
       <div
         className="tg-band tg-fig0-band"
         style={{ borderBottom: "1px solid var(--tg-frame-hair)" }}
@@ -253,7 +254,22 @@ export function DispatchHeader({ post }: { post: PublicPostDetail }) {
           <div
             className="tg-img-slot"
             style={{ aspectRatio: "16 / 9", border: "1px solid var(--tg-frame)" }}
-          />
+          >
+            {post.image_url && (
+              // eslint-disable-next-line @next/next/no-img-element -- plain <img>: this is a patched Next.js; see AGENTS.md
+              <img
+                src={post.image_url}
+                alt={post.title}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            )}
+          </div>
           <div
             style={{
               fontFamily: "var(--tg-font-mono)",
@@ -264,7 +280,7 @@ export function DispatchHeader({ post }: { post: PublicPostDetail }) {
               marginTop: 12,
             }}
           >
-            FIG.0 — Lead image placeholder
+            {post.image_url ? "FIG.0 — Cover" : "FIG.0 — Lead image placeholder"}
           </div>
         </div>
       </div>

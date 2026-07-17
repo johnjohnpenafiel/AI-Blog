@@ -20,6 +20,7 @@ function makePost(overrides: Partial<PostListItem> = {}): PostListItem {
     section: "Customer Experience",
     format: "Deep Dive",
     story_type: "Vendor Launch",
+    image_url: null,
     eval_pov: 2,
     eval_format: 2,
     eval_grounding: 2,

@@ -160,6 +160,20 @@ export function FeaturedStory({ post }: { post: PublicFeaturedPost }) {
               className="tg-img-slot"
               style={{ aspectRatio: "16 / 9", border: "1px solid var(--tg-frame)" }}
             >
+              {post.image_url && (
+                // eslint-disable-next-line @next/next/no-img-element -- plain <img>: this is a patched Next.js; see AGENTS.md
+                <img
+                  src={post.image_url}
+                  alt={post.title}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              )}
               <span
                 style={{
                   position: "absolute",

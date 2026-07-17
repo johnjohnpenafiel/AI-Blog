@@ -17,6 +17,7 @@ export interface PublicPostListItem {
   tags: string[];
   section: string | null;
   format: string | null;
+  image_url: string | null;
   published_at: string;
   read_time_minutes: number;
 }
@@ -48,6 +49,7 @@ export interface PublicPostDetail {
   tags: string[];
   section: string | null;
   format: string | null;
+  image_url: string | null;
   published_at: string;
   read_time_minutes: number;
   sources: PublicPostSource[];

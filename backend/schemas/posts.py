@@ -49,6 +49,7 @@ class PostListItem(BaseModel):
     section: str | None = None
     format: str | None = None
     story_type: str | None = None
+    image_url: str | None = None
     status: PostStatus
     created_at: datetime
     scheduled_at: datetime | None = None
@@ -80,6 +81,7 @@ class PostOut(BaseModel):
     section: str | None = None
     format: str | None = None
     story_type: str | None = None
+    image_url: str | None = None
     status: PostStatus
     publishing_mode: PublishingMode
     scheduled_at: datetime | None

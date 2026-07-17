@@ -19,6 +19,7 @@ const POST: PostListItem = {
   section: "Customer Experience",
   format: "Deep Dive",
   story_type: "Vendor Launch",
+  image_url: null,
   eval_pov: 2,
   eval_format: 1,
   eval_grounding: 2,
@@ -76,6 +77,16 @@ describe("PublishedRow", () => {
     expect(screen.queryByText("Voice AI")).not.toBeInTheDocument();
     // Status badge removed — implied by the Published tab.
     expect(screen.queryByText(/Published/i)).not.toBeInTheDocument();
+  });
+
+  it("renders the cover thumbnail only when the post has an image_url", () => {
+    const { unmount } = renderRow({ image_url: null });
+    expect(screen.queryByTestId("published-cover")).not.toBeInTheDocument();
+    unmount();
+
+    renderRow({ image_url: "https://cdn.example/cover.webp" });
+    const cover = screen.getByTestId("published-cover") as HTMLImageElement;
+    expect(cover).toHaveAttribute("src", "https://cdn.example/cover.webp");
   });
 
   it("links View post to /blog/{slug} opening in a new tab", () => {

@@ -22,6 +22,7 @@ class PublicPostListItem(BaseModel):
     tags: list[str]
     section: str | None = None
     format: str | None = None
+    image_url: str | None = None
     published_at: datetime
     read_time_minutes: int
 
@@ -64,6 +65,7 @@ class PublicPostDetail(BaseModel):
     tags: list[str]
     section: str | None = None
     format: str | None = None
+    image_url: str | None = None
     published_at: datetime
     read_time_minutes: int
     sources: list[PublicPostSource]

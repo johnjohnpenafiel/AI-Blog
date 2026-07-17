@@ -48,11 +48,12 @@ The audience is dealership operators, automotive tech executives, and industry o
 ### Components
 
 - **Frontend** (`frontend/`): Next.js 16 (App Router) + React 19 + Tailwind CSS v4. Source layout is `src/app/`. Two route groups: `(public)` for The Garage AI blog (homepage, post pages, about) and `dashboard/` for the admin UI (overview, queue, scheduled, published, settings). NextAuth handles credential-based login for the admin only. No component library — UI is hand-built against the design tokens, with one shared `Button` (`components/button.tsx`).
-- **Backend** (`backend/`): Python + FastAPI. Routers: `auth.py`, `posts.py` (admin), `public.py` (public read-only), `pipeline.py`, `settings.py`. Services: `news_fetcher.py` (Perplexity, open-canvas sourcing), `content_classifier.py` (Haiku promo-vs-news + importance classifier), `blog_writer.py` (Claude, format-aware generation + Roundup), `pipeline.py` (`run_pipeline` + `run_roundup` orchestrators), `publisher.py` (status routing + `publish_due_posts` bulk-publisher), `evals.py` (in-loop generation-quality judge). Canonical category vocabulary lives in `taxonomy.py`. `scheduler.py` runs APScheduler in-process for the **Mon / Thu / Fri** cron — each day mapped to a format (Mon → Brief, Thu → Deep Dive, Fri → Roundup) — AND a 1-minute interval job (`scheduled-publisher`) that flips accepted posts whose `scheduled_at` has passed to `published`.
+- **Backend** (`backend/`): Python + FastAPI. Routers: `auth.py`, `posts.py` (admin), `public.py` (public read-only), `pipeline.py`, `settings.py`. Services: `news_fetcher.py` (Perplexity, open-canvas sourcing), `content_classifier.py` (Haiku promo-vs-news + importance classifier), `blog_writer.py` (Claude, format-aware generation + Roundup), `pipeline.py` (`run_pipeline` + `run_roundup` orchestrators), `publisher.py` (status routing + `publish_due_posts` bulk-publisher), `evals.py` (in-loop generation-quality judge), `image_art_director.py` (Opus metaphor → image prompt) + `image_generator.py` (Recraft V4.1 cover image, fail-soft). Canonical category vocabulary lives in `taxonomy.py`. `scheduler.py` runs APScheduler in-process for the **Mon / Thu / Fri** cron — each day mapped to a format (Mon → Brief, Thu → Deep Dive, Fri → Roundup) — AND a 1-minute interval job (`scheduled-publisher`) that flips accepted posts whose `scheduled_at` has passed to `published`.
 - **Database**: PostgreSQL. Schema managed by SQLAlchemy models + Alembic migrations.
 - **External services**:
-  - Anthropic Claude API (`claude-sonnet-5`) — blog generation.
+  - Anthropic Claude API (`claude-sonnet-5`) — blog generation. Also `claude-opus-4-8` for the per-post image art director.
   - Perplexity Sonar API — news aggregation with intent-based queries.
+  - fal.ai (Recraft V4.1, `fal-ai/recraft/v4.1/text-to-image`) — per-post cover-image generation.
 - **Auth**: NextAuth.js, credentials provider, single seeded admin user, 2-hour session TTL. Passwords stored as bcrypt hashes via `passlib`.
 - **Environment**: Docker Compose for local dev. Production hosting is split across Vercel (frontend), Render (backend), and Neon (Postgres) — see the Hosting section below.
 
@@ -82,7 +83,7 @@ The audience is dealership operators, automotive tech executives, and industry o
 ├── backend/                   # FastAPI app
 │   ├── main.py
 │   ├── routers/{auth.py, posts.py, public.py, pipeline.py, settings.py}
-│   ├── services/{news_fetcher.py, blog_writer.py, pipeline.py, publisher.py}
+│   ├── services/{news_fetcher.py, blog_writer.py, image_art_director.py, image_generator.py, pipeline.py, publisher.py}
 │   ├── scripts/seed_admin.py
 │   ├── models/                # SQLAlchemy models
 │   ├── schemas/               # Pydantic schemas
@@ -117,6 +118,7 @@ Production deployment splits across three vendors, each picked for what it does 
 | Database (Postgres 17) | Neon | Free (3 GB) | $0 |
 | Post generation | Anthropic Claude Sonnet 5 | Pay-per-use | ~$0.50–1.50/mo |
 | News fetching | Perplexity Sonar | Pay-per-use | ~$0.50–1.50/mo |
+| Cover images | fal.ai Recraft V4.1 + Claude Opus 4.8 (art director) | Pay-per-use | ~$0.50–1.00/mo (3 posts/wk) |
 
 Notes:
 - Render Starter is required (not Free) because APScheduler runs in-process and must stay resident to fire the cron — Render's free tier spins down after 15 min of idle.
@@ -157,6 +159,7 @@ Notes:
 | section | VARCHAR | nullable; v2 taxonomy, validated against code vocab |
 | format | VARCHAR | nullable; v2 taxonomy (Brief / Deep Dive / Roundup …) |
 | story_type | VARCHAR | nullable; v2 taxonomy |
+| image_url | VARCHAR | nullable; AI-generated cover URL (fal.ai/Recraft) set by the pipeline's image step; NULL = not generated / fail-soft skip → UI placeholder |
 | eval_pov | SMALLINT | nullable; generation-eval POV score (0–2) |
 | eval_format | SMALLINT | nullable; generation-eval format score (0–2) |
 | eval_grounding | SMALLINT | nullable; generation-eval grounding score (0–2) |
@@ -256,6 +259,10 @@ Send the winning section's articles to Claude (`claude-sonnet-5`) with a **forma
 
 After generation, each post is scored by a Haiku LLM-judge against the source excerpts it was written from — POV / format / source-grounding (0–2 each) + pass/fail + notes — and the result is **persisted on the post** (`eval_*` columns) and shown in the dashboard. This is **observational only**: a failing post in `auto` mode still publishes. The eval fails soft (a judge error never breaks a run → scores stay NULL). Regeneration clears the score (no source excerpts to re-score against). See the 2026-06-05 decision-log entries.
 
+### Step 5 — Cover image (`backend/services/image_art_director.py` + `image_generator.py`, in-loop, fail-soft)
+
+After the post is persisted, an **art director** (`claude-opus-4-8`, tool-calling structured output) turns the post's title/summary/section + a deterministically-rotated metaphor **device** and **backdrop** into a symbolic image prompt — it finds a visual *metaphor* for the operational tension, never a literal depiction. That prompt goes to **Recraft V4.1** on fal.ai (one synchronous call, orange-forward `colors` palette) and the resulting URL is stored on `posts.image_url`. A minimal `ImageHost` seam (v1 `FalPassthroughHost`) fronts hosting so a later move to our own bucket is a one-class swap. **Fail-soft**: any failure returns None → `image_url` stays NULL and the run completes (the UI shows a placeholder). Runs before routing, inside the pipeline's single commit. The full locked recipe (modern-futurist style, object-design law, composition + text rotation) lives in `feature-plans/per-post-image-generation.md`.
+
 ### The Roundup run (`run_roundup`, Fridays)
 
 The Friday run does **not** fetch news. `run_roundup` reads the week's own `published` posts from the DB and synthesizes a Roundup (~500–600w: week-range → through-line → "The Big Story" → "Also This Week" → "Worth Watching"), linking the week's Brief + Deep Dive. It's the safety net for important stories that didn't win an earlier slot. Skips cleanly if nothing was published that week.
@@ -293,7 +300,7 @@ The Friday run does **not** fetch news. `run_roundup` reads the week's own `publ
 ## Constraints and non-negotiables
 
 - **Single dark theme.** No light/dark toggle. Color tokens defined in `Design/README.md`.
-- **No images in the UI.** Typography and color carry the design across both surfaces.
+- **AI-generated cover images only — no photography.** Each post gets one AI-generated *symbolic* cover (fal.ai/Recraft V4.1) in the featured + card slots, shown in the dashboard review panel too. No photographic or stock imagery, and no light/dark toggle — typography, color, and the generated illustrations carry the design. (Reverses the MVP-era "no images in the UI" rule — see the 2026-07-06 decision-log entry and `feature-plans/per-post-image-generation.md`.)
 - **Single admin user.** No registration flow, no multi-user roles.
 - **Stay in the niche.** "AI as the dealership operating system" — no expansion into adjacent automotive beats.
 - **Source transparency.** Every post must list its sources (title, publisher, link, date) — part of the editorial contract with the audience.

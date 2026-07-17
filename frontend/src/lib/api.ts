@@ -48,6 +48,8 @@ export interface PostListItem {
   section: string | null;
   format: string | null;
   story_type: string | null;
+  // AI-generated cover image URL (null = not generated / failed → placeholder).
+  image_url: string | null;
   // Generation-eval scores (0–2 each; null = not scored).
   eval_pov: number | null;
   eval_format: number | null;
