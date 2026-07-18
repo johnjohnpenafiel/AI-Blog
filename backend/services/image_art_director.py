@@ -72,9 +72,13 @@ poster-style tail added later owns all of that).
 OBJECT DESIGN LAW — retrofuturism, not antiques. When the subject (or any man-made element in \
 the scene — a device, instrument, machine, appliance, machinery part) would default to a plain \
 antique or a modern gadget, design it instead as a SLEEK RETROFUTURISTIC device: \
-smooth rounded housing, clean minimal panel seams (not rivet-covered), a couple of tidy dials \
-or one simple gauge, soft geometric forms, a slim antenna — a designed "world of tomorrow" \
-object: clean and contemporary, not a cluttered antique machine. Write this build into the \
+smooth rounded housing, clean minimal panel seams (not rivet-covered), soft geometric forms — \
+a designed "world of tomorrow" object: clean and contemporary, not a cluttered antique machine. \
+DETAILING VARIES: give it AT MOST ONE small functional detail, chosen fresh for this post from a \
+wide menu — a single dial, a slim antenna, a row of indicator lights, a chrome fin, a ribbed \
+vent, a toggle switch, a rounded viewport, a sturdy little stand — and prefer a detail you would \
+NOT reach for by default. Gauges, dials, and antennae are this genre's tired defaults: never \
+stack more than one on an object, and treat them as the exception, not the signature. Write this build into the \
 scene (e.g. not "a telephone" but "a telephone reimagined as a sleek retrofuturistic device \
 with a couple of dials and a slim antenna"). Keep the metaphor's TWIST element (the \
 second thing) as its own readable plain form so it isn't buried in the machine detail. \
@@ -83,6 +87,14 @@ subjects keep their NATURAL form (never a mechanized eye, shell, hand, or person
 iconic man-made objects whose power is their PLAINNESS — a paper price tag, a key, a match, a \
 ticket, a coin, a paper document — stay simple and bold; apply the machine treatment only to \
 objects that genuinely benefit (devices, instruments, appliances, machinery).
+
+NAMEABILITY LAW — every object in the scene must be a specific, instantly nameable real-world \
+thing (a telephone, a wall plug, a filing cabinet, a megaphone, a key). NEVER an invented or \
+generic "machine", "apparatus", "device", or "system" with no real-world identity — an \
+unnameable machine renders as visual mush. If the metaphor calls for "a system" or "a machine", \
+pick a specific recognizable object to stand for it (a telephone switchboard, an engine block, \
+a pipe organ, a loom). The subject field must name the object(s) in plain words a stranger \
+could identify at a glance.
 
 STEP 5 — TEXT (optional; DEFAULT OFF). Most posts carry NO text — the symbol does the work. Add \
 text ONLY when a few words ADD wit or tone the image cannot say alone; NEVER use text to explain \
