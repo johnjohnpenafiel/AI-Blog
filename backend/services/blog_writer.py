@@ -34,6 +34,56 @@ THEIR store — will it make money, save time, or retain customers? Be honest
 about whether it actually works versus vendor hype: privilege evidence, real
 deployments, and results over announcements and marketing claims."""
 
+# Title spec — shared by the fresh-news and Roundup prompts. The title does
+# three jobs: inform the reader, seed the cover-image art director (which
+# derives its visual metaphor from title+summary — abstract titles produce
+# generic covers), and carry the site's voice. Prompt-tested against an
+# LLM-judge rubric (representation / image-support / voice, pass = all >= 4/5):
+# the old one-liner ("punchy and informative") scored 0% pass; this spec scored
+# 91% across two independent runs. See the 2026-07-18 decision-log entry.
+TITLE_SPEC = """- Title — the title does three jobs at once; it fails unless it does all three:
+  1. TELL THE STORY. A reader must know what happened and why it matters to
+     their store without opening the post. Specific beats clever.
+  2. FEED THE COVER ARTIST. An AI illustrator draws this post's cover from the
+     title. Give it something drawable: a concrete object, a physical scene, or
+     a collision of two concrete things. BANNED words: "revolution",
+     "game-changer", "transformation", "reshaping", "the future of",
+     "the rise of", "unleash", "landscape".
+  3. SOUND LIKE US. Dry, operator-skeptical wit — a sharp colleague leaning on
+     the service counter, not a press release. Sarcastic when vendors
+     overpromise; genuinely impressed only when there's proof. Plain words,
+     short clauses.
+
+  Titles in our voice (style reference only — never reuse or imitate closely):
+  - "Everyone Bought the AI. Nobody Wired It Together."
+  - "The Phone Picks Up on the First Ring Now. It Isn't a Person."
+  - "Your Used-Car Photos Took Three Days. The Robot Took Lunch."
+  Notice the pattern: concrete nouns doing things (phones, photos, wiring),
+  a twist or tension, no buzzwords, wit that comes from the situation itself.
+
+  Hard rules:
+  - At least one PHYSICAL, drawable object from the dealership world must
+    appear in the title (a phone, keys, a lift, a sticker, a lot, a letter,
+    a folder, a camera, a service bay...). Percentages, dollar figures, and
+    company names are NOT drawable — if you use one, pair it with a physical
+    object that carries the image.
+  - If the post is a Roundup, the title must evoke the whole week's
+    through-line, not just its single biggest story.
+  - Vary the structure. The two-beat snap ("X did this. Y didn't.") is one
+    tool, not the house formula — single-clause titles with a twist are just
+    as welcome. Across many posts, titles should not all sound alike.
+
+  Before submitting, verify — rewrite the title if any check fails:
+  (a) Is there a physical, drawable object in the title, and is it the one
+      DOING or RECEIVING the main action? The image lives in what the object
+      does or what happens to it (letters landing on a desk, a phone answering
+      itself, a sticker peeling off) — not in a decorative mention. A
+      percentage or company name never counts. Never OPEN the title with a
+      number.
+  (b) If this is a Roundup: does the title span the week's through-line
+      rather than one story?
+  (c) Would a dealership operator know what happened from the title alone?"""
+
 # Per-format structure + length. Each format's skeleton doubles as the
 # generation spec (see notes/v2-ideas.md Format index). Only the formats we
 # generate from fresh news live here; the Roundup uses a different input path.
@@ -75,7 +125,7 @@ Format — {format}:
 - Structure: {structure}
 
 Requirements:
-- Title: punchy and informative
+{title_spec}
 - Summary: 2–3 sentences
 - Body: markdown formatted, no fluff, matching the format above
 - Tags: select 1–2 from [Voice AI, Pricing & Analytics, CRM, Merchandising,
@@ -139,6 +189,7 @@ def _render_prompt(
     )
     return PROMPT_TEMPLATE.format(
         pov_block=POV_BLOCK,
+        title_spec=TITLE_SPEC,
         format=fmt,
         length=spec["length"],
         structure=spec["structure"],
@@ -223,7 +274,7 @@ markdown) that ties them together. Structure:
 - **Worth Watching** — a forward-looking line or two.
 
 Requirements:
-- Title: punchy, evokes a week-in-review.
+{title_spec}
 - Summary: 2–3 sentences.
 - Tags: select 1–2 from [Voice AI, Pricing & Analytics, CRM, Merchandising,
   Sales Dev, OT & Infrastructure, Industry Move].
@@ -259,7 +310,9 @@ def generate_roundup(posts: list[dict]) -> GeneratedPost:
     client = anthropic.Anthropic(api_key=api_key)
 
     prompt = ROUNDUP_PROMPT_TEMPLATE.format(
-        pov_block=POV_BLOCK, posts_json=json.dumps(posts, indent=2)
+        pov_block=POV_BLOCK,
+        title_spec=TITLE_SPEC,
+        posts_json=json.dumps(posts, indent=2),
     )
     logger.info("calling Claude (%s) for weekly roundup of %d posts", MODEL, len(posts))
 
