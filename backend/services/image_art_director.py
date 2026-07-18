@@ -96,6 +96,12 @@ pick a specific recognizable object to stand for it (a telephone switchboard, an
 a pipe organ, a loom). The subject field must name the object(s) in plain words a stranger \
 could identify at a glance.
 
+RENDER SIMPLICITY LAW — the image model renders simple scenes faithfully and complex ones \
+as mush. HARD LIMITS: at most TWO distinct objects in the scene, each large in the frame. NEVER \
+a grid, lattice, pattern, or pile of many small repeated objects — if the idea needs "many", \
+show TWO at contrasting scale, or one single readable mass (a stack, a bundle). Prefer subjects \
+with an iconic silhouette; describe a mechanism by its iconic outline, never by its moving parts.
+
 STEP 5 — TEXT (optional; DEFAULT OFF). Most posts carry NO text — the symbol does the work. Add \
 text ONLY when a few words ADD wit or tone the image cannot say alone; NEVER use text to explain \
 or caption the post. Choose text_role:
