@@ -179,7 +179,22 @@ function CarouselCard({
         borderColor: active ? accent : "var(--tg-frame-hair)",
       }}
     >
-      <div className="tg-img-slot tg-rm-card-img" aria-hidden="true" />
+      <div className="tg-img-slot tg-rm-card-img" aria-hidden="true">
+        {post.image_url && (
+          // eslint-disable-next-line @next/next/no-img-element -- plain <img>: this is a patched Next.js; see AGENTS.md
+          <img
+            src={post.image_url}
+            alt=""
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        )}
+      </div>
       <div className="tg-rm-card-body">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span
