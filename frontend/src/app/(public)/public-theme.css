@@ -1,8 +1,9 @@
 /* ============================================================================
    THE GARAGE AI — PUBLIC SURFACE THEME
-   Ported from the Claude Design handoff (design-handoff/the-garage-ai).
-   Dark "console" aesthetic: neutral gray ramp, orange + sand the only accents,
-   square corners everywhere, a 3px stage frame and a 132px indexed gutter.
+   Ported from the Claude Design project ("The Garage AI" — homepage from the
+   v5 canvas, palette shared with Post v2). Dark "console" aesthetic: neutral
+   gray ramp, orange + sand accents, square corners everywhere, a 3px stage
+   frame, and the v5 News index (sticky filter tree + editorial row list).
 
    SCOPING: every token is namespaced `--tg-*` and every rule is nested under
    `.tg-surface`. Nothing here leaks to the admin dashboard, which keeps its own
@@ -11,14 +12,13 @@
    ============================================================================ */
 
 .tg-surface {
-  /* ── neutrals ── */
+  /* ── neutrals (v5 palette) ── */
   --tg-ink-black: #0a0a0a;
-  --tg-bg: #1a1a1a;
+  --tg-bg: #17191c;
   --tg-band: #242424;
-  --tg-card: #2a2a2a;
-  --tg-card-hover: #303030;
+  --tg-card: #2a2a2a; /* loading-skeleton blocks (post cards retired) */
   --tg-frame: #646464;
-  --tg-frame-hair: #333333;
+  --tg-frame-hair: #4a4a4a;
 
   /* ── text ── */
   --tg-ink: #f9f9f9;
@@ -26,16 +26,17 @@
   --tg-faint: #646464;
   --tg-ink-soft: #cfcbc5;
 
-  /* ── brand (the only saturated hues) ── */
+  /* ── brand (the only saturated hues; #ff3d97 row-hover is the one sanctioned
+        exception — a literal, per the v5 canvas, not a token) ── */
   --tg-orange: #e85002;
   --tg-orange-bright: #f16001;
+  --tg-orange-deep: #b83e02;
   --tg-red: #c10801;
   --tg-sand: #d9c3ab;
   --tg-halftone-field: #2a0700;
 
   /* ── layout ── */
-  --tg-gutter: 132px;
-  --tg-edge: clamp(28px, 4vw, 64px); /* band content's left inset (rail removed) */
+  --tg-edge: clamp(28px, 4vw, 64px); /* band content's left inset */
   --tg-frame-pad: clamp(10px, 1.4vw, 22px);
   --tg-content-pad: clamp(24px, 5vw, 96px);
 
@@ -51,7 +52,6 @@
 
 @media (max-width: 720px) {
   .tg-surface {
-    --tg-gutter: 64px;
     --tg-edge: 20px;
     --tg-content-pad: 24px;
   }
@@ -74,8 +74,8 @@
 }
 
 /* ── Stage scroll model — the desktop/mobile split ────────────────────────────
-   Desktop (>768px): the handoff's locked-viewport stage — 100dvh, masthead
-   pinned, content scrolls INSIDE the frame. The design's signature.
+   Desktop (>768px): the locked-viewport stage — 100dvh, masthead pinned,
+   content scrolls INSIDE the frame. The design's signature.
    Mobile (≤768px): natural document scroll — the browser URL bar can auto-hide,
    momentum is native, and anchors / find-in-page / "scroll to top" tap all work.
    Decision + rationale: Trello / PLANNING (deferred-to-Phase-4 mobile note). */
@@ -145,7 +145,7 @@
 }
 
 /* Masthead brand block ("THE GARAGE AI"). Its bottom rule closes off the
-   masthead (desktop; the mobile query below thins it to match the frame). */
+   masthead (desktop; the mobile query above thins it to match the frame). */
 .tg-masthead-brand {
   border-bottom: 3px solid var(--tg-frame);
 }
@@ -164,19 +164,6 @@
   );
 }
 
-/* ── Gutter row: indexed marker column + content column ───────────────────── */
-.tg-row {
-  display: grid;
-  grid-template-columns: var(--tg-gutter) 1fr;
-}
-.tg-marker {
-  padding-left: 24px;
-  font-family: var(--tg-font-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  color: var(--tg-faint);
-}
-
 /* ── Kicker / eyebrow ─────────────────────────────────────────────────────── */
 .tg-kicker {
   font-family: var(--tg-font-mono);
@@ -184,45 +171,6 @@
   letter-spacing: 0.18em;
   color: var(--tg-orange);
   text-transform: uppercase;
-}
-
-/* ── Buttons ──────────────────────────────────────────────────────────────── */
-.tg-btn {
-  font-family: var(--tg-font-mono);
-  font-size: 11px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  padding: 14px 30px;
-  background: var(--tg-orange);
-  color: var(--tg-ink-black);
-  border: none;
-  cursor: pointer;
-  font-weight: 500;
-  display: inline-block;
-  text-decoration: none;
-  transition: background 0.15s ease;
-}
-.tg-btn:hover {
-  background: var(--tg-orange-bright);
-}
-
-.tg-btn-ghost {
-  font-family: var(--tg-font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  padding: 11px 22px;
-  background: transparent;
-  color: var(--tg-mute);
-  border: 1px solid var(--tg-frame);
-  cursor: pointer;
-  display: inline-block;
-  text-decoration: none;
-  transition: color 0.15s ease, border-color 0.15s ease;
-}
-.tg-btn-ghost:hover {
-  color: var(--tg-ink);
-  border-color: var(--tg-orange);
 }
 
 /* ── Nav + body links ─────────────────────────────────────────────────────── */
@@ -250,129 +198,360 @@
   border-bottom-color: var(--tg-orange);
 }
 
-/* ── Section / format tab buttons (filter) ────────────────────────────────── */
-.tg-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  font-family: var(--tg-font-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 9px 9px 9px 14px;
-  background: var(--tg-band);
-  color: #8a8680;
-  border: 1px solid var(--tg-frame);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
-}
-.tg-chip:hover {
-  color: var(--tg-ink);
-  border-color: var(--tg-orange);
-  background: color-mix(in srgb, var(--tg-orange) 5%, var(--tg-band));
-}
-.tg-chip[data-active="true"] {
-  background: var(--tg-orange);
-  color: var(--tg-ink-black);
-  border-color: var(--tg-orange);
-}
-.tg-chip-count {
-  font-size: 9px;
-  line-height: 1;
-  padding: 3px 6px;
-  border: 1px solid currentColor;
-  opacity: 0.55;
-  letter-spacing: 0.05em;
-}
-.tg-chip[data-active="true"] .tg-chip-count {
-  opacity: 1;
-  background: var(--tg-ink-black);
-  color: var(--tg-orange);
-  border-color: var(--tg-ink-black);
+/* ── News index (the v5 homepage — Stripe-blog layout) ────────────────────────
+   A giant "News" title with a superscript count, then a two-column body:
+   a sticky filter tree (Format / Section folders with checkbox items) on the
+   left, and the full-width editorial row list on the right. Rows flip to the
+   hot-magenta hover (the sanctioned non-orange exception, straight from the
+   v5 canvas) with ink-black content. */
+/* Density calibration: the v5 canvas was authored at a ~2000px-wide
+   viewport, so its fixed px sizes (28px row titles, 16px filter labels,
+   320px filter column…) read ~25% too large at a typical ~1500px window.
+   Zooming the whole index reproduces the canvas's proportions — type,
+   spacing, and column widths scale together. ONE number to tune. */
+.tg-idx-scale {
+  zoom: 0.8;
 }
 
-/* ── Post card (halftone header + mono title + > point list) ──────────────── */
-.tg-card {
-  background: var(--tg-card);
-  border: 1px solid var(--tg-frame-hair);
+.tg-news-title {
+  position: relative;
+  display: inline-block;
+  font-family: var(--tg-font-display);
+  font-weight: 700;
+  font-stretch: 100%;
+  font-size: clamp(58px, 10vw, 130px);
+  line-height: 0.82;
+  letter-spacing: -0.03em;
+  color: var(--tg-ink-soft);
+  /* 52px below the baseline = the 52px band padding above the caps — the
+     title breathes equally on both sides (both are true gaps via the trim). */
+  margin: 0 0 52px;
+  /* Trim the box to cap-height/baseline (same treatment as the masthead
+     wordmark): Archivo leaves ~0.058em of air above the caps, which made
+     the 36px top padding render as ~44px. With the trim, the padding above
+     "News" is the true visual gap. */
+  text-box: trim-both cap alphabetic;
+}
+.tg-news-count {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  font-family: var(--tg-font-mono);
+  font-weight: 400;
+  font-size: 0.15em;
+  color: var(--tg-sand);
+  letter-spacing: 0.02em;
+  margin-left: 0.12em;
+}
+
+.tg-idx {
+  /* Filter column width: the canvas's 320px × the filter counter-zoom below,
+     so the aside's INTERNAL layout width stays exactly 320px. */
+  --fw: 384px;
+  /* The v5 canvas renders at the UA's `normal` line-height (~1.09 for
+     Archivo); the app inherits Tailwind preflight's 1.5, which made every
+     row ~11px and every filter item ~5px taller than the design. Restore
+     the canvas's inheritance so heights match it exactly. */
+  line-height: normal;
+}
+.tg-idx-body {
+  display: grid;
+  grid-template-columns: var(--fw) 1fr;
+}
+.tg-idx-label {
+  font-family: var(--tg-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: var(--tg-faint);
+  text-transform: uppercase;
+}
+.tg-filters-head {
+  width: 100%;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--tg-frame-hair);
+}
+.tg-rows-head {
+  display: grid;
+  grid-template-columns: 172px 1fr;
+  /* 12px × the filters' 1.2 counter-zoom — keeps this head's height and its
+     hairline level with the "/ Filters" head next door. */
+  padding-top: 14.4px;
+  padding-bottom: 14.4px;
+  border-bottom: 1px solid var(--tg-frame-hair);
+}
+/* "/ Date" and "/ Name" render at the same effective size as "/ Filters":
+   the filters head sits inside the 1.2 counter-zoom, this one doesn't, so
+   these labels carry the ×1.2 in their font-size (13px × 1.2). */
+.tg-rows-head .tg-idx-label {
+  font-size: 15.6px;
+}
+
+.tg-filters {
+  /* Counter-zoom: the filter tree carries more relative presence on the
+     canvas than the row list does, so it scales 1.2 on top of the index's
+     0.8 (net ~0.96 of the authored px). Tune together with --fw above —
+     keep --fw = 320px × this zoom. */
+  zoom: 1.2;
+  padding: 0 26px 24px 0;
   display: flex;
   flex-direction: column;
-  cursor: pointer;
-  text-decoration: none;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease,
-    background 0.18s ease;
+  gap: 24px;
+  align-items: flex-start;
 }
-.tg-card:hover {
-  background: var(--tg-card-hover);
-  border-color: rgba(232, 80, 20, 0.45);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
-  transform: translateY(-3px);
+/* Filter panel sticks once it reaches the masthead; the News title row + index
+   column scroll past it (sticky works against .tg-stage-scroll on desktop). */
+@media (min-width: 821px) {
+  .tg-filters {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: calc(100dvh - var(--tg-frame-pad) - 118px);
+    overflow-y: auto;
+    scrollbar-width: none;
+    background: var(--tg-bg);
+  }
+  .tg-filters::-webkit-scrollbar {
+    display: none;
+  }
 }
-.tg-card-read {
-  color: var(--tg-faint);
-  transition: color 0.18s ease;
+.tg-fgroup {
+  width: 100%;
 }
-.tg-card:hover .tg-card-read {
-  color: var(--tg-orange);
-}
-
-/* ── Dispatch row (editorial list) ────────────────────────────────────────── */
-.tg-dispatch {
-  display: grid;
-  grid-template-columns: var(--tg-gutter) 1fr;
-  border-bottom: 1px solid var(--tg-frame-hair);
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 0.18s ease;
-}
-.tg-dispatch:hover {
-  background: rgba(232, 80, 20, 0.025);
-}
-.tg-dispatch-headline {
-  color: var(--tg-ink-soft);
-  transition: color 0.18s ease;
-}
-.tg-dispatch:hover .tg-dispatch-headline {
-  color: var(--tg-ink);
-}
-.tg-dispatch-index,
-.tg-dispatch-read {
-  color: var(--tg-faint);
-  transition: color 0.18s ease;
-}
-.tg-dispatch:hover .tg-dispatch-index,
-.tg-dispatch:hover .tg-dispatch-read {
-  color: var(--tg-orange);
-}
-
-/* ── Share chip ───────────────────────────────────────────────────────────── */
-.tg-share-chip {
-  display: inline-flex;
+.tg-fgroup-head {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--tg-frame);
-  color: var(--tg-mute);
+  gap: 10px;
+  background: none;
+  border: none;
   cursor: pointer;
-  background: transparent;
-  font-family: var(--tg-font-mono);
-  font-size: 11px;
-  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  padding: 0 0 4px;
 }
-.tg-share-chip:hover {
-  color: var(--tg-ink-black);
-  background: var(--tg-orange);
+.tg-fgroup-chev {
+  font-size: 10px;
+  color: var(--tg-orange);
+  width: 11px;
+}
+.tg-fgroup-title {
+  font-family: var(--tg-font-mono);
+  font-size: 14px;
+  letter-spacing: 0.03em;
+  color: var(--tg-orange);
+}
+.tg-fgroup-list {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--tg-frame-hair);
+  margin-left: 9px;
+  padding-left: 18px;
+  margin-top: 8px;
+}
+.tg-fitem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 0;
+  text-align: left;
+  width: 100%;
+}
+.tg-fbox {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  border: 1px solid var(--tg-frame);
+  display: inline-block;
+  position: relative;
+  transition: border-color 0.15s;
+}
+/* Checked = orange checkmark (uniform for every filter — replaces the
+   canvas's per-accent filled square, per operator preference). */
+.tg-fitem[data-checked="true"] .tg-fbox {
   border-color: var(--tg-orange);
 }
+.tg-fitem[data-checked="true"] .tg-fbox::after {
+  /* Classic UI tick: an L-shape rotated −45°, centered in the box (the
+     translate lifts it slightly above true center so the check reads
+     optically centered, like a native checkbox). */
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 5px;
+  border-left: 2px solid var(--tg-orange);
+  border-bottom: 2px solid var(--tg-orange);
+  transform: translate(-50%, -62%) rotate(-45deg);
+}
+.tg-fitem-label {
+  font-family: var(--tg-font-display);
+  font-stretch: 106%;
+  font-size: 15px;
+  color: var(--tg-mute);
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+.tg-fitem:hover .tg-fitem-label,
+.tg-fitem[data-checked="true"] .tg-fitem-label {
+  color: var(--tg-ink);
+}
+.tg-fitem-count {
+  color: var(--tg-faint);
+}
+.tg-clear {
+  font-family: var(--tg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tg-faint);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0 0;
+}
+.tg-clear:hover {
+  color: var(--tg-orange);
+}
 
-/* ── Image placeholder slot (everything here is a clearly-marked empty slot
-      the operator fills later — the hero video asset was pulled, so there is
-      no real asset live right now). NOTE: the old "no images in the UI"
-      constraint is an authorized deviation for the redesign — these slots
-      are intentional. ─────────────────────────────────────────────────── */
+.tg-rows {
+  min-width: 0;
+  padding-left: 28px;
+}
+.tg-row {
+  border-bottom: 1px solid var(--tg-frame-hair);
+  transition: background 0.15s;
+  display: block;
+  text-decoration: none;
+}
+.tg-row:hover {
+  background: #ff3d97;
+}
+.tg-row-main {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 172px 1fr 40px;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  padding: 16px 0;
+}
+.tg-row-date {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--tg-font-mono);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--tg-mute);
+}
+.tg-row-bullet {
+  width: 9px;
+  height: 9px;
+  background: var(--tg-orange-deep);
+  flex-shrink: 0;
+}
+.tg-row-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding-right: 16px;
+}
+.tg-row-title {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-family: var(--tg-font-display);
+  font-weight: 300;
+  font-stretch: 100%;
+  font-size: clamp(19px, 2.1vw, 28px);
+  letter-spacing: -0.01em;
+  color: var(--tg-ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s;
+}
+.tg-row:hover .tg-row-title {
+  color: var(--tg-ink-black);
+}
+.tg-row:hover .tg-row-date {
+  color: var(--tg-ink-black);
+}
+.tg-row:hover .tg-row-bullet {
+  background: var(--tg-ink-black);
+}
+.tg-row-arrow {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--tg-ink-soft);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.tg-row:hover .tg-row-arrow {
+  opacity: 1;
+  color: var(--tg-ink-black);
+}
+.tg-row-plus {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  color: var(--tg-faint);
+  transition: color 0.15s;
+}
+.tg-row:hover .tg-row-plus {
+  color: var(--tg-ink-black);
+}
+.tg-rows-empty {
+  padding: 44px 0;
+  font-family: var(--tg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--tg-faint);
+  text-transform: uppercase;
+}
+
+@media (max-width: 820px) {
+  .tg-idx-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tg-rows-head {
+    grid-template-columns: 108px 1fr;
+  }
+  .tg-rows {
+    padding-left: 0;
+  }
+  .tg-filters {
+    border-right: none;
+    border-bottom: 1px solid var(--tg-frame-hair);
+    padding: 20px 0 24px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px 40px;
+  }
+  .tg-fgroup {
+    width: auto;
+  }
+  .tg-row-main {
+    grid-template-columns: 108px 1fr 30px;
+    padding: 18px 0;
+  }
+  .tg-row-date {
+    gap: 8px;
+    font-size: 11px;
+  }
+  .tg-row-title {
+    font-size: 17px;
+  }
+}
+
+/* ── Image slot — holds the post's AI-generated cover, or the marked
+      placeholder when image_url is null ─────────────────────────────────── */
 .tg-img-slot {
   position: relative;
   background: var(--tg-halftone-field);
@@ -404,74 +583,388 @@
   padding: 2px 7px;
 }
 
-/* ── Featured story frame (the cover dispatch, framed as a distinct artifact
-   rather than a bigger post-card) ──────────────────────────────────────── */
-.tg-featured-frame {
-  padding: 36px 40px 40px;
-}
-@media (max-width: 720px) {
-  .tg-featured-frame {
-    padding: 28px 24px 30px;
-  }
+/* ── Post page (the "Post v2" canvas — hero, metadata sidebar, article) ───────
+   Same density calibration as the index: the canvas was authored at a ~2000px
+   viewport, so the whole page runs at 0.8 zoom; line-height resets to the
+   canvas's UA `normal` (Tailwind preflight forces 1.5). */
+.tg-post-scale {
+  zoom: 0.8;
+  line-height: normal;
 }
 
-/* ── Themed article prose (markdown body → design's editorial voice) ──────── */
-.tg-prose {
-  max-width: 720px;
+/* Hero title */
+.tg-hero {
+  position: relative;
+  padding: clamp(36px, 3.8vw, 56px) 24px;
 }
-.tg-prose > * {
-  max-width: 700px;
+.tg-hero-title {
+  font-family: var(--tg-font-display);
+  font-weight: 600;
+  font-stretch: 100%;
+  font-size: clamp(38px, 6.8vw, 110px);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  color: var(--tg-ink-soft);
+  margin: 0;
 }
-.tg-prose p {
+
+/* Post body: metadata sidebar + article grid */
+.tg-post {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  gap: 0 clamp(40px, 5vw, 96px);
+  padding: 0 24px 30px;
+}
+@media (max-width: 820px) {
+  .tg-post {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tg-meta {
+    position: static !important;
+    margin-bottom: 44px;
+  }
+}
+.tg-collabel {
+  font-family: var(--tg-font-mono);
+  /* 15.6px = the home index's label size (13px × its 1.2 counter-zoom) —
+     both pages sit under the same 0.8 page scale, so they match on screen. */
+  font-size: 15.6px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tg-mute);
+}
+.tg-colrule {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--tg-frame-hair);
+  margin-bottom: 8px;
+}
+.tg-meta {
+  align-self: start;
+}
+@media (min-width: 821px) {
+  .tg-meta {
+    position: sticky;
+    top: 32px;
+  }
+}
+/* Mini-title: slides open (grid-rows trick) once the hero scrolls away */
+.tg-meta-minititle {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: grid-template-rows 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.12s,
+    opacity 0.12s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.12s;
+}
+.tg-meta-minititle > div {
+  overflow: hidden;
+  min-height: 0;
+}
+.tg-meta-minititle h2 {
+  font-family: var(--tg-font-display);
+  font-weight: 600;
+  font-stretch: 100%;
+  font-size: clamp(24px, 2.2vw, 34px);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  color: var(--tg-ink-soft);
+  margin: 0;
+  padding-bottom: 22px;
+  text-wrap: balance;
+}
+.tg-meta-minititle[data-show="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+  transition: grid-template-rows 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.45s ease 0.15s, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (max-width: 820px) {
+  .tg-meta-minititle {
+    display: none;
+  }
+}
+.tg-meta-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px dashed var(--tg-mute);
+}
+.tg-meta-key {
+  font-family: var(--tg-font-mono);
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tg-mute);
+}
+.tg-meta-val {
+  font-family: var(--tg-font-mono);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: var(--tg-orange);
+  text-transform: uppercase;
+  text-align: right;
+}
+/* Gold chip — canvas literal (oklch gold + dashed border, a sanctioned
+   exception alongside .tg-needs; scoped to the metadata sidebar). */
+.tg-meta-chip {
+  font-family: var(--tg-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: oklch(0.82 0.17 75);
+  border: 1px dashed oklch(0.82 0.17 75 / 0.45);
+  padding: 3px 9px;
+  display: inline-block;
+}
+.tg-meta-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.tg-meta-block {
+  padding: 18px 0;
+  border-bottom: 1px dashed var(--tg-mute);
+}
+.tg-meta-block:last-child {
+  border-bottom: none;
+}
+.tg-btnrow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+.tg-btn {
+  font-family: var(--tg-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tg-ink-soft);
+  background: none;
+  border: 1px solid var(--tg-frame);
+  padding: 11px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.tg-btn:hover {
+  color: var(--tg-ink-black);
+  background: var(--tg-orange);
+  border-color: var(--tg-orange);
+}
+
+/* Expand button + full-page reader overlay */
+.tg-expand-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: -5px -4px;
+  padding: 0;
+  color: var(--tg-mute);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.tg-expand-btn:hover {
+  color: var(--tg-orange);
+}
+.tg-reader {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(6, 6, 6, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: tg-reader-fade 0.2s ease;
+}
+@keyframes tg-reader-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.tg-reader-panel {
+  position: absolute;
+  inset: clamp(20px, 4vh, 56px) clamp(20px, 3vw, 60px);
+  background: var(--tg-bg);
+  border: 1px solid var(--tg-frame);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.tg-reader-close {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  z-index: 2;
+  color: var(--tg-mute);
+}
+.tg-reader-scroll {
+  overflow-y: auto;
+  flex: 1;
+}
+.tg-reader-inner {
+  max-width: none;
+  padding: clamp(36px, 5vh, 64px) clamp(28px, 4vw, 80px) 72px;
+}
+.tg-reader-inner.tg-article {
+  max-width: none;
+}
+.tg-reader-inner .tg-fig-frame {
+  max-width: 900px;
+}
+
+/* Article column — full-width so the `/ Article` rule runs to the right
+   edge; the prose inside stays capped for readability. The rule's padding
+   keeps the expand icon at the prose's right edge, not the far right. */
+.tg-artcol {
+  min-width: 0;
+}
+.tg-artcol > .tg-colrule {
+  padding-right: max(0px, calc(100% - 820px));
+}
+
+/* Article prose (markdown body → the canvas's editorial voice) */
+.tg-article {
+  min-width: 0;
+  max-width: 820px;
+}
+.tg-article p {
   font-family: var(--tg-font-display);
   font-weight: 400;
-  font-stretch: 110%;
-  font-size: 18px;
+  font-stretch: 108%;
+  font-size: 21px;
   line-height: 1.62;
   letter-spacing: 0.002em;
-  color: #d2cec8;
-  margin: 0 0 26px;
+  color: var(--tg-ink-soft);
+  margin: 0 0 28px;
+  text-wrap: pretty;
 }
-.tg-prose > p:first-child {
-  font-size: 22px;
-  font-weight: 500;
-  font-stretch: 112%;
-  color: #e4e0da;
-  line-height: 1.5;
+.tg-article p.tg-lede {
+  font-size: 23.5px;
+  line-height: 1.55;
+  color: #e2ded8;
 }
-.tg-prose h2,
-.tg-prose h3 {
+.tg-article h2 {
   font-family: var(--tg-font-display);
-  font-weight: 700;
-  font-stretch: 112%;
-  font-size: clamp(22px, 2.4vw, 30px);
-  line-height: 1.1;
+  font-weight: 600;
+  font-stretch: 102%;
+  font-size: clamp(28px, 3.2vw, 44px);
+  line-height: 1.05;
+  letter-spacing: -0.022em;
+  color: var(--tg-ink-soft);
+  margin: 56px 0 24px;
+  text-wrap: balance;
+}
+.tg-article a {
+  color: var(--tg-orange);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  transition: color 0.15s;
+}
+.tg-article a:hover {
+  color: var(--tg-orange-bright);
+}
+.tg-fig {
+  margin: 40px 0;
+}
+.tg-fig-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--tg-ink-black);
+  border: 1px solid var(--tg-frame-hair);
+  overflow: hidden;
+}
+.tg-fig img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tg-figcap {
+  font-family: var(--tg-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--tg-faint);
+  text-transform: uppercase;
+  margin-top: 12px;
+}
+.tg-quote,
+.tg-article blockquote {
+  border-left: 2px solid var(--tg-orange);
+  padding: 4px 0 4px 26px;
+  margin: 44px 0;
+}
+.tg-quote p,
+.tg-article blockquote p {
+  font-weight: 500;
+  font-stretch: 104%;
+  font-size: clamp(22px, 2.4vw, 28px);
+  line-height: 1.3;
   letter-spacing: -0.012em;
   color: var(--tg-ink);
-  margin: 36px 0 18px;
+  margin: 0 0 12px;
 }
-.tg-prose h3 {
-  font-size: clamp(20px, 2vw, 24px);
+.tg-quote cite,
+.tg-article blockquote cite {
+  font-family: var(--tg-font-mono);
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--tg-faint);
+  text-transform: uppercase;
 }
-.tg-prose ul,
-.tg-prose ol {
-  margin: 0 0 26px;
+/* Markdown elements the canvas didn't compose by hand, styled to the same
+   register: `>`-marker mono-orange lists, h3 one step under h2, band-toned
+   code. */
+.tg-article h3 {
+  font-family: var(--tg-font-display);
+  font-weight: 600;
+  font-stretch: 102%;
+  font-size: clamp(22px, 2.2vw, 30px);
+  line-height: 1.1;
+  letter-spacing: -0.018em;
+  color: var(--tg-ink-soft);
+  margin: 44px 0 20px;
+}
+.tg-article ul,
+.tg-article ol {
+  margin: 0 0 28px;
   padding-left: 0;
   list-style: none;
-  max-width: 700px;
 }
-.tg-prose li {
+.tg-article li {
   position: relative;
   padding-left: 26px;
   margin-bottom: 12px;
   font-family: var(--tg-font-display);
   font-weight: 400;
-  font-stretch: 108%;
-  font-size: 17px;
+  font-stretch: 106%;
+  font-size: 19px;
   line-height: 1.55;
   color: var(--tg-mute);
 }
-.tg-prose li::before {
+.tg-article li::before {
   content: ">";
   position: absolute;
   left: 0;
@@ -480,518 +973,276 @@
   font-size: 14px;
   color: var(--tg-orange);
 }
-.tg-prose a {
-  color: var(--tg-orange);
-  text-decoration: none;
-  border-bottom: 1px solid rgba(232, 80, 20, 0.4);
-}
-.tg-prose a:hover {
-  border-bottom-color: var(--tg-orange);
-}
-.tg-prose strong {
+.tg-article strong {
   color: var(--tg-ink);
   font-weight: 600;
 }
-.tg-prose blockquote {
-  border-left: 3px solid var(--tg-orange);
-  padding: 6px 0 6px 28px;
-  margin: 40px 0;
-}
-.tg-prose blockquote p {
-  font-family: var(--tg-font-display);
-  font-weight: 600;
-  font-stretch: 108%;
-  font-size: clamp(22px, 2.6vw, 30px);
-  line-height: 1.25;
-  letter-spacing: -0.012em;
-  color: var(--tg-ink);
-  margin: 0;
-}
-.tg-prose code {
+.tg-article code {
   font-family: var(--tg-font-mono);
   font-size: 0.9em;
   background: var(--tg-band);
   border: 1px solid var(--tg-frame-hair);
   padding: 1px 5px;
 }
-.tg-prose pre {
+.tg-article pre {
   font-family: var(--tg-font-mono);
   font-size: 13px;
   background: var(--tg-band);
   border: 1px solid var(--tg-frame-hair);
   padding: 16px;
   overflow-x: auto;
-  margin: 0 0 26px;
+  margin: 0 0 28px;
 }
-.tg-prose pre code {
+.tg-article pre code {
   background: none;
   border: none;
   padding: 0;
 }
 
-/* ── Card grids (responsive) ──────────────────────────────────────────────── */
-.tg-rel-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+/* Below-article bands: "/ Sources" and "/ Related articles" */
+.tg-band-sec {
+  border-top: 1px solid var(--tg-frame-hair);
+  padding: 40px 24px 46px;
 }
-@media (max-width: 900px) {
-  .tg-rel-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+/* Sources live inside the article column — same 820px measure as the prose,
+   no band inset (the column provides it), lighter close (the grid's own
+   bottom padding follows). */
+.tg-artcol .tg-band-sec {
+  max-width: 820px;
+  padding: 40px 0 8px;
 }
-@media (max-width: 560px) {
-  .tg-rel-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-/* ── Reading-modes horizontal carousel ───────────────────────────────────────
-   One bordered console (.tg-rm-console) houses both halves — a vertical filter
-   list (left) and a sideways scroll-snap carousel of PORTRAIT post cards
-   (right) — divided by a single hairline rather than two independently
-   bordered chunks floating apart. Card width + symmetric side padding (so the
-   first/last card can center) are CSS-only, so the JS can navigate with
-   scrollIntoView and stay responsive. */
-.tg-rm-console {
-  border: 1px solid var(--tg-frame);
-}
-.tg-rm-layout {
-  display: grid;
-  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
-  align-items: stretch;
-}
-.tg-rm-filters {
-  display: flex;
-  flex-direction: column;
-  gap: 1px; /* frame color shows through as hairline dividers */
-  background: var(--tg-frame);
-  border-right: 1px solid var(--tg-frame);
-}
-.tg-mode-card {
-  /* The console's height is CONSTANT (the stage block is fully deterministic —
-     fixed card height, always-reserved controls row, empty state sized to the
-     same block; see --rm-card-h below). Because the target height never moves,
-     the four cards can safely grow to share it: they render identical in every
-     state (0 / 1 / many carousel posts) and no leftover strip is ever exposed. */
-  flex: 1 1 auto;
-}
-.tg-rm-stage {
-  min-width: 0;
-  padding: 30px 32px;
-  /* the carousel's card width — also the unit for the side padding below */
-  --rm-card-w: min(300px, 78vw);
-  /* the carousel card's FIXED height — the height authority for the whole
-     console. Post content never changes it (internal clamps + overflow:hidden
-     absorb variance), so the stage block is the same height with 1 card or 5. */
-  --rm-card-h: 450px;
-}
-.tg-rm-carousel {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-/* Empty state occupies exactly the carousel block's footprint
-   (12px viewport padding + card + 20px gap + 32px controls row),
-   so a format with zero posts renders the console at the same height. */
-.tg-rm-empty {
-  height: calc(var(--rm-card-h) + 64px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.tg-rm-viewport {
-  display: flex;
-  gap: 20px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  overscroll-behavior-x: contain;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  /* symmetric side padding so the first & last cards can scroll to center */
-  padding: 6px calc(50% - var(--rm-card-w) / 2);
-  /* soften the peeked cards at the left/right edges */
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent 0,
-    #000 9%,
-    #000 91%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    90deg,
-    transparent 0,
-    #000 9%,
-    #000 91%,
-    transparent 100%
-  );
-}
-.tg-rm-viewport::-webkit-scrollbar {
-  display: none;
-}
-.tg-rm-card {
-  flex: 0 0 var(--rm-card-w);
-  width: var(--rm-card-w);
-  height: var(--rm-card-h); /* fixed — post content must never drive height */
-  scroll-snap-align: center;
-  display: flex;
-  flex-direction: column;
-  background: var(--tg-card);
-  border: 1px solid var(--tg-frame-hair);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
-  text-decoration: none;
-  overflow: hidden;
-  transform-origin: center center;
-  transition: opacity 0.35s ease, transform 0.35s ease, border-color 0.25s ease,
-    background 0.18s ease;
-}
-.tg-rm-card:hover {
-  background: var(--tg-card-hover);
-}
-.tg-rm-card-img {
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  border: none;
-  border-bottom: 1px solid var(--tg-frame-hair);
-}
-.tg-rm-card-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 15px 16px 16px;
-}
-.tg-rm-card-title {
+.tg-seclabel {
   font-family: var(--tg-font-mono);
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 1.3;
-  letter-spacing: 0.005em;
-  color: var(--tg-ink);
-  margin: 0;
+  /* Matches .tg-collabel / the home index labels (see note there). */
+  font-size: 15.6px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.tg-rm-card-summary {
-  font-family: var(--tg-font-mono);
-  font-size: 11px;
-  line-height: 1.65;
-  letter-spacing: 0.02em;
   color: var(--tg-mute);
-  margin: 0;
-  text-transform: uppercase;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  margin-bottom: 26px;
 }
-.tg-rm-card-point {
+/* Source rows — same link-row family as .tg-rel-row, plus a right-aligned
+   mono publisher column. The whole row is the outbound link. */
+.tg-src-row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) auto 32px;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--tg-frame-hair);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.tg-src-row:first-of-type {
+  border-top: 1px solid var(--tg-frame-hair);
+}
+.tg-src-pub {
+  font-family: var(--tg-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tg-faint);
+  white-space: nowrap;
+}
+.tg-src-row:hover {
+  background: #ff3d97;
+}
+.tg-src-row:hover .tg-rel-title,
+.tg-src-row:hover .tg-rel-date,
+.tg-src-row:hover .tg-rel-arrow,
+.tg-src-row:hover .tg-src-pub {
+  color: var(--tg-ink-black);
+}
+.tg-src-row:hover .tg-rel-bullet {
+  background: var(--tg-ink-black);
+}
+@media (max-width: 700px) {
+  .tg-src-row {
+    grid-template-columns: 104px 1fr 24px;
+  }
+  .tg-src-pub {
+    display: none;
+  }
+}
+/* Link-row shared parts (.tg-rel-date/bullet/title/arrow) — used by the
+   source rows and the related-card date kicker. */
+.tg-rel-date {
   display: flex;
   align-items: center;
-  gap: 9px;
-  min-width: 0;
+  gap: 12px;
   font-family: var(--tg-font-mono);
-  font-size: 11px;
-  line-height: 1;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--tg-mute);
 }
-.tg-rm-card-tag {
-  font-family: var(--tg-font-mono);
-  font-size: 9px;
-  letter-spacing: 0.05em;
-  background: rgba(255, 255, 255, 0.035);
+.tg-rel-bullet {
+  width: 9px;
+  height: 9px;
+  background: var(--tg-orange-deep);
+  flex-shrink: 0;
+}
+.tg-rel-title {
+  font-family: var(--tg-font-display);
+  font-weight: 300;
+  font-stretch: 104%;
+  font-size: clamp(18px, 2vw, 26px);
+  letter-spacing: -0.01em;
   color: var(--tg-ink-soft);
-  border: 1px solid var(--tg-frame-hair);
-  padding: 4px 8px;
-  text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
+  transition: color 0.15s;
 }
-.tg-rm-controls {
+.tg-rel-arrow {
+  /* Near-invisible at rest (a shade above the band background) — the arrow
+     only reads on the hover flood, where it flips ink-black. */
+  color: #2b2e32;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
+  justify-content: flex-end;
 }
-.tg-rm-nav {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--tg-font-mono);
-  font-size: 15px;
-  color: var(--tg-mute);
-  background: var(--tg-band);
-  border: 1px solid var(--tg-frame);
-  cursor: pointer;
-  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
-}
-.tg-rm-nav:hover:not(:disabled) {
-  color: var(--tg-ink);
-  border-color: var(--tg-orange);
-  background: color-mix(in srgb, var(--tg-orange) 6%, var(--tg-band));
-}
-.tg-rm-nav:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-.tg-rm-dots {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-}
-.tg-rm-dot {
-  width: 6px;
-  height: 6px;
-  padding: 0;
-  background: var(--tg-frame);
-  border: none;
-  cursor: pointer;
-  transform: rotate(45deg);
-  transition: background 0.18s ease, transform 0.18s ease;
-}
-.tg-rm-dot[data-active="true"] {
-  transform: rotate(45deg) scale(1.5);
-}
-@media (prefers-reduced-motion: reduce) {
-  .tg-rm-viewport {
-    scroll-behavior: auto;
+@media (max-width: 700px) {
+  .tg-rel-title {
+    white-space: normal;
+    font-size: 16px;
   }
-  .tg-rm-card {
-    transition: opacity 0.001s, border-color 0.001s;
-    transform: none !important;
+  .tg-rel-date {
+    font-size: 11px;
+    gap: 8px;
   }
 }
 
-/* ── Hero pipeline strip ────────────────────────────────────────────────────
-   The hero's right rail explains how the site makes itself. One synchronized
-   9s cycle tells a story: an orange spark descends the spine leaving a lit
-   trail behind it; each stage node (a diamond, echoing the section-diamond
-   idiom) FLARES as the spark passes, then settles to a warm "visited" state;
-   stage titles brighten in the same rhythm. At cycle's end everything resets
-   and the run begins again. All animations share one timeline (no delays) —
-   per-stage keyframes (a–d) place each flare where the spark actually is:
-   pass-by at ~2% / 29% / 58% / 83% of the cycle (spark reaches bottom at 92%).
-   Fully static under prefers-reduced-motion (nodes rest in the visited state). */
-.tg-pipe {
+/* ── Related-article cards — two-up gallery: framed cover figure beside a
+      large light title, clamped summary, and mono chips. Hover floods the
+      card's text in hot-magenta highlight (the text-highlight cousin of the
+      index rows' full-row flood). ─────────────────────────────────────────── */
+.tg-relgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.tg-relcard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 32px;
+  min-width: 0;
+  padding: 8px 56px 8px 0;
+  text-decoration: none;
+}
+.tg-relcard + .tg-relcard {
+  border-left: 1px solid var(--tg-frame-hair);
+  padding-left: 56px;
+  padding-right: 0;
+}
+/* Framed figure — the cover (or the marked placeholder slot when there's
+   no image) in a plain hairline frame. */
+.tg-relcard-fig {
+  align-self: start;
+  border: 1px solid var(--tg-frame-hair);
+}
+.tg-relcard-frame {
   position: relative;
+  aspect-ratio: 1 / 1;
+  background: var(--tg-ink-black);
+  overflow: hidden;
 }
-.tg-pipe::before {
-  /* the spine */
-  content: "";
+.tg-relcard-frame.tg-img-slot {
+  border: 0;
+}
+.tg-relcard-frame img {
   position: absolute;
-  left: 3px;
-  top: 4px;
-  bottom: 4px;
-  width: 1px;
-  background: var(--tg-frame-hair);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
-.tg-pipe-trail {
-  /* the lit portion of the spine, growing behind the spark. scaleY (not
-     height) — transform interpolates reliably and stays in lockstep with the
-     spark, so the spark never detaches from its trail. */
-  position: absolute;
-  left: 3px;
-  top: 4px;
-  bottom: 8px;
-  width: 1px;
-  background: rgb(232 80 2 / 0.45);
-  transform-origin: top;
-  transform: scaleY(0);
-  animation: tg-pipe-trail 9s linear infinite;
+.tg-relcard-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
-@keyframes tg-pipe-trail {
-  0% {
-    transform: scaleY(0);
-    opacity: 1;
-  }
-  92% {
-    transform: scaleY(1);
-    opacity: 1;
-  }
-  96%,
-  100% {
-    transform: scaleY(1);
-    opacity: 0;
-  }
+.tg-relcard-title {
+  font-family: var(--tg-font-display);
+  font-weight: 300;
+  font-stretch: 104%;
+  font-size: clamp(24px, 2.3vw, 34px);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: var(--tg-ink-soft);
+  margin: 16px 0 0;
 }
-.tg-pipe-runner {
-  /* the travelling spark */
-  position: absolute;
-  left: 1px;
-  top: 4px;
-  width: 5px;
-  height: 5px;
-  background: var(--tg-orange);
-  transform: rotate(45deg);
-  box-shadow: 0 0 8px rgb(232 80 2 / 0.55);
-  animation: tg-pipe-run 9s linear infinite;
+.tg-relcard-title svg {
+  display: inline;
+  vertical-align: baseline;
+  margin-left: 2px;
 }
-@keyframes tg-pipe-run {
-  0% {
-    top: 4px;
-    opacity: 0;
-  }
-  2% {
-    opacity: 1;
-  }
-  88% {
-    opacity: 1;
-  }
-  92%,
-  100% {
-    top: calc(100% - 10px);
-    opacity: 0;
-  }
-}
-
-/* Stage rows: the container's color carries the title (title inherits);
-   descriptions stay faint. */
-.tg-pipe-stage {
+.tg-relcard-sum {
+  margin: auto 0 0;
+  padding-top: 28px;
+  font-family: var(--tg-font-display);
+  font-weight: 400;
+  font-stretch: 106%;
+  font-size: 17px;
+  line-height: 1.5;
   color: var(--tg-mute);
-  animation-duration: 9s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
 }
-.tg-pipe-node {
-  position: absolute;
-  left: 0;
-  top: 3px;
-  width: 7px;
-  height: 7px;
-  transform: rotate(45deg);
-  border: 1px solid var(--tg-frame);
-  animation-duration: 9s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
+.tg-relcard-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
 }
-.tg-pipe-stage[data-stage="0"] {
-  animation-name: tg-pipe-stage-a;
+.tg-relcard-chip {
+  font-family: var(--tg-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tg-mute);
+  border: 1px solid var(--tg-frame-hair);
+  padding: 4px 9px;
 }
-.tg-pipe-stage[data-stage="1"] {
-  animation-name: tg-pipe-stage-b;
+/* Hover — magenta text-highlight (same sanctioned literal as the row flood) */
+.tg-relcard-hl {
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
-.tg-pipe-stage[data-stage="2"] {
-  animation-name: tg-pipe-stage-c;
+.tg-relcard:hover .tg-relcard-hl {
+  background: #ff3d97;
+  color: var(--tg-ink-black);
 }
-.tg-pipe-stage[data-stage="3"] {
-  animation-name: tg-pipe-stage-d;
+.tg-relcard:hover .tg-relcard-chip {
+  background: #ff3d97;
+  border-color: #ff3d97;
+  color: var(--tg-ink-black);
 }
-.tg-pipe-stage[data-stage="0"] .tg-pipe-node {
-  animation-name: tg-pipe-node-a;
-}
-.tg-pipe-stage[data-stage="1"] .tg-pipe-node {
-  animation-name: tg-pipe-node-b;
-}
-.tg-pipe-stage[data-stage="2"] .tg-pipe-node {
-  animation-name: tg-pipe-node-c;
-}
-.tg-pipe-stage[data-stage="3"] .tg-pipe-node {
-  animation-name: tg-pipe-node-d;
-}
-
-/* Titles: mute → ink at pass-by, hold lit until the cycle resets. */
-@keyframes tg-pipe-stage-a {
-  0%, 1% { color: var(--tg-mute); }
-  3%, 94% { color: var(--tg-ink); }
-  100% { color: var(--tg-mute); }
-}
-@keyframes tg-pipe-stage-b {
-  0%, 27% { color: var(--tg-mute); }
-  30%, 94% { color: var(--tg-ink); }
-  100% { color: var(--tg-mute); }
-}
-@keyframes tg-pipe-stage-c {
-  0%, 56% { color: var(--tg-mute); }
-  59%, 94% { color: var(--tg-ink); }
-  100% { color: var(--tg-mute); }
-}
-@keyframes tg-pipe-stage-d {
-  0%, 81% { color: var(--tg-mute); }
-  84%, 94% { color: var(--tg-ink); }
-  100% { color: var(--tg-mute); }
-}
-
-/* Nodes: gray → flare (solid orange + glow) at pass-by → warm "visited"
-   (translucent orange) → reset. */
-@keyframes tg-pipe-node-a {
-  0%, 1% { border-color: var(--tg-frame); background: transparent; box-shadow: none; }
-  3%, 9% { border-color: var(--tg-orange); background: var(--tg-orange); box-shadow: 0 0 10px rgb(232 80 2 / 0.6); }
-  14%, 94% { border-color: rgb(232 80 2 / 0.65); background: rgb(232 80 2 / 0.3); box-shadow: none; }
-  100% { border-color: var(--tg-frame); background: transparent; box-shadow: none; }
-}
-@keyframes tg-pipe-node-b {
-  0%, 27% { border-color: var(--tg-frame); background: transparent; box-shadow: none; }
-  30%, 36% { border-color: var(--tg-orange); background: var(--tg-orange); box-shadow: 0 0 10px rgb(232 80 2 / 0.6); }
-  41%, 94% { border-color: rgb(232 80 2 / 0.65); background: rgb(232 80 2 / 0.3); box-shadow: none; }
-  100% { border-color: var(--tg-frame); background: transparent; box-shadow: none; }
-}
-@keyframes tg-pipe-node-c {
-  0%, 56% { border-color: var(--tg-frame); background: transparent; box-shadow: none; }
-  59%, 65% { border-color: var(--tg-orange); background: var(--tg-orange); box-shadow: 0 0 10px rgb(232 80 2 / 0.6); }
-  70%, 94% { border-color: rgb(232 80 2 / 0.65); background: rgb(232 80 2 / 0.3); box-shadow: none; }
-  100% { border-color: var(--tg-frame); background: transparent; box-shadow: none; }
-}
-@keyframes tg-pipe-node-d {
-  0%, 81% { border-color: var(--tg-frame); background: transparent; box-shadow: none; }
-  84%, 90% { border-color: var(--tg-orange); background: var(--tg-orange); box-shadow: 0 0 10px rgb(232 80 2 / 0.6); }
-  92%, 94% { border-color: rgb(232 80 2 / 0.65); background: rgb(232 80 2 / 0.3); box-shadow: none; }
-  100% { border-color: var(--tg-frame); background: transparent; box-shadow: none; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tg-pipe-runner,
-  .tg-pipe-trail {
-    display: none;
+@media (max-width: 1100px) {
+  .tg-relgrid {
+    grid-template-columns: 1fr;
   }
-  .tg-pipe-stage {
-    animation: none;
-    color: var(--tg-ink-soft);
+  .tg-relcard {
+    padding: 0 0 44px;
   }
-  .tg-pipe-node {
-    animation: none;
-    border-color: rgb(232 80 2 / 0.65);
-    background: rgb(232 80 2 / 0.3);
+  .tg-relcard + .tg-relcard {
+    border-left: 0;
+    border-top: 1px solid var(--tg-frame-hair);
+    padding: 44px 0 0;
   }
 }
-
-/* ── Two-column bands collapse on narrow viewports ────────────────────────── */
-@media (max-width: 860px) {
-  .tg-hero-grid {
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
-  /* Stacked under the identity column, the card stack runs full width (the
-     desktop centered-in-half sizing no longer applies). Each card keeps its
-     own full border, so no extra hairline is needed here. */
-  .tg-hero-cards {
-    width: 100% !important;
-  }
-}
-@media (max-width: 760px) {
-  .tg-featured-grid {
-    grid-template-columns: minmax(0, 1fr) !important;
+@media (max-width: 700px) {
+  .tg-relcard {
+    grid-template-columns: 1fr;
+    gap: 22px;
   }
 }
 
 /* ── Rail removed sitewide ──────────────────────────────────────────────────
    The indexed marker gutter is gone: every band runs full-width with a single
-   editorial left inset (--tg-edge). This was formerly a mobile-only collapse —
-   it's now the layout at all widths. Markers that carried meaning were folded
-   into content (breadcrumbs, section headers); the decorative glyphs
-   ((*), (★), (src), (index), …) were dropped from the markup. `.tg-m-only`
-   stays defined as an inert hook. */
+   editorial left inset (--tg-edge). Markers that carried meaning were folded
+   into content (breadcrumbs, section headers). `.tg-m-only` stays defined as
+   an inert hook. (The v5 News index manages its own insets and does not use
+   .tg-band-content.) */
 .tg-band {
-  grid-template-columns: minmax(0, 1fr) !important;
-}
-.tg-dispatch {
   grid-template-columns: minmax(0, 1fr) !important;
 }
 .tg-band-marker {
@@ -1011,126 +1262,21 @@
     padding-right: 20px !important;
   }
 
-  /* Dispatch rows tighten further on mobile so more of the index fits. */
-  .tg-dispatch {
-    padding: 22px 0 24px !important;
-  }
-
-  /* Hero: the strip (up next + pipeline) is genuine identity content, not a
-     repeat of the post below, so it STAYS on mobile — stacked full-width under
-     the identity column (top hairline set in the ≤860 block). */
-
-  /* Reading modes: the two-column desktop layout (vertical filters | carousel)
-     stacks inside the same console. The filters become a compact 2×2 grid
-     (label + one-line description only; this is the original pre-carousel
-     mobile treatment, unchanged by the carousel redesign); the carousel sits
-     full-width below it, separated by a horizontal rule instead of the
-     desktop's vertical one. */
-  .tg-rm-layout {
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
-  .tg-rm-filters {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    /* hairline separators between the 2×2 cells: the frame color shows
-       through 1px gaps, so the cards need opaque backgrounds below */
-    gap: 1px;
-    background: var(--tg-frame);
-    border-right: none;
-    border-bottom: 1px solid var(--tg-frame);
-  }
-  .tg-rm-stage {
-    padding: 24px 20px;
-  }
-  .tg-mode-card {
-    padding: 14px !important;
-    gap: 10px !important;
-    background: var(--tg-band) !important;
-  }
-  .tg-mode-card[data-active="true"] {
-    background: color-mix(in srgb, var(--tg-orange) 8%, var(--tg-band)) !important;
-  }
-  .tg-mode-label {
-    font-size: 14px !important;
-  }
-  .tg-mode-desc {
-    display: none !important;
-  }
-
-  /* Section filter chips: one swipeable row instead of a tall wrapped block
-     that pushes the filtered list below the fold. Bleeds to the right edge
-     so the cut-off chip advertises the scroll. */
-  .tg-chip-row {
-    flex-wrap: nowrap !important;
-    overflow-x: auto;
-    margin-right: -20px;
-    padding-right: 20px;
-    scrollbar-width: none;
-  }
-  .tg-chip-row::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Empty IMAGE placeholder slots are desktop set-dressing — on a phone they
-     cost a full screen of nothing. Reclaim the space; revisit when per-post
-     image generation ships real assets. */
-  .tg-card > .tg-img-slot,
-  .tg-fig0-band {
-    display: none !important;
-  }
-
-  /* Article title: the desktop clamp bottoms out at 36px — a long headline
-     runs 7+ lines on a phone. 30px keeps the editorial scale in ~5. */
-  .tg-post-title {
-    font-size: 30px !important;
-  }
-
-  /* Article meta strip: tighter gaps so Published / By / Read time / Share
-     wrap into a compact block instead of a sparse column. */
-  .tg-meta-strip {
-    gap: 20px 28px !important;
-  }
-  .tg-meta-items {
-    gap: 18px 28px !important;
-  }
-}
-
-@media (max-width: 760px) {
-  /* Featured band collapses to one column — drop the empty image slot and
-     the (now vertical) 56px gap along with it. */
-  .tg-featured-grid {
-    gap: 0 !important;
-  }
-  .tg-featured-grid > .tg-img-slot {
+  /* An EMPTY cover figure is desktop set-dressing — on a phone it costs a
+     full screen of nothing. Real covers still render. */
+  .tg-fig-empty {
     display: none !important;
   }
 }
 
 /* ── Touch ergonomics — comfortable tap targets on coarse pointers ────────── */
 @media (pointer: coarse) {
-  .tg-surface .tg-share-chip {
-    width: 42px;
-    height: 42px;
-  }
-  .tg-surface .tg-chip {
-    padding: 12px 12px 12px 14px;
-  }
   .tg-surface .tg-nav-link {
     padding: 8px 2px; /* grows the hit area; visual size unchanged */
   }
 }
 
 /* ── Keyframes ────────────────────────────────────────────────────────────── */
-@keyframes tg-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 @keyframes tg-pulse-dot {
   0%,
   100% {
@@ -1140,20 +1286,12 @@
     opacity: 0.2;
   }
 }
-.tg-fade-up {
-  opacity: 0;
-  animation: tg-fade-up 0.7s var(--tg-ease, ease) forwards;
-}
 .tg-pulse {
   animation: tg-pulse-dot 1.6s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .tg-surface .tg-pulse {
-    animation: none;
-  }
-  .tg-surface .tg-fade-up {
-    opacity: 1;
     animation: none;
   }
 }

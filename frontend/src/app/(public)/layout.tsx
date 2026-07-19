@@ -26,7 +26,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 
         {/* Masthead: wordmark (pinned on desktop, in-flow on mobile) */}
         <header style={{ background: "var(--tg-bg)", flexShrink: 0 }}>
-          <div className="tg-masthead-brand" style={{ padding: "20px 24px 24px" }}>
+          <div className="tg-masthead-brand" style={{ padding: "26px 24px" }}>
             <Wordmark />
           </div>
         </header>

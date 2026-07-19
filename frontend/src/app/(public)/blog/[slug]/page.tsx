@@ -1,10 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-import { DispatchBody } from "@/components/public/dispatch-body";
-import { DispatchHeader } from "@/components/public/dispatch-header";
+import { PostView } from "@/components/public/post-view";
 import { RelatedDispatches } from "@/components/public/related-dispatches";
-import { SourcesList } from "@/components/public/sources-list";
 import {
   getPublicPost,
   listPublicPosts,
@@ -65,27 +63,15 @@ export default async function PostPage({ params }: PostPageProps) {
     const rest = others.filter(
       (p) => !(post.section != null && p.section === post.section),
     );
-    related = [...sameSection, ...rest].slice(0, 3);
+    related = [...sameSection, ...rest].slice(0, 2);
   } catch {
     related = [];
   }
 
   return (
-    <>
-      <DispatchHeader post={post} />
-
-      {/* article body */}
-      <div className="tg-band" style={{ background: "var(--tg-bg)" }}>
-        <div
-          className="tg-band-content"
-          style={{ padding: "44px var(--tg-content-pad) 8px 0" }}
-        >
-          <DispatchBody content={post.content} />
-        </div>
-      </div>
-
-      <SourcesList sources={post.sources} />
+    <div className="tg-post-scale">
+      <PostView post={post} />
       <RelatedDispatches posts={related} />
-    </>
+    </div>
   );
 }

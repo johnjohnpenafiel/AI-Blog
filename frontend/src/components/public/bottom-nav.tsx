@@ -1,15 +1,10 @@
 import Link from "next/link";
 
-import { LogoMark } from "./logo-mark";
-
 /**
- * Fixed bottom nav floating over the stage — a boxed LogoMark (→ home) at left,
- * mono nav links at right, both on a blurred near-black panel.
- *
- * Deviation from the handoff (which showed Home / Blogs / Subscribe): the index
- * *is* the blog, so "Blogs" was redundant, and Subscribe is omitted until the
- * newsletter flow is built (Phase 4) — re-add it then. Wired to our real
- * routes: Home, About.
+ * Fixed bottom nav floating over the stage — mono nav links on a blurred
+ * near-black panel, right-aligned (per the v5 canvas, which dropped the old
+ * boxed-LogoMark panel). "News" is the homepage: the index IS the news.
+ * Subscribe returns when the newsletter flow ships (Phase 4).
  */
 export function BottomNav() {
   const panel: React.CSSProperties = {
@@ -30,21 +25,16 @@ export function BottomNav() {
         right: 0,
         zIndex: 200,
         display: "flex",
-        justifyContent: "space-between",
+        justifyContent: "flex-end",
         alignItems: "center",
         padding:
           "16px clamp(20px, 3vw, 44px) calc(16px + env(safe-area-inset-bottom, 0px))",
         pointerEvents: "none",
       }}
     >
-      <div style={{ ...panel, gap: 10, padding: "8px 12px" }}>
-        <Link href="/" aria-label="Home">
-          <LogoMark size={24} />
-        </Link>
-      </div>
       <div style={{ ...panel, gap: 28, padding: "12px 22px" }}>
         <Link href="/" className="tg-nav-link">
-          Home
+          News
         </Link>
         <Link href="/about" className="tg-nav-link">
           About
