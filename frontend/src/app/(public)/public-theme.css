@@ -1120,7 +1120,12 @@
   position: relative;
   aspect-ratio: 16 / 9;
   background: var(--tg-ink-black);
-  border: 1px solid var(--tg-frame-hair);
+  /* Matte frame — a brightened version of the page bg (#17191c lifted, same
+     cool cast) so the image reads as raised off the band, closed with a
+     hairline at the outer edge — matches the in-article image treatment. */
+  border: 24px solid #22252a;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px var(--tg-frame-hair);
   overflow: hidden;
 }
 .tg-fig img {
@@ -1227,10 +1232,23 @@
   border: none;
   padding: 0;
 }
+/* Inline body images (markdown), if any: matte frame in the page-bg tone,
+   closed with a hairline — the border blends into the band so the image reads
+   as inset. (The cover figure is framed separately, see .tg-fig-frame.) */
+.tg-article p img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 0 28px;
+  border: 24px solid #22252a;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px var(--tg-frame-hair);
+}
 
-/* Below-article bands: "/ Sources" and "/ Related articles" */
+/* Below-article bands: "/ Sources" and "/ Related articles". The section
+   rule runs UNDER the label (label first, hairline below, then content) —
+   no band-top border. */
 .tg-band-sec {
-  border-top: 1px solid var(--tg-frame-hair);
   padding: 40px 24px 46px;
 }
 /* Sources live inside the article column — same 820px measure as the prose,
@@ -1247,7 +1265,9 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--tg-mute);
-  margin-bottom: 26px;
+  border-bottom: 1px solid var(--tg-frame-hair);
+  padding-bottom: 14px;
+  margin-bottom: 40px;
 }
 /* Source rows — same link-row family as .tg-rel-row, plus a right-aligned
    mono publisher column. The whole row is the outbound link. */
@@ -1261,9 +1281,8 @@
   text-decoration: none;
   transition: background 0.15s;
 }
-.tg-src-row:first-of-type {
-  border-top: 1px solid var(--tg-frame-hair);
-}
+/* No top border on the first source row — the section label's rule above
+   already draws the line; a second one would double up. */
 .tg-src-pub {
   font-family: var(--tg-font-mono);
   font-size: 12px;
@@ -1356,15 +1375,26 @@
   text-decoration: none;
 }
 .tg-relcard + .tg-relcard {
-  border-left: 1px solid var(--tg-frame-hair);
+  /* Dashed = machinery — same bright dashed divider as the filter bar and
+     the post metadata rows (1px dashed --tg-mute). */
+  border-left: 1px dashed var(--tg-mute);
   padding-left: 56px;
   padding-right: 0;
 }
-/* Framed figure — the cover (or the marked placeholder slot when there's
-   no image) in a plain hairline frame. */
+/* Framed figure — a console-window chrome: light outer frame + an empty
+   title-bar strip, the cover (or placeholder slot) filling the pane below. */
 .tg-relcard-fig {
   align-self: start;
-  border: 1px solid var(--tg-frame-hair);
+  /* Window chrome in the hairline gray (--tg-frame-hair) — a step darker
+     than the frame gray so the chrome sits quieter; the background + padding
+     form the thicker side/bottom borders and the bar strip on top is the
+     taller title band. */
+  background: var(--tg-frame-hair);
+  padding: 0 7px 7px;
+}
+.tg-relcard-bar {
+  height: 24px;
+  background: var(--tg-frame-hair);
 }
 .tg-relcard-frame {
   position: relative;
@@ -1423,13 +1453,16 @@
   margin-top: 18px;
 }
 .tg-relcard-chip {
+  /* Same voice as the post sidebar's gold chips (.tg-meta-chip): mono
+     uppercase in the canvas gold with a dashed border. */
   font-family: var(--tg-font-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-size: 13px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--tg-mute);
-  border: 1px solid var(--tg-frame-hair);
-  padding: 4px 9px;
+  color: oklch(0.82 0.17 75);
+  border: 1px dashed oklch(0.82 0.17 75 / 0.45);
+  padding: 3px 9px;
+  display: inline-block;
 }
 /* Hover — magenta text-highlight (same sanctioned literal as the row flood) */
 .tg-relcard-hl {
@@ -1454,7 +1487,7 @@
   }
   .tg-relcard + .tg-relcard {
     border-left: 0;
-    border-top: 1px solid var(--tg-frame-hair);
+    border-top: 1px dashed var(--tg-mute);
     padding: 44px 0 0;
   }
 }

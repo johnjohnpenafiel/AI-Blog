@@ -6,6 +6,18 @@
 
 New entries at the top.
 
+### 2026-07-19 — Post-page polish pass: image frames, related-card chrome, section rules
+
+**Context**: First round of one-thing-at-a-time polish on the post page, styled against Stripe-blog references. Iterated live with the operator; all values below are the landed ones.
+
+**Decisions**:
+
+- **Matte image frames (cover + inline article images).** The cover figure (`.tg-fig-frame`) and any inline body image (`.tg-article p img`) sit in a **24px matte border of `#22252a`** — the page bg (`#17191c`) lifted in brightness with its cool cast kept, so the image reads as *raised page*, not a foreign gray (tried `--tg-band` and `#2b2f36` first; both too loud/neutral). Hairline (`--tg-frame-hair`) closes the outer edge via box-shadow; **6px border-radius** — a deliberate, sanctioned exception to the public "radius 0" rule, scoped to these frames. Cover caption reads just **"Cover"** (the `FIG.0 —` prefix retired).
+- **Related-card window chrome.** `.tg-relcard-fig` renders as console-window chrome: `--tg-frame-hair` fill forming a **24px empty title bar** on top and **7px side/bottom** matte around the 1:1 image pane (no `[ FIG. n ]` text/icons — frame only). Started at silver `#c2c7ce` per the reference, stepped to `--tg-frame`, landed one notch darker on `--tg-frame-hair` for subtlety.
+- **Related-card tags = gold chips.** `.tg-relcard-chip` now uses the `.tg-meta-chip` recipe (mono 13px uppercase, canvas gold `oklch(0.82 0.17 75)`, dashed border) — extends the gold literal's sanctioned scope from the metadata sidebar to these tags. Card hover floods them magenta like the rest of the card. (An intermediate take styled them as plain filter-item labels; rejected.)
+- **Section rule runs under the label.** `.tg-band-sec` bands (`/ Sources`, `/ Related articles`) drop the band-top hairline; `.tg-seclabel` carries a full-width rule *below* the label (14px below label, 40px above content), and the first source row drops its top border so lines don't double. Matches the reference's `/ SECTION` treatment.
+- **Related-card divider goes dashed-bright.** The line between the two cards is `1px dashed --tg-mute` (desktop vertical, stacked horizontal) — the established machinery semantic from the filter bars and metadata rows.
+
 ### 2026-07-19 — Mobile/tablet optimization pass (public surface)
 
 **Context**: The v3 public redesign (v5 index + Post v2) shipped desktop-first; the ≤820px experience was a naive collapse. This pass recomposes the public surface for phone/tablet against the Stripe blog (index) and NYT (masthead/menu) mobile references. Desktop is untouched throughout — every change lives inside `@media (max-width: 820px)` / `768px` / `767px` blocks. **The dashboard was not part of this pass.**

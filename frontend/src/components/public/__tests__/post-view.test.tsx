@@ -42,7 +42,7 @@ describe("PostView", () => {
     // the article must not render a second h1.
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     // No image_url → the marked placeholder figure renders.
-    expect(screen.getByText("FIG.0 — Lead image placeholder")).toBeInTheDocument();
+    expect(screen.getByText("Lead image placeholder")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 2, name: "The phones stopped ringing" }),
     ).toBeInTheDocument();

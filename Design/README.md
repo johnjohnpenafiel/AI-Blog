@@ -71,7 +71,7 @@ Layout variables: `--tg-edge` (band left inset, clamp), `--tg-frame-pad` (frame 
 
 **Hot magenta `#ff3d97`** — a literal, not a token: the News-index rows and the post page's source rows flood magenta on hover with ink-black content, and the related-article cards flood their *text* with it (highlight style). The one sanctioned non-orange accent (v5 / Post v2 canvases; see the 2026-07-18 decisions). Must not propagate beyond those link surfaces.
 
-**Gold `oklch(0.82 0.17 75)`** — a second canvas literal, scoped to the post metadata sidebar's chips (`.tg-meta-chip`: author + category tags, dashed gold border). Must not propagate.
+**Gold `oklch(0.82 0.17 75)`** — a second canvas literal, scoped to the post page's mono dashed-border chips: the metadata sidebar's (`.tg-meta-chip`: author + category tags) and the related-article cards' section/format tags (`.tg-relcard-chip`, same recipe; 2026-07-19). Must not propagate beyond these chip surfaces.
 
 (The per-format accent system — `formatAccent`, tinted chips/cards — retired with the v5/Post v2 redesign; format is now a filter, not a color.)
 
@@ -101,16 +101,16 @@ Full anatomy in `site-map/public/_shell.md`; the rules:
 | Idiom | Treatment |
 |---|---|
 | **Kicker** | `// Label` — DM Mono 10px, 0.18em tracking, uppercase, orange (`.tg-kicker`) or sand. |
-| **Column rule** | `.tg-colrule` + `.tg-collabel` — `/ Label` mono header over a hairline (the post page's `/ Metadata`, `/ Article`; band variant `.tg-band-sec` + `.tg-seclabel` for `/ Sources`, `/ Related articles`). |
+| **Column rule** | `.tg-colrule` + `.tg-collabel` — `/ Label` mono header over a hairline (the post page's `/ Metadata`, `/ Article`; band variant `.tg-band-sec` + `.tg-seclabel` for `/ Sources`, `/ Related articles` — there the rule runs *under* the label, full-width, and the first list row drops its top border so the lines don't double). |
 | **Meta button** | `.tg-btn` — mono ghost button (frame border, ink-soft text); hover floods orange with ink-black text. The post sidebar's share row (`.tg-btnrow`). |
 | **Gold chip** | `.tg-meta-chip` — mono uppercase chip in the canvas's oklch gold with a dashed border (a sanctioned dashed exception alongside `.tg-needs`, scoped to the post metadata sidebar). Author + category tags. |
 | **Filter tree** | `.tg-fgroup` / `.tg-fitem` — folder groups (▾ chevron + folder icon + orange mono title) of checkbox items with live counts; checked box shows an orange checkmark, label brightens to ink. Sticky beside the index on desktop. |
 | **Nav link** | `.tg-nav-link` — mono uppercase, mute → ink on hover. |
 | **Body link** | `.tg-body-link` — orange with a 40%-orange underline that solidifies on hover. |
-| **News row** | `.tg-row` — the index's one-line link row: orange-deep square bullet + dotted date (`2026.7.17`) · light-weight Archivo title (ellipsized; ↗ only when untruncated) · plus glyph. Hover floods the row `#ff3d97` with ink-black content. The post page's source rows (`.tg-src-row`) speak the same voice; its related-article cards (`.tg-relcard`) are the two-up gallery cousin — framed 1:1 cover + light-Archivo title + clamped summary + mono chips, hovering floods the text in magenta highlight. |
+| **News row** | `.tg-row` — the index's one-line link row: orange-deep square bullet + dotted date (`2026.7.17`) · light-weight Archivo title (ellipsized; ↗ only when untruncated) · plus glyph. Hover floods the row `#ff3d97` with ink-black content. The post page's source rows (`.tg-src-row`) speak the same voice; its related-article cards (`.tg-relcard`) are the two-up gallery cousin — a console-window-chrome cover (`.tg-relcard-fig`: `--tg-frame-hair` chrome, 24px empty title bar + 7px side/bottom matte around the 1:1 pane) + light-Archivo title + clamped summary + gold chips, hovering floods the text in magenta highlight; cards split by a bright dashed `--tg-mute` divider. |
 | **Expand button** | `.tg-expand-btn` — bare corner-bracket icon button (mute → orange); opens/closes the post page's full-screen reader overlay (`.tg-reader`). |
 | **Rule header** | pulse dot + mono label + stretching hairline + right-aligned mono count. |
-| **Image slot** | `.tg-img-slot` — holds the post's **AI-generated cover** (fal.ai/Recraft, pipeline image step) via `object-fit: cover`, falling back to the framed placeholder + badge when `image_url` is null. On the post page it's FIG.0 (`.tg-fig`, 16:9 ink-black frame + mono caption) after the lede; empty figures are hidden on mobile. |
+| **Image slot** | `.tg-img-slot` — holds the post's **AI-generated cover** (fal.ai/Recraft, pipeline image step) via `object-fit: cover`, falling back to the framed placeholder + badge when `image_url` is null. On the post page it's the cover figure (`.tg-fig`, 16:9 pane in a 24px matte border of `#22252a` — the page bg subtly lifted — with a hairline outer edge, 6px radius, and a mono "Cover" caption) after the lede; empty figures are hidden on mobile. Inline article images (`.tg-article p img`) get the same matte treatment. |
 | **Needs-content marker** | `.tg-needs` — loud dashed yellow chip marking intentional content gaps (the one sanctioned dashed border, shared with the gold chip). |
 | **Article prose** (`.tg-article`) | Post markdown: 18.5px Archivo paragraphs (first paragraph enlarged as the `.tg-lede`), Archivo 600 headings at ~normal width, orange underlined links, orange-rule blockquotes, `>`-marker mono-orange lists, mono code on `--tg-band`. The markdown's leading `# H1` is stripped — the hero owns the title. |
 
@@ -204,7 +204,7 @@ The dashboard is a cockpit, not a page: the viewport is pinned (`h-screen overfl
 
 | ✓ DO | ✗ NEVER |
 |---|---|
-| Square corners (public) / real `clip-path` chamfers via `ChamferedPanel` (dashboard) | `border-radius` anywhere (LogoMark rings + status dots are the only circles) |
+| Square corners (public) / real `clip-path` chamfers via `ChamferedPanel` (dashboard) | `border-radius` anywhere (LogoMark rings + status dots are the only circles; one sanctioned exception — the post page's matte image frames carry a 6px radius, 2026-07-19) |
 | Orange `#e85002` as the accent, load-bearing | Any other saturated accent (sand, the link rows' `#ff3d97` hover, the post sidebar's gold chips, and semantic states are the sanctioned exceptions) |
 | DM Mono (public) / IBM Plex Mono (dashboard) for all chrome, uppercase + tracked | Serif fonts; Chakra Petch / JetBrains Mono / Inter / Fraunces (all retired) |
 | Archivo for editorial content, extended on public display | Extended Archivo in dashboard card rows (overflow) |

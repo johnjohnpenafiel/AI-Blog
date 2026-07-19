@@ -20,6 +20,7 @@ export function RelatedDispatches({ posts }: { posts: PublicPostListItem[] }) {
         {posts.map((post) => (
           <Link key={post.slug} href={`/blog/${post.slug}`} className="tg-relcard">
             <div className="tg-relcard-fig">
+              <div className="tg-relcard-bar" />
               <div
                 className={
                   post.image_url

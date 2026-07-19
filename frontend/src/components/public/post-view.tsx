@@ -58,7 +58,7 @@ function CoverFig({ imageUrl, title }: { imageUrl: string | null; title: string 
         )}
       </div>
       <div className="tg-figcap">
-        {imageUrl ? "FIG.0 — Cover" : "FIG.0 — Lead image placeholder"}
+        {imageUrl ? "Cover" : "Lead image placeholder"}
       </div>
     </div>
   );
