@@ -17,7 +17,9 @@ the same density calibration as the home index).
 Post View
 ├── Hero (.tg-hero)
 │   └── Hero Title (.tg-hero-title)  ← Archivo 600, normal width, clamp
-│                                      34–98px, ink-soft, max 18ch, balanced
+│                                      34–98px (≤820px raises the floor:
+│                                      clamp 55–68px so the title anchors the
+│                                      page on phone/tablet), ink-soft, max 18ch
 └── Post Grid (.tg-post — 280–380px sidebar | 1fr article; ≤820px stacks)
     ├── Metadata Sidebar (.tg-meta — sticky top 32px ≥821px)
     │   ├── Mini Title (.tg-meta-minititle)  ← hidden until the hero title
@@ -34,7 +36,9 @@ Post View
     │             mono ghost buttons; hover floods orange with ink-black text)
     └── Article (.tg-article — max 820px)
         ├── "/ Article" rule (.tg-colrule) + Expand Button (.tg-expand-btn)
-        │       ← corner-bracket icon; opens the full-page Reader Overlay
+        │       ← corner-bracket icon; opens the full-page Reader Overlay.
+        │         Hidden ≤820px — the article is already full-width there, so
+        │         the reader adds nothing (the overlay's own close keeps it)
         ├── Lede (p.tg-lede)      ← the markdown's first plain paragraph,
         │                            21px #e2ded8 (leading `# H1` is stripped —
         │                            the hero owns the title)

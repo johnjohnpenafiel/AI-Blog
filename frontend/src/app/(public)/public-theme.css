@@ -103,6 +103,109 @@
   }
 }
 
+/* Masthead brand block ("THE GARAGE AI"). Its bottom rule closes off the
+   masthead (desktop; the mobile query below thins it to match the frame —
+   it must come AFTER this rule so the 2px override wins the cascade). */
+.tg-masthead-brand {
+  border-bottom: 3px solid var(--tg-frame);
+}
+
+/* ── Mobile masthead bar + full-screen menu (≤768px) ──────────────────────────
+   The NYT pattern in the stage's language: burger left, wordmark centered
+   (fixed size — the fit-to-width stage piece is desktop-only), and the menu
+   as a full-screen overlay of stacked Archivo links over hairlines. */
+.tg-masthead-mobile {
+  display: none;
+}
+@media (max-width: 768px) {
+  .tg-masthead-desktop {
+    display: none;
+  }
+  .tg-masthead-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 15px 16px;
+  }
+}
+/* Burger: quiet chrome, not a loud control — it only opens the menu, while
+   real navigation is clicking through pages. Bars sit in muted gray and
+   brighten to ink on interaction, the same recede→brighten as .tg-nav-link. */
+.tg-burger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 30px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--tg-mute);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.tg-burger:hover,
+.tg-burger:active {
+  color: var(--tg-ink);
+}
+.tg-burger-ghost {
+  visibility: hidden;
+}
+.tg-mobile-wordmark {
+  font-family: var(--tg-font-display);
+  font-weight: 700;
+  font-stretch: 125%;
+  /* Fluid: ~19px on phones, growing to ~25px at the 768px tablet edge. */
+  font-size: clamp(19px, 3.3vw, 25px);
+  letter-spacing: -0.005em;
+  line-height: 0.82;
+  color: var(--tg-orange);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.tg-mobnav {
+  position: fixed;
+  inset: 0;
+  /* above the bottom nav (200), below the reader overlay (400) */
+  z-index: 300;
+  background: var(--tg-bg);
+  overflow-y: auto;
+  padding: 16px 16px 40px;
+}
+.tg-mobnav-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  margin: 2px 0 14px;
+  background: none;
+  border: 0;
+  color: var(--tg-mute);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.tg-mobnav-close:hover,
+.tg-mobnav-close:active {
+  color: var(--tg-ink);
+}
+.tg-mobnav-list {
+  display: flex;
+  flex-direction: column;
+}
+.tg-mobnav-link {
+  font-family: var(--tg-font-display);
+  font-weight: 600;
+  font-stretch: 104%;
+  font-size: 26px;
+  color: var(--tg-ink-soft);
+  text-decoration: none;
+  padding: 22px 8px;
+  border-bottom: 1px solid var(--tg-frame-hair);
+}
+
 @media (max-width: 768px) {
   .tg-stage {
     min-height: 100dvh;
@@ -133,8 +236,14 @@
   }
   .tg-stage-scroll {
     overflow-x: hidden;
-    /* bottom-nav clearance + iPhone home-indicator safe area */
-    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    /* iPhone home-indicator safe area (the bottom nav is desktop-only, so
+       no nav clearance here — the burger menu owns mobile navigation) */
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  /* Desktop-only: the burger menu owns mobile navigation (!important beats
+     the component's inline display: flex, the established mobile pattern). */
+  .tg-bottom-nav {
+    display: none !important;
   }
 }
 
@@ -142,12 +251,6 @@
 .tg-frame > *:not(.tg-scanline) {
   position: relative;
   z-index: 1;
-}
-
-/* Masthead brand block ("THE GARAGE AI"). Its bottom rule closes off the
-   masthead (desktop; the mobile query above thins it to match the frame). */
-.tg-masthead-brand {
-  border-bottom: 3px solid var(--tg-frame);
 }
 
 .tg-scanline {
@@ -516,37 +619,150 @@
   text-transform: uppercase;
 }
 
+/* Mobile recompose (≤820px): the filter tree becomes horizontal filter BARS —
+   one per group: fixed label cell (folder + title) | dashed vertical divider |
+   a horizontally scrollable item strip (checkboxes hidden; checked = orange
+   label). The "/ Date / Name" head disappears, and each row stacks the date
+   kicker above a large WRAPPING title with the + centered on the right. */
 @media (max-width: 820px) {
   .tg-idx-body {
     grid-template-columns: minmax(0, 1fr);
   }
+  /* Tighter gap between the masthead and the News title — the desktop 52px
+     top padding (inline on the wrapper, hence !important) reads as dead air
+     on a phone. */
+  .tg-idx-pad {
+    padding-top: 28px !important;
+  }
   .tg-rows-head {
-    grid-template-columns: 108px 1fr;
+    display: none;
   }
   .tg-rows {
     padding-left: 0;
   }
+  .tg-news-title {
+    margin-bottom: 34px;
+  }
   .tg-filters {
     border-right: none;
-    border-bottom: 1px solid var(--tg-frame-hair);
-    padding: 20px 0 24px;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 20px 40px;
+    padding: 0;
+    flex-direction: column;
+    gap: 0;
+    align-items: stretch;
+  }
+  .tg-filters-head {
+    padding: 2px 0 10px;
+  }
+  .tg-filters-head .tg-idx-label {
+    font-size: 12px;
   }
   .tg-fgroup {
-    width: auto;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--tg-frame-hair);
   }
-  .tg-row-main {
-    grid-template-columns: 108px 1fr 30px;
-    padding: 18px 0;
+  .tg-fgroup-title {
+    font-size: 13px;
   }
-  .tg-row-date {
+  .tg-fgroup-head {
+    flex-shrink: 0;
+    padding: 2px 14px 2px 0;
+    /* Dashed = machinery — same color as the post metadata rows' dashed
+       separators (--tg-mute), so the two surfaces' dashes match. */
+    border-right: 1px dashed var(--tg-mute);
+  }
+  .tg-fgroup-chev {
+    display: none;
+  }
+  .tg-fgroup-list {
+    flex: 1;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
     gap: 8px;
-    font-size: 11px;
+    border-left: 0;
+    margin: 0;
+    padding: 0 0 0 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tg-fgroup-list::-webkit-scrollbar {
+    display: none;
+  }
+  /* Every item carries its own horizontal padding (not the gap) so the
+     checked flood has breathing room without a layout shift on toggle. */
+  .tg-fitem {
+    width: auto;
+    flex-shrink: 0;
+    padding: 4px 10px;
+  }
+  .tg-fbox {
+    display: none;
+  }
+  /* Resting items sink toward the background; selected floods the item with
+     the index rows' hover magenta (ink-black content) — selection reads as
+     state, not a font-color change. */
+  .tg-fitem-label {
+    font-size: 14px;
+    color: var(--tg-faint);
+  }
+  .tg-fitem[data-checked="true"] {
+    background: #ff3d97;
+  }
+  .tg-fitem[data-checked="true"] .tg-fitem-label,
+  .tg-fitem[data-checked="true"] .tg-fitem-count {
+    color: var(--tg-ink-black);
+  }
+  .tg-clear {
+    align-self: flex-start;
+    padding: 12px 0 0;
+  }
+  /* Tablet (768–820px): the reference's single-line row — the base
+     date | title | + grid stays, title one-line ellipsized (uniform row
+     heights), at the reference's density (~43px effective rows). */
+  .tg-row-main {
+    grid-template-columns: 120px 1fr 34px;
+    padding: 14px 0;
   }
   .tg-row-title {
-    font-size: 17px;
+    font-size: 26px;
+    line-height: 1.16;
+  }
+  .tg-row-arrow {
+    display: none;
+  }
+}
+
+/* Phone (<768px): rows stack — date kicker above a freely wrapping title,
+   the + spanning both rows. */
+@media (max-width: 767px) {
+  .tg-row-main {
+    grid-template-columns: minmax(0, 1fr) 30px;
+    grid-template-rows: auto auto;
+    row-gap: 10px;
+    padding: 20px 0 24px;
+  }
+  .tg-row-date {
+    grid-column: 1;
+    grid-row: 1;
+    gap: 10px;
+    font-size: 14px;
+  }
+  .tg-row-name {
+    grid-column: 1;
+    grid-row: 2;
+    padding-right: 12px;
+  }
+  .tg-row-plus {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+  .tg-row-title {
+    white-space: normal;
+    overflow: visible;
   }
 }
 
@@ -622,6 +838,19 @@
   .tg-meta {
     position: static !important;
     margin-bottom: 44px;
+  }
+  /* Phones bottom out at the base clamp's 38px floor — too small once the
+     title is the only thing on screen. Larger floor + slope for the whole
+     mobile/tablet band; the title is the page's one display moment here. */
+  .tg-hero-title {
+    font-size: clamp(55px, 14vw, 68px);
+  }
+  /* No reader-overlay opener when the article is already full-width (the
+     sidebar stacked above it). The overlay's own close button keeps the
+     shared class but stays visible, so a reader opened on desktop can still
+     be dismissed after a resize into this band. */
+  .tg-expand-btn:not(.tg-reader-close) {
+    display: none;
   }
 }
 .tg-collabel {

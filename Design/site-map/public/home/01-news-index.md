@@ -46,5 +46,15 @@ Notes:
   title/plus to ink-black — the one sanctioned non-orange accent, straight from
   the v5 canvas (kept deliberately; see Design/decisions.md 2026-07-18).
 - The index manages its own 24px insets (plain divs, not `.tg-band-content`).
-- ≤820px: filters become a horizontal wrap row above the rows; date column
-  narrows to 108px; titles drop to 17px.
+- **≤820px (mobile recompose):** each filter group becomes a horizontal
+  **filter bar** — fixed label cell (folder icon + orange title, chevron
+  hidden) | dashed-mute vertical divider (same dash as the post metadata
+  separators) | a scrollbar-less horizontally scrolling item strip. The whole
+  filter block is dialed smaller (labels ~13–14px). Selection is a **magenta
+  `#ff3d97` flood** on the chosen item (ink-black label, matching the index
+  rows' hover), not a font-color change; resting items sit in faint gray.
+  "✕ Clear all" drops below the bars, and the `/ Date / Name` head disappears.
+  Rows split by band: **tablet (768–820px)** keeps the single-line
+  `date | title | +` grid, title one-line ellipsized at the reference density
+  (26px, 14px padding, 120px date col, ~43px rows); **phones (<768px)** stack
+  the date kicker above a freely wrapping title, `+` spanning both rows.
