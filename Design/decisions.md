@@ -6,6 +6,22 @@
 
 New entries at the top.
 
+### 2026-07-18 — Post page v2: hero + metadata sidebar replaces the banded article layout
+
+**Context**: Second import from the Claude Design project ("The Garage AI", page `The Garage AI Post v2.html`), following the v5 homepage. The canvas recomposes the dispatch page around a two-column editorial layout; ported 1:1 into `post-view.tsx` + the post block of `public-theme.css`, with real post data bound in.
+
+**What changed**:
+- **Full replace of the article page anatomy.** The breadcrumb band, kicker/summary title block, horizontal metadata strip, and FIG.0 band are gone. New shape: a giant hero title (Archivo 600 @ 100% width, clamp 34–98px), then a `.tg-post` grid — sticky `/ Metadata` sidebar (280–380px) + `/ Article` column (max 820px).
+- **The sidebar carries all metadata**: dotted date (orange), author + category tags as **gold chips** (`.tg-meta-chip`, canvas-literal `oklch(0.82 0.17 75)` with a dashed border — a new sanctioned exception, scoped here), read time, and a two-button share row (`.tg-btn` mono ghost → orange flood on hover; the copy-link chip retired). A **mini-title** slides open in the sidebar (grid-rows animation, IntersectionObserver) once the hero scrolls out of view.
+- **Reader overlay**: the `/ Article` rule holds a corner-bracket expand button opening a full-screen reader (`.tg-reader`, fixed z-400, blurred backdrop, Escape/backdrop closes) that re-renders the article full-width.
+- **Article voice**: 21px Archivo @ 108% ink-soft prose (23.5px `.tg-lede` first paragraph), Archivo 600 @ 102% h2s, orange *underlined* links. Column labels (`/ Metadata`, `/ Article`, seclabels) author at **15.6px** — the home index's effective label size, so the two pages match on screen under the shared 0.8 scale. The `/ Article` rule runs to the column's right edge while its expand icon stays at the prose edge (border-box padding trick). The markdown's leading `# H1` is stripped — the hero owns the title. FIG.0 (the AI cover) sits between the lede and the body inside the article column, 16:9 on ink-black; empty figures hidden ≤720px.
+- **Metadata separators are dashed mute** — `1px dashed var(--tg-mute)` under each sidebar row, establishing the semantic: *dashed = metadata key-value machinery, solid hairline = link-row lists*.
+- **Sources kept** (not on the canvas — the editorial contract), moved **inside the article column** (same 820px measure, scrolls with the prose) and recomposed as link rows (`.tg-src-row`: dotted date + orange-deep bullet · Archivo 300 title · mono publisher · near-invisible `→` that reads only on the magenta hover flood).
+- **Related = a two-up card gallery** (Stripe-blog-inspired, recomposed in our language): `.tg-relcard` pairs a hairline-framed 1:1 cover with a light-Archivo title + inline ↗ (the index glyph), a 4-line-clamped summary, and mono SECTION/FORMAT chips; hovering floods the card's *text* in magenta highlight (`box-decoration-break: clone`) — the text-highlight cousin of the row flood. `PostCard`, `ShareChips`, `.tg-card`, `.tg-share-chip`, `.tg-prose`, and the old solid-orange `.tg-btn`/`.tg-btn-ghost` are deleted; the per-format accent system (`formatAccent`) retired with them — format is a filter now, not a color.
+- **Same density calibration as the index**: the whole page runs in `.tg-post-scale` (0.8 zoom + `line-height: normal`), matching the canvas's ~2000px authoring viewport.
+
+**Tradeoffs**: the summary/standfirst no longer renders on the page (it survives as meta description + OG); section/format tokens no longer appear on the post surface (taxonomy is still recorded and filterable from the index); two dead canvas components (a bracketed tab bar, a subscribe band) were deliberately not ported — the canvas's own App never mounts them.
+
 ### 2026-07-18 — Homepage v5: the News index replaces the four-band homepage
 
 **Context**: The homepage design was iterated on the Claude Design canvas (project "The Garage AI", page `The Garage AI v5.html`) and imported directly via the Claude Design MCP server — the first handoff using the June-2026 two-way integration rather than a static bundle. v5 is a deliberate reduction: the archive itself becomes the page.

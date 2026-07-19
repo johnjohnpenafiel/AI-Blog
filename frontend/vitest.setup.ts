@@ -12,6 +12,21 @@ if (typeof globalThis.ResizeObserver === "undefined") {
   globalThis.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
 }
 
+// jsdom lacks IntersectionObserver — stub it so components that watch
+// scroll visibility (e.g. PostView's hero → mini-title swap) don't crash.
+if (typeof globalThis.IntersectionObserver === "undefined") {
+  class IntersectionObserverStub {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords() {
+      return [];
+    }
+  }
+  globalThis.IntersectionObserver =
+    IntersectionObserverStub as unknown as typeof IntersectionObserver;
+}
+
 // jsdom doesn't implement matchMedia. Stub it so components that subscribe
 // to viewport breakpoints (e.g. Sidebar's mobile drawer) don't crash.
 if (typeof window !== "undefined" && !window.matchMedia) {

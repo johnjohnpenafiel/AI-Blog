@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useLayoutEffect, useRef, useState } from "react";
 
 import type { PublicPostListItem } from "@/lib/public-api";
+import { dotDate } from "@/lib/public-format";
 
 /**
  * The v5 News index — the entire homepage (Stripe-blog layout, from the
@@ -20,22 +21,13 @@ import type { PublicPostListItem } from "@/lib/public-api";
  * loaded posts render, so there are never dead buckets.
  */
 
-/** Reading-mode filters (map to Post.format) — labels + accents per the canvas. */
+/** Reading-mode filters (map to Post.format) — labels per the canvas. */
 const FORMATS = [
-  { id: "Brief", label: "2-Minute Intel", accent: "var(--tg-orange-deep)" },
-  { id: "Deep Dive", label: "Go Further", accent: "var(--tg-sand)" },
-  { id: "Roundup", label: "The Week", accent: "var(--tg-orange-bright)" },
-  { id: "Explainer", label: "Start Here", accent: "var(--tg-orange-deep)" },
+  { id: "Brief", label: "2-Minute Intel" },
+  { id: "Deep Dive", label: "Go Further" },
+  { id: "Roundup", label: "The Week" },
+  { id: "Explainer", label: "Start Here" },
 ];
-
-/** "2026.7.17" — the index's dotted date (month unpadded, day padded). */
-function dotDate(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return `${d.getUTCFullYear()}.${d.getUTCMonth() + 1}.${String(
-    d.getUTCDate(),
-  ).padStart(2, "0")}`;
-}
 
 function FolderIcon({ color = "var(--tg-orange)" }: { color?: string }) {
   return (
@@ -84,13 +76,11 @@ function FilterItem({
   label,
   count,
   checked,
-  accent,
   onClick,
 }: {
   label: string;
   count: number;
   checked: boolean;
-  accent: string;
   onClick: () => void;
 }) {
   return (
@@ -100,13 +90,7 @@ function FilterItem({
       data-checked={checked}
       onClick={onClick}
     >
-      <span
-        className="tg-fbox"
-        style={{
-          borderColor: checked ? accent : undefined,
-          background: checked ? accent : undefined,
-        }}
-      />
+      <span className="tg-fbox" />
       <span className="tg-fitem-label">
         {label} <span className="tg-fitem-count">({count})</span>
       </span>
@@ -212,8 +196,8 @@ export function NewsIndex({ posts }: { posts: PublicPostListItem[] }) {
   const toggleSec = toggleIn(setSec);
 
   return (
-    <div style={{ background: "var(--tg-bg)" }}>
-      <div style={{ padding: "36px 24px 64px" }}>
+    <div className="tg-idx-scale" style={{ background: "var(--tg-bg)" }}>
+      <div style={{ padding: "52px 24px 64px" }}>
         <h1 className="tg-news-title">
           News
           <sup className="tg-news-count">
@@ -238,7 +222,6 @@ export function NewsIndex({ posts }: { posts: PublicPostListItem[] }) {
                     label={f.label}
                     count={countFmt(f.id)}
                     checked={fmt.has(f.id)}
-                    accent={f.accent}
                     onClick={() => toggleFmt(f.id)}
                   />
                 ))}
@@ -256,7 +239,6 @@ export function NewsIndex({ posts }: { posts: PublicPostListItem[] }) {
                     label={s}
                     count={countSec(s)}
                     checked={sec.has(s)}
-                    accent="var(--tg-orange-deep)"
                     onClick={() => toggleSec(s)}
                   />
                 ))}
