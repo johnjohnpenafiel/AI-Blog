@@ -1243,6 +1243,9 @@
   border: 24px solid #22252a;
   border-radius: 6px;
   box-shadow: 0 0 0 1px var(--tg-frame-hair);
+  /* Equivalent of the framed images' 10% page-tone overlay (an <img> can't
+     host a ::after). */
+  filter: brightness(0.91);
 }
 
 /* Below-article bands: "/ Sources" and "/ Related articles". The section
@@ -1385,16 +1388,16 @@
    title-bar strip, the cover (or placeholder slot) filling the pane below. */
 .tg-relcard-fig {
   align-self: start;
-  /* Window chrome in the hairline gray (--tg-frame-hair) — a step darker
-     than the frame gray so the chrome sits quieter; the background + padding
-     form the thicker side/bottom borders and the bar strip on top is the
-     taller title band. */
-  background: var(--tg-frame-hair);
+  /* Window chrome a step lighter than the post-image matte — pulled toward
+     neutral gray (the blue cast dialed back) so it reads as chrome, not sky;
+     the background + padding form the thicker side/bottom borders and the
+     bar strip on top is the taller title band. */
+  background: #2d2f33;
   padding: 0 7px 7px;
 }
 .tg-relcard-bar {
   height: 24px;
-  background: var(--tg-frame-hair);
+  background: #2d2f33;
 }
 .tg-relcard-frame {
   position: relative;
@@ -1411,6 +1414,18 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+/* Subtle page-tone overlay on every framed image (related cards + the post
+   cover figure, incl. the reader overlay's) — knocks the brightness down a
+   touch so covers blend with the site. Guarded off the .tg-img-slot
+   placeholder (whose ::after is the "IMAGE" badge). */
+.tg-relcard-frame:not(.tg-img-slot)::after,
+.tg-fig-frame:not(.tg-img-slot)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(23, 25, 28, 0.1);
+  pointer-events: none;
 }
 .tg-relcard-body {
   display: flex;
