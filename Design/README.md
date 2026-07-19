@@ -122,7 +122,7 @@ Full anatomy in `site-map/public/_shell.md`; the rules:
 
 ## Mobile layer (≤720px band collapse)
 
-The desktop composition is not shrunk — it's **recomposed**: the News index stacks at ≤820px (the filter tree becomes a horizontal wrap row above the rows; the date column narrows, row titles drop to 17px), the post page's sidebar goes static above the article at ≤820px (mini-title off), empty cover figures are hidden at ≤720px, and tap targets grow on coarse pointers. Mobile shows less, better.
+The desktop composition is not shrunk — it's **recomposed**. The **masthead** flips at ≤768px from the fit-to-width wordmark to a NYT-style bar (quiet muted-gray burger left, fixed-size centered orange wordmark) that opens a full-screen menu overlay of stacked links; the desktop **bottom nav is hidden** (the menu owns mobile navigation). The **News index** stacks at ≤820px (each filter group becomes a horizontal filter bar — label cell | dashed divider | scrollable item strip, checkboxes hidden, the whole block dialed smaller, **selection = magenta `#ff3d97` flood** on the item — the `/ Date / Name` head disappears; tablet rows stay single-line ellipsized, phones stack the date over a wrapping title). The **post page** sidebar goes static above the article at ≤820px (mini-title off), the hero title's clamp floor is raised so it anchors the page, the reader-expand icon is hidden (the article is already full-width), empty cover figures are hidden at ≤720px, and tap targets grow on coarse pointers. Mobile shows less, better.
 
 ---
 

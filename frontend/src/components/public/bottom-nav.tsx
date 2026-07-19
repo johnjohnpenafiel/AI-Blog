@@ -18,6 +18,7 @@ export function BottomNav() {
   };
   return (
     <div
+      className="tg-bottom-nav"
       style={{
         position: "fixed",
         bottom: 0,

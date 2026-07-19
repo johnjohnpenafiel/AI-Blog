@@ -6,6 +6,28 @@
 
 New entries at the top.
 
+### 2026-07-19 — Mobile/tablet optimization pass (public surface)
+
+**Context**: The v3 public redesign (v5 index + Post v2) shipped desktop-first; the ≤820px experience was a naive collapse. This pass recomposes the public surface for phone/tablet against the Stripe blog (index) and NYT (masthead/menu) mobile references. Desktop is untouched throughout — every change lives inside `@media (max-width: 820px)` / `768px` / `767px` blocks. **The dashboard was not part of this pass.**
+
+**Decisions**:
+
+*News index (≤820px):*
+- **Each filter group becomes a horizontal filter bar**: fixed label cell (folder icon + orange title; chevron hidden) | a **dashed-mute** vertical divider | a scrollbar-less horizontally-scrolling item strip. Checkboxes (`.tg-fbox`) hidden; the whole filter block is dialed smaller (labels ~13–14px). The divider is dashed deliberately — the bar is *machinery*, and dashed-mute is the established machinery semantic (post metadata separators), also mirroring the reference's dotted divider. Scoped to `.tg-fgroup-head`; not a general dashed license.
+- **Selection = magenta flood, not a font-color change.** Resting items sit in faint gray; the checked item floods `#ff3d97` with an ink-black label — the same hot-magenta as the index rows' hover, so "selected" and "active row" speak one color. (Superseded the first pass's checked-label-turns-orange.) "✕ Clear all" drops below the bars; the `/ Date / Name` head disappears.
+- **Rows split by band** (both 26px titles, no ↗ arrow): **tablet (768–820px)** keeps the single-line `date | title | +` grid, one-line ellipsized at the reference density (14px padding, 120px date col, ~43px rows); **phones (<768px)** stack the date kicker above a freely **wrapping** title, `+` spanning both rows. Taller phone rows accepted — readable headlines beat scan density.
+
+*Masthead + navigation:*
+- **≤768px masthead flips to a NYT-style bar** (`MobileMasthead`): burger left, fixed-size centered orange wordmark (`clamp(19–25px)`, growing toward the tablet edge), invisible burger mirror right for true centering. The desktop fit-to-width `Wordmark` is `>768px` only.
+- The burger opens a **full-screen menu overlay** (`.tg-mobnav`) of stacked Archivo links over hairlines — no search/subsections (we don't have them). **Portaled to `<body>`**: inside the header it was trapped under page content by the frame's `z-index:1` stacking context; the portal carries `tg-surface` so the `--tg-*` tokens still resolve. Closes on tap/✕/Escape/route-change; freezes page scroll while open.
+- The burger reads as **quiet chrome, not a control**: muted-gray bars, no frame/fill, brightening to ink on interaction (the `.tg-nav-link` recede→brighten). Rejected a louder framed-orange-flood button — a menu opener shouldn't compete with the wordmark when real navigation is clicking through pages.
+- **The desktop bottom nav is hidden ≤768px** (`.tg-bottom-nav`, `!important` over its inline `display:flex`) — the burger menu owns mobile navigation, so it would only duplicate.
+
+*Post page (≤820px):*
+- **Hero title clamp floor raised** to `clamp(55–68px)` so the title anchors the page on phone/tablet (the base `clamp(38–110px)` bottomed out too small under the 0.8 page zoom).
+- **Reader-expand icon hidden** — the article is already full-width when the sidebar stacks, so the overlay adds nothing. Scoped `:not(.tg-reader-close)` so a reader opened before a resize can still be dismissed.
+- Masthead↔"News" top gap tightened (52→28px), via a class on the index wrapper overriding its inline padding.
+
 ### 2026-07-18 — Post page v2: hero + metadata sidebar replaces the banded article layout
 
 **Context**: Second import from the Claude Design project ("The Garage AI", page `The Garage AI Post v2.html`), following the v5 homepage. The canvas recomposes the dispatch page around a two-column editorial layout; ported 1:1 into `post-view.tsx` + the post block of `public-theme.css`, with real post data bound in.

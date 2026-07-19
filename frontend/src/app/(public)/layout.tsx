@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { BottomNav } from "@/components/public/bottom-nav";
+import { MobileMasthead } from "@/components/public/mobile-masthead";
 import { PublicFooter } from "@/components/public/public-footer";
 import { Wordmark } from "@/components/public/wordmark";
 
@@ -24,11 +25,16 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       <div className="tg-frame tg-stage-frame">
         <div className="tg-scanline" />
 
-        {/* Masthead: wordmark (pinned on desktop, in-flow on mobile) */}
+        {/* Masthead: fit-to-width wordmark on desktop; on mobile a
+            burger | centered wordmark bar + full-screen menu overlay */}
         <header style={{ background: "var(--tg-bg)", flexShrink: 0 }}>
-          <div className="tg-masthead-brand" style={{ padding: "26px 24px" }}>
+          <div
+            className="tg-masthead-brand tg-masthead-desktop"
+            style={{ padding: "26px 24px" }}
+          >
             <Wordmark />
           </div>
+          <MobileMasthead />
         </header>
 
         {/* Scroll region — every page's bands render here, then the footer */}

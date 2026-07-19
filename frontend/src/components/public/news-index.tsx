@@ -197,7 +197,7 @@ export function NewsIndex({ posts }: { posts: PublicPostListItem[] }) {
 
   return (
     <div className="tg-idx-scale" style={{ background: "var(--tg-bg)" }}>
-      <div style={{ padding: "52px 24px 64px" }}>
+      <div className="tg-idx-pad" style={{ padding: "52px 24px 64px" }}>
         <h1 className="tg-news-title">
           News
           <sup className="tg-news-count">
