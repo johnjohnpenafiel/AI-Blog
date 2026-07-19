@@ -6,6 +6,22 @@
 
 New entries at the top.
 
+### 2026-07-18 — Homepage v5: the News index replaces the four-band homepage
+
+**Context**: The homepage design was iterated on the Claude Design canvas (project "The Garage AI", page `The Garage AI v5.html`) and imported directly via the Claude Design MCP server — the first handoff using the June-2026 two-way integration rather than a static bundle. v5 is a deliberate reduction: the archive itself becomes the page.
+
+**Decision**: Full replace. The homepage is now a single **News index** (Stripe-blog layout): a giant "News" title with a live superscript count, a sticky left **filter tree** (Format / Section folder groups of checkbox items — multi-select within a group, intersect across groups, all data-driven with live counts), and the full dispatch list as one-line editorial rows (date bullet · title · plus glyph). The four previous bands — hero intro (video + pipeline animation), reading-modes carousel, featured story, dispatch index — were **retired** along with their components, CSS, and the `week-schedule` lib. Format filters wear the reading-mode labels (2-Minute Intel / Go Further / The Week / Start Here).
+
+Accompanying system changes, all from the same canvas (Post v2 shares them — "same as v5"):
+- **Palette shift**: `--tg-bg` `#1a1a1a` → `#17191c` (subtle cool tint), `--tg-frame-hair` `#333333` → `#4a4a4a` (hairlines step up in presence), new `--tg-orange-deep` `#b83e02` (row bullets, checked filter boxes).
+- **Hot-magenta row hover `#ff3d97`** — the row floods magenta with ink-black content. A deliberate, sanctioned exception to "orange is the only accent," kept pixel-identical to the canvas (confirmed with the operator). A literal, not a token, matching the canvas.
+- **Bottom nav simplified**: the boxed-LogoMark panel is dropped; one right-aligned panel with News / About ("News" is home — the index is the news). `logo-mark.tsx` is kept on disk (the brand's only drawn vector; candidates for reuse in the post-page redesign).
+- **Title voice**: the News title and row titles run Archivo at **normal width** (100%/104%) and weight 300 for rows — a lighter register than the extended-118% band headings elsewhere.
+
+**Tradeoffs**: The featured/editor's-choice pin loses its public surface (the dashboard pin endpoints still work; the band no longer exists — revisit if a featured slot returns). The hero video and pipeline animation are gone. Homepage sorting is fixed newest-first with no "All" pseudo-filter (unchecked = all). The magenta hover is a brand-rule exception that must not propagate beyond the index rows.
+
+**References**: `frontend/src/components/public/news-index.tsx`, `frontend/src/app/(public)/public-theme.css`, `Design/site-map/public/home/01-news-index.md`, Claude Design project "The Garage AI" → `The Garage AI v5.html`.
+
 ### 2026-07-06 — Per-post AI cover images: the locked visual recipe
 
 **Context**: The redesign reserved `.tg-img-slot` frames (16:9 featured, 5:4 card) for real cover art but left them as placeholders. A Phase-0 bake-off explored what those covers should look like.

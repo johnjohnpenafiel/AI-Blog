@@ -24,7 +24,7 @@ The surfaces deliberately do **not** share one visual system. Each has its own l
 |---|---|---|
 | Feel | Editorial broadsheet × dark console | Operational command center / HUD |
 | Corners | Square everywhere (radius 0, defensively enforced) | Chamfered (45° cuts) — no radius either |
-| Background | Neutral **gray** ramp (`#1a1a1a` base) | **Black** chassis (`#0a0a0a` body, `#000` panels) |
+| Background | Neutral **gray** ramp (`#17191c` base) | **Black** chassis (`#0a0a0a` body, `#000` panels) |
 | Chrome font | DM Mono | IBM Plex Mono |
 | Editorial font | Archivo (variable width, run extended) | Archivo (`--font-editorial`, post content only) |
 | Token namespace | `--tg-*`, scoped under `.tg-surface` | `:root` tokens + Tailwind `@theme` utilities |
@@ -44,30 +44,33 @@ The surfaces deliberately do **not** share one visual system. Each has its own l
 
 ## Aesthetic direction
 
-A dark editorial console: a print-flavored broadsheet run through terminal chrome. The whole site is a **stage** — a 3px gray frame insets the viewport, a fit-to-width wordmark and scrolling headline ticker crown it, and every page is a vertical stack of full-width **bands** indexed by a mono marker in a left gutter, like a numbered contact sheet. Square corners everywhere; hierarchy comes from the gray ramp, hairline rules, and type — never from rounding or heavy borders. Orange is load-bearing (CTAs, live states, links, the featured star); sand is the quieter second voice (kickers, thesis lines).
+A dark editorial console: a print-flavored broadsheet run through terminal chrome. The whole site is a **stage** — a 3px gray frame insets the viewport, a fit-to-width wordmark crowns it, and every page is a stack of full-width **bands** with a single editorial left inset (the marker gutter and ticker are retired). The homepage is the **v5 News index**: the archive itself as a filterable row list. Square corners everywhere; hierarchy comes from the gray ramp, hairline rules, and type — never from rounding or heavy borders. Orange is load-bearing (CTAs, live states, links); sand is the quieter second voice (kickers, counts); the index rows' hot-magenta hover is the one sanctioned third voice.
 
 ## Color tokens (`--tg-*`)
 
 | Token | Value | Usage |
 |---|---|---|
-| `--tg-ink-black` | `#0a0a0a` | Ticker band background; text-on-orange (buttons, active chips). |
-| `--tg-bg` | `#1a1a1a` | Base page/band background. |
+| `--tg-ink-black` | `#0a0a0a` | Text-on-orange (buttons, active chips); row content on the magenta hover. |
+| `--tg-bg` | `#17191c` | Base page/band background (v5 palette — cool tint). |
 | `--tg-band` | `#242424` | Alternate (lifted) band background — used to stripe sections. |
 | `--tg-card` | `#2a2a2a` | Post cards. |
 | `--tg-card-hover` | `#303030` | Card hover. |
-| `--tg-frame` | `#646464` | The stage frame, masthead/ticker rules, chip + ghost borders. |
-| `--tg-frame-hair` | `#333333` | Hairline rules — band separators, card borders, list dividers. |
+| `--tg-frame` | `#646464` | The stage frame, masthead rules, ghost borders, filter checkboxes. |
+| `--tg-frame-hair` | `#4a4a4a` | Hairline rules — index heads/rows, card borders, list dividers (v5 palette). |
 | `--tg-ink` | `#f9f9f9` | Primary text. |
 | `--tg-mute` | `#a7a7a7` | Secondary text — summaries, meta. |
 | `--tg-faint` | `#646464` | Lowest-emphasis chrome — gutter markers, fine print. |
 | `--tg-ink-soft` | `#cfcbc5` | Warm off-white — resting dispatch headlines, tag chips. |
 | `--tg-orange` | `#e85002` | THE accent. CTAs, links, live dots, section diamonds, active states. |
 | `--tg-orange-bright` | `#f16001` | Button hover; the Roundup format accent. |
+| `--tg-orange-deep` | `#b83e02` | Muted third orange — index row bullets, checked filter boxes (Brief / Explainer / Section accents). |
 | `--tg-red` | `#c10801` | Reserved deep red (halftone art direction). |
 | `--tg-sand` | `#d9c3ab` | Secondary warm accent — kickers, thesis lines, the Deep Dive format accent, copy-link confirm. |
 | `--tg-halftone-field` | `#2a0700` | Image-slot field color (dark burnt ground for future halftone art). |
 
-Layout variables: `--tg-gutter` (132px desktop / 64px small), `--tg-frame-pad` (frame inset, clamp), `--tg-content-pad` (band right padding, clamp).
+Layout variables: `--tg-edge` (band left inset, clamp), `--tg-frame-pad` (frame inset, clamp), `--tg-content-pad` (band right padding, clamp). (`--tg-gutter` is gone with the marker rail.)
+
+**Hot magenta `#ff3d97`** — a literal, not a token: the News-index row hover floods the row magenta with ink-black content. The one sanctioned non-orange accent (v5 canvas; see the 2026-07-18 decision). Must not propagate beyond the index rows.
 
 **Format accents** (`lib/public-format.ts` → `formatAccent`): Brief = orange, Deep Dive = sand, Roundup = orange-bright. Used to tint format chips, mode cards, and post-card accents.
 
@@ -77,18 +80,18 @@ Layout variables: `--tg-gutter` (132px desktop / 64px small), `--tg-frame-pad` (
 |---|---|---|
 | Display — wordmark, headlines, band headings | **Archivo** 700 (variable `wdth` axis) | Run **extended**: `font-stretch` 110–125% (wordmark 125%, hero/dispatch headlines 112–118%), tight leading (0.96–1.1), slight negative tracking. |
 | Editorial body — summaries, prose, ledes | **Archivo** 400–500, stretch 108–112% | Article prose 18px/1.62; ledes and standfirsts larger (21–22px). |
-| Chrome — kickers, meta, buttons, chips, markers, ticker | **DM Mono** 300/400/500 | 8–12px, letter-spacing 0.08–0.3em, mostly uppercase. |
+| Chrome — kickers, meta, buttons, index labels/dates, filter titles | **DM Mono** 300/400/500 | 8–15px, letter-spacing 0.02–0.3em, mostly uppercase. |
 
-Rules: no serifs; chrome is always DM Mono; headlines are always extended Archivo; the ticker, gutter markers, and all labels stay mono uppercase. Post-card titles/excerpts are deliberately mono uppercase (the "card voice") — an exception to the Archivo-for-content rule, scoped to cards only.
+Rules: no serifs; chrome is always DM Mono; band headings are extended Archivo — but the v5 index runs Archivo at **normal width** (News title 100%, row titles 104% at weight 300), a deliberately lighter register. Labels stay mono uppercase. Post-card titles/excerpts are deliberately mono uppercase (the "card voice") — an exception to the Archivo-for-content rule, scoped to cards only.
 
 ## The stage (layout system)
 
 Full anatomy in `site-map/public/_shell.md`; the rules:
 
 - **Stage frame** — 3px `--tg-frame` border (top/left/right; no bottom — the floating bottom nav is the visual close), inset by `--tg-frame-pad`. A faint `.tg-scanline` texture overlays the whole stage.
-- **Masthead** — fit-to-width Archivo wordmark block + the scrolling ticker (real dispatch headlines interleaved with orange brand taglines; pure CSS 60s loop).
+- **Masthead** — the fit-to-width Archivo wordmark block (the scrolling ticker is retired).
 - **Scroll model is a media-query split** (`.tg-stage*`): **desktop (>768px)** is the locked-viewport stage — 100dvh, masthead pinned, content scrolls *inside* the frame (the design's signature). **Mobile (≤768px)** is natural document scroll — the frame goes full-bleed with thin 2px side borders running the whole document, and the masthead scrolls away (the bottom nav is the persistent navigation). Anything scroll-linked must handle both scrollers.
-- **Bands** — every page is a stack of `.tg-band` rows: `var(--tg-gutter)` marker column + content column, separated by `--tg-frame-hair` hairlines, optionally striped with `--tg-band`. The **gutter marker** is a small mono token in parentheses — a running index `(01)`, a count `(07)`, or a glyph `(★)` `(*)` `(↩)` `(src)` `(rel)` `(meta)` `(fig.0)` `(✶)`.
+- **Bands** — every page is a stack of full-width `.tg-band` rows with a single editorial left inset (`--tg-edge`), separated by `--tg-frame-hair` hairlines, optionally striped with `--tg-band`. (The marker-gutter rail was removed sitewide; the v5 News index manages its own 24px insets outside the band system.)
 - **Bottom nav** — fixed, floating over the stage: boxed LogoMark left, mono links right, on blurred near-black panels.
 - **LogoMark** (two overlapping rings) is the only drawn vector and — with tiny status dots — the only round geometry allowed.
 
@@ -101,11 +104,11 @@ Full anatomy in `site-map/public/_shell.md`; the rules:
 | **Format chip** | Mono uppercase in a 1px outlined chip, tinted by the format accent (`color-mix` 33% border). |
 | **Primary button** | `.tg-btn` — solid orange fill, ink-black mono uppercase text; hover → orange-bright. |
 | **Ghost button** | `.tg-btn-ghost` — transparent, `--tg-frame` border, mute text; hover → ink text + orange border. |
-| **Filter chip** | `.tg-chip` — outlined mono chip with a boxed count; active = solid orange with ink-black text. |
+| **Filter tree** | `.tg-fgroup` / `.tg-fitem` — folder groups (▾ chevron + folder icon + orange mono title) of checkbox items with live counts; checked box fills with the item's accent, label brightens to ink. Sticky beside the index on desktop. |
 | **Nav link** | `.tg-nav-link` — mono uppercase, mute → ink on hover. |
 | **Body link** | `.tg-body-link` — orange with a 40%-orange underline that solidifies on hover. |
 | **Post card** | `.tg-card` — `--tg-card` surface, hairline border; hover lifts (translateY −3px, deeper shadow, orange-tint border). |
-| **Dispatch row** | `.tg-dispatch` — full-width link row; hover washes the row faint-orange and turns index/read affordances orange. |
+| **News row** | `.tg-row` — the index's one-line link row: orange-deep square bullet + dotted date (`2026.7.17`) · light-weight Archivo title (ellipsized; ↗ only when untruncated) · plus glyph. Hover floods the row `#ff3d97` with ink-black content. |
 | **Share chip** | `.tg-share-chip` — 34px square mono button (`X` / `in` / `↗`); hover inverts to orange. |
 | **Rule header** | pulse dot + mono label + stretching hairline + right-aligned mono count. |
 | **Image slot** | `.tg-img-slot` — holds the post's **AI-generated cover** (fal.ai/Recraft, pipeline image step) via `object-fit: cover`, falling back to the framed placeholder + badge when `image_url` is null. Wired in the featured 16:9 and card 5:4 slots and the dashboard review panel. Reverses the old "no images" constraint; hidden on mobile per the redesign. |
@@ -114,14 +117,12 @@ Full anatomy in `site-map/public/_shell.md`; the rules:
 
 ## Motion
 
-- `.tg-fade-up` — 0.7s rise-and-fade entrance, staggered by inline `animationDelay` (hero).
-- `.tg-pulse` — 1.6s opacity pulse on live dots.
-- Ticker — 60s linear infinite track loop.
-- All three respect `prefers-reduced-motion: reduce`.
+- `.tg-pulse` — 1.6s opacity pulse on live dots; respects `prefers-reduced-motion: reduce`.
+- Everything else moves only on interaction (0.15s hover transitions). The old `.tg-fade-up` entrance and the ticker loop were retired with the v5 homepage.
 
 ## Mobile layer (≤720px band collapse)
 
-The desktop composition is not shrunk — it's **recomposed** (see the 2026-07-03 decision entries): bands drop the gutter (meaningful markers rejoin content via `.tg-m-only`), the reading-modes selector becomes a compact 2×2 grid (descriptions hidden), filter chips become one swipeable edge-bled row, the hero's duplicate card is dropped, empty image slots are hidden, tap targets grow on coarse pointers. Mobile shows less, better.
+The desktop composition is not shrunk — it's **recomposed**: the News index stacks at ≤820px (the filter tree becomes a horizontal wrap row above the rows; the date column narrows, row titles drop to 17px), empty image slots are hidden at ≤720px, and tap targets grow on coarse pointers. Mobile shows less, better.
 
 ---
 
@@ -204,7 +205,7 @@ The dashboard is a cockpit, not a page: the viewport is pinned (`h-screen overfl
 | ✓ DO | ✗ NEVER |
 |---|---|
 | Square corners (public) / real `clip-path` chamfers via `ChamferedPanel` (dashboard) | `border-radius` anywhere (LogoMark rings + status dots are the only circles) |
-| Orange `#e85002` as the accent, load-bearing | Any other saturated accent (sand + semantic states are the sanctioned exceptions) |
+| Orange `#e85002` as the accent, load-bearing | Any other saturated accent (sand, the index rows' `#ff3d97` hover, and semantic states are the sanctioned exceptions) |
 | DM Mono (public) / IBM Plex Mono (dashboard) for all chrome, uppercase + tracked | Serif fonts; Chakra Petch / JetBrains Mono / Inter / Fraunces (all retired) |
 | Archivo for editorial content, extended on public display | Extended Archivo in dashboard card rows (overflow) |
 | `--tg-*` on public, `:root`/Tailwind on dashboard | Cross-surface token references |
