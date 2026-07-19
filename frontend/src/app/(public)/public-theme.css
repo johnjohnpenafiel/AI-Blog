@@ -524,13 +524,11 @@
 }
 .tg-row {
   border-bottom: 1px solid var(--tg-frame-hair);
-  transition: background 0.15s;
   display: block;
   text-decoration: none;
 }
-.tg-row:hover {
-  background: #ff3d97;
-}
+/* Only the title line takes the magenta flood — the open drawer below it
+   stays on the page tone (the row is a toggle now, not a link). */
 .tg-row-main {
   width: 100%;
   display: grid;
@@ -541,6 +539,10 @@
   cursor: pointer;
   text-align: left;
   padding: 16px 0;
+  transition: background 0.15s;
+}
+.tg-row-main:hover {
+  background: #ff3d97;
 }
 .tg-row-date {
   display: flex;
@@ -579,26 +581,14 @@
   text-overflow: ellipsis;
   transition: color 0.15s;
 }
-.tg-row:hover .tg-row-title {
+.tg-row-main:hover .tg-row-title {
   color: var(--tg-ink-black);
 }
-.tg-row:hover .tg-row-date {
+.tg-row-main:hover .tg-row-date {
   color: var(--tg-ink-black);
 }
-.tg-row:hover .tg-row-bullet {
+.tg-row-main:hover .tg-row-bullet {
   background: var(--tg-ink-black);
-}
-.tg-row-arrow {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  color: var(--tg-ink-soft);
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-.tg-row:hover .tg-row-arrow {
-  opacity: 1;
-  color: var(--tg-ink-black);
 }
 .tg-row-plus {
   justify-self: end;
@@ -607,7 +597,113 @@
   color: var(--tg-faint);
   transition: color 0.15s;
 }
-.tg-row:hover .tg-row-plus {
+.tg-row-main:hover .tg-row-plus {
+  color: var(--tg-ink-black);
+}
+/* Open row: the full title shows (no ellipsis). */
+.tg-row[data-open="true"] .tg-row-title {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* ── Row drawer — inline dispatch details under the title line ─────────────
+   Always mounted; opens/closes with the mini-title's grid-rows slide
+   (0fr → 1fr + fade + lift, same spring curve) so the index rows below get
+   pushed/pulled smoothly. */
+.tg-row-drawer {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    grid-template-rows 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.25s ease,
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tg-row[data-open="true"] .tg-row-drawer {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+}
+.tg-row-drawer-clip {
+  overflow: hidden;
+  min-height: 0;
+}
+.tg-drawer-inner {
+  padding: 12px 0 30px;
+}
+.tg-drawer-grid {
+  display: grid;
+  grid-template-columns: 172px minmax(0, 1fr);
+  row-gap: 26px;
+  align-items: start;
+}
+.tg-drawer-label {
+  font-family: var(--tg-font-mono);
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #948bff; /* blue-violet — sanctioned literal, drawer labels only */
+  padding-top: 3px;
+}
+.tg-drawer-sum {
+  margin: 0;
+  max-width: 640px;
+  font-family: var(--tg-font-display);
+  font-weight: 400;
+  font-stretch: 106%;
+  font-size: 19px;
+  line-height: 1.55;
+  color: var(--tg-mute);
+}
+.tg-drawer-value {
+  font-family: var(--tg-font-display);
+  font-stretch: 104%;
+  font-size: 19px;
+  color: var(--tg-ink-soft);
+}
+.tg-drawer-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tg-drawer-chip {
+  /* The gold chip recipe (.tg-meta-chip / .tg-relcard-chip). */
+  font-family: var(--tg-font-mono);
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: oklch(0.82 0.17 75);
+  border: 1px dashed oklch(0.82 0.17 75 / 0.45);
+  padding: 3px 9px;
+  display: inline-block;
+}
+.tg-drawer-read {
+  display: block;
+  margin-top: 34px;
+  padding: 13px 0;
+  text-align: center;
+  text-decoration: none;
+  font-family: var(--tg-font-mono);
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--tg-ink-soft);
+  border: 1px solid var(--tg-frame);
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tg-row-drawer {
+    transition: none;
+  }
+}
+.tg-drawer-read:hover {
+  background: var(--tg-orange);
+  border-color: var(--tg-orange);
   color: var(--tg-ink-black);
 }
 .tg-rows-empty {
@@ -730,9 +826,6 @@
     font-size: 26px;
     line-height: 1.16;
   }
-  .tg-row-arrow {
-    display: none;
-  }
 }
 
 /* Phone (<768px): rows stack — date kicker above a freely wrapping title,
@@ -763,6 +856,17 @@
   .tg-row-title {
     white-space: normal;
     overflow: visible;
+  }
+  /* Drawer collapses to a label-over-value stack on phones. */
+  .tg-drawer-grid {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 8px;
+  }
+  .tg-drawer-label {
+    padding-top: 14px;
+  }
+  .tg-drawer-grid > .tg-drawer-label:first-child {
+    padding-top: 0;
   }
 }
 

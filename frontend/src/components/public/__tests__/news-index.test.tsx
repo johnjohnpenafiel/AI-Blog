@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 
 import { NewsIndex } from "../news-index";
 import type { PublicPostListItem } from "@/lib/public-api";
@@ -100,6 +100,50 @@ describe("NewsIndex", () => {
     for (const t of ["Alpha", "Bravo", "Charlie", "Delta"]) {
       expect(screen.getByText(t)).toBeInTheDocument();
     }
+  });
+
+  it("toggles a detail drawer with summary, section, format, topics, and a Read link", () => {
+    render(<NewsIndex posts={POSTS} />);
+    const drawer = (slug: string) =>
+      screen.getByText(`Summary ${slug}`).closest(".tg-row-drawer")!;
+
+    // closed (inert) by default — the drawer stays mounted for the slide
+    expect(drawer("a")).toHaveAttribute("inert");
+
+    // open: drawer becomes interactive and shows the post's details
+    fireEvent.click(screen.getByRole("button", { name: /Alpha/ }));
+    expect(drawer("a")).not.toHaveAttribute("inert");
+    const openDrawer = within(drawer("a") as HTMLElement);
+    expect(
+      openDrawer.getByText("Customer Experience", {
+        selector: ".tg-drawer-value",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      openDrawer.getByText("Brief", { selector: ".tg-drawer-value" }),
+    ).toBeInTheDocument();
+    expect(openDrawer.getByText("Voice AI")).toBeInTheDocument();
+    expect(openDrawer.getByRole("link", { name: "Read" })).toHaveAttribute(
+      "href",
+      "/blog/a",
+    );
+
+    // toggle closed again
+    fireEvent.click(screen.getByRole("button", { name: /Alpha/ }));
+    expect(drawer("a")).toHaveAttribute("inert");
+  });
+
+  it("omits the drawer's section row when the post has no section", () => {
+    render(<NewsIndex posts={POSTS} />);
+    fireEvent.click(screen.getByRole("button", { name: /Delta/ }));
+    const drawer = within(
+      screen.getByText("Summary d").closest(".tg-row-drawer") as HTMLElement,
+    );
+    expect(drawer.queryByText("Section:")).not.toBeInTheDocument();
+    // Delta is a Roundup — format still shows
+    expect(
+      drawer.getByText("Roundup", { selector: ".tg-drawer-value" }),
+    ).toBeInTheDocument();
   });
 
   it("renders the empty state before the first post is published", () => {

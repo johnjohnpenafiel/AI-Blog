@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import type { PublicPostListItem } from "@/lib/public-api";
 import { dotDate } from "@/lib/public-format";
@@ -98,48 +98,28 @@ function FilterItem({
   );
 }
 
+/**
+ * One index row — the title line toggles an inline drawer (summary · section ·
+ * topic chips · a full-width Read link). Only the title line takes the magenta
+ * hover flood; the open drawer stays on the page tone. An open row shows the
+ * full (wrapping) title, so the ↗ read affordance is gone.
+ */
 function NewsRow({ post }: { post: PublicPostListItem }) {
-  const titleRef = useRef<HTMLSpanElement>(null);
-  const [trunc, setTrunc] = useState(false);
-
-  // The ↗ read affordance only renders when the one-line title is NOT
-  // ellipsized (a truncated title already fills the row to its edge).
-  useLayoutEffect(() => {
-    const el = titleRef.current;
-    if (!el) return;
-    const check = () => setTrunc(el.scrollWidth > el.clientWidth + 1);
-    check();
-    window.addEventListener("resize", check);
-    if (typeof document !== "undefined" && document.fonts?.ready) {
-      document.fonts.ready.then(check).catch(() => {});
-    }
-    return () => window.removeEventListener("resize", check);
-  }, [post.title]);
-
+  const [open, setOpen] = useState(false);
   return (
-    <Link href={`/blog/${post.slug}`} className="tg-row">
-      <div className="tg-row-main">
+    <div className="tg-row" data-open={open}>
+      <button
+        type="button"
+        className="tg-row-main"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+      >
         <span className="tg-row-date">
           <span className="tg-row-bullet" />
           {dotDate(post.published_at)}
         </span>
         <span className="tg-row-name">
-          <span className="tg-row-title" ref={titleRef}>
-            {post.title}
-          </span>
-          {!trunc && (
-            <span className="tg-row-arrow" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 18 18" fill="none">
-                <path
-                  d="M5 13L13 5M13 5H6M13 5V12"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
-          )}
+          <span className="tg-row-title">{post.title}</span>
         </span>
         <span className="tg-row-plus">
           <svg
@@ -149,11 +129,58 @@ function NewsRow({ post }: { post: PublicPostListItem }) {
             fill="none"
             aria-hidden="true"
           >
-            <path d="M14 5v18M5 14h18" stroke="currentColor" strokeWidth="1" />
+            {open ? (
+              <path d="M5 14h18" stroke="currentColor" strokeWidth="1" />
+            ) : (
+              <path
+                d="M14 5v18M5 14h18"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+            )}
           </svg>
         </span>
+      </button>
+      {/* Always mounted so the grid-rows slide can run both ways; `inert`
+          keeps the collapsed drawer out of the tab order. */}
+      <div className="tg-row-drawer" inert={!open}>
+        <div className="tg-row-drawer-clip">
+          <div className="tg-drawer-inner">
+            <div className="tg-drawer-grid">
+              <span className="tg-drawer-label">Summary:</span>
+              <p className="tg-drawer-sum">{post.summary}</p>
+              {post.section && (
+                <>
+                  <span className="tg-drawer-label">Section:</span>
+                  <span className="tg-drawer-value">{post.section}</span>
+                </>
+              )}
+              {post.format && (
+                <>
+                  <span className="tg-drawer-label">Format:</span>
+                  <span className="tg-drawer-value">{post.format}</span>
+                </>
+              )}
+              {post.tags.length > 0 && (
+                <>
+                  <span className="tg-drawer-label">Topics:</span>
+                  <span className="tg-drawer-chips">
+                    {post.tags.map((t) => (
+                      <span key={t} className="tg-drawer-chip">
+                        {t}
+                      </span>
+                    ))}
+                  </span>
+                </>
+              )}
+            </div>
+            <Link href={`/blog/${post.slug}`} className="tg-drawer-read">
+              Read
+            </Link>
+          </div>
+        </div>
       </div>
-    </Link>
+    </div>
   );
 }
 

@@ -6,6 +6,18 @@
 
 New entries at the top.
 
+### 2026-07-19 — News-index rows become expandable drawers (Stripe-reference)
+
+**Context**: Homepage index rows were one-line links straight to the post. Per the Stripe-blog reference, a row now opens an inline detail drawer first; reading is an explicit second step.
+
+**Decisions**:
+
+- **Row = toggle, drawer = detail, Read = navigation.** `.tg-row-main` (a button) toggles `.tg-row-drawer`: mono labels `Summary:` / `Section:` / `Format:` / `Topics:` aligned under the date column (172px grid), Archivo 19px values, gold topic chips, and a full-width mono `Read` ghost link (frame border, orange flood on hover). Section/Format rows are omitted when null. (The reference's AUTHOR field has no equivalent — single-operator blog.)
+- **Hover floods only the title line.** The magenta `#ff3d97` flood moved from `.tg-row` to `.tg-row-main`, so an open drawer stays on the page tone (per the reference's green-flood-on-title-only).
+- **Open rows drop the ellipsis** — the full title wraps; the ↗ read affordance (and its truncation-measuring JS) is retired since the drawer's Read button owns navigation. The `+` glyph flips to `—` while open.
+- **Motion reuses the mini-title spring**: `grid-template-rows 0fr→1fr` + fade + 6px lift on `cubic-bezier(0.22, 1, 0.36, 1)` over 0.55s, so the rows below get pushed/pulled smoothly. The drawer stays mounted (needed for the close leg) with `inert` gating focus; `prefers-reduced-motion` disables the slide. Phones collapse the drawer grid to a label-over-value stack.
+- **Blue-violet `#948bff` drawer labels** — a third sanctioned canvas literal (after magenta and gold), scoped strictly to `.tg-drawer-label`. Tried on the row dates + bullets too — rejected there (too much presence at index volume); labels-only won. A cooler `#7d9bff` variant was also tried and rejected.
+
 ### 2026-07-19 — Post-page polish pass: image frames, related-card chrome, section rules
 
 **Context**: First round of one-thing-at-a-time polish on the post page, styled against Stripe-blog references. Iterated live with the operator; all values below are the landed ones.

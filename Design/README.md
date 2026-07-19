@@ -73,6 +73,8 @@ Layout variables: `--tg-edge` (band left inset, clamp), `--tg-frame-pad` (frame 
 
 **Gold `oklch(0.82 0.17 75)`** — a second canvas literal, scoped to the post page's mono dashed-border chips: the metadata sidebar's (`.tg-meta-chip`: author + category tags) and the related-article cards' section/format tags (`.tg-relcard-chip`, same recipe; 2026-07-19). Must not propagate beyond these chip surfaces.
 
+**Blue-violet `#948bff`** — a third canvas literal, scoped to the News-index row drawer's mono labels (`.tg-drawer-label`; 2026-07-19). Must not propagate.
+
 (The per-format accent system — `formatAccent`, tinted chips/cards — retired with the v5/Post v2 redesign; format is now a filter, not a color.)
 
 ## Typography
@@ -107,7 +109,8 @@ Full anatomy in `site-map/public/_shell.md`; the rules:
 | **Filter tree** | `.tg-fgroup` / `.tg-fitem` — folder groups (▾ chevron + folder icon + orange mono title) of checkbox items with live counts; checked box shows an orange checkmark, label brightens to ink. Sticky beside the index on desktop. |
 | **Nav link** | `.tg-nav-link` — mono uppercase, mute → ink on hover. |
 | **Body link** | `.tg-body-link` — orange with a 40%-orange underline that solidifies on hover. |
-| **News row** | `.tg-row` — the index's one-line link row: orange-deep square bullet + dotted date (`2026.7.17`) · light-weight Archivo title (ellipsized; ↗ only when untruncated) · plus glyph. Hover floods the row `#ff3d97` with ink-black content. The post page's source rows (`.tg-src-row`) speak the same voice; its related-article cards (`.tg-relcard`) are the two-up gallery cousin — a console-window-chrome cover (`.tg-relcard-fig`: near-neutral raised-gray chrome `#2d2f33`, 24px empty title bar + 7px side/bottom matte around the 1:1 pane) + light-Archivo title + clamped summary + gold chips, hovering floods the text in magenta highlight; cards split by a bright dashed `--tg-mute` divider. |
+| **News row** | `.tg-row` — the index's expandable row: a title line (orange-deep square bullet + dotted date (`2026.7.17`) · light-weight Archivo title, ellipsized · plus glyph, flipping to a minus when open) that **toggles an inline drawer**, not a link. Hover floods only the title line `#ff3d97` with ink-black content; the open drawer stays on the page tone, shows the full wrapping title, and slides open/closed with the mini-title's grid-rows spring. (The ↗ affordance is retired — the drawer's Read button navigates.) The post page's source rows (`.tg-src-row`) speak the same voice as the title line; its related-article cards (`.tg-relcard`) are the two-up gallery cousin — a console-window-chrome cover (`.tg-relcard-fig`: near-neutral raised-gray chrome `#2d2f33`, 24px empty title bar + 7px side/bottom matte around the 1:1 pane) + light-Archivo title + clamped summary + gold chips, hovering floods the text in magenta highlight; cards split by a bright dashed `--tg-mute` divider. |
+| **Row drawer** | `.tg-row-drawer` — the row's inline detail panel: mono uppercase labels (`Summary:` / `Section:` / `Format:` / `Topics:`) in **blue-violet `#948bff`** (a sanctioned literal, scoped to these labels) aligned under the date column, Archivo values, gold topic chips, and a full-width mono `Read` ghost button (frame border → orange flood on hover). |
 | **Expand button** | `.tg-expand-btn` — bare corner-bracket icon button (mute → orange); opens/closes the post page's full-screen reader overlay (`.tg-reader`). |
 | **Rule header** | pulse dot + mono label + stretching hairline + right-aligned mono count. |
 | **Image slot** | `.tg-img-slot` — holds the post's **AI-generated cover** (fal.ai/Recraft, pipeline image step) via `object-fit: cover`, falling back to the framed placeholder + badge when `image_url` is null. On the post page it's the cover figure (`.tg-fig`, 16:9 pane in a 24px matte border of `#22252a` — the page bg subtly lifted — with a hairline outer edge, 6px radius, and a mono "Cover" caption) after the lede; empty figures are hidden on mobile. Inline article images (`.tg-article p img`) get the same matte treatment. Every rendered cover carries a 10% page-tone dimming overlay (`rgba(23,25,28,.1)` ::after on the frames; `brightness(.91)` on inline imgs) so images blend with the dark site. |
@@ -205,7 +208,7 @@ The dashboard is a cockpit, not a page: the viewport is pinned (`h-screen overfl
 | ✓ DO | ✗ NEVER |
 |---|---|
 | Square corners (public) / real `clip-path` chamfers via `ChamferedPanel` (dashboard) | `border-radius` anywhere (LogoMark rings + status dots are the only circles; one sanctioned exception — the post page's matte image frames carry a 6px radius, 2026-07-19) |
-| Orange `#e85002` as the accent, load-bearing | Any other saturated accent (sand, the link rows' `#ff3d97` hover, the post sidebar's gold chips, and semantic states are the sanctioned exceptions) |
+| Orange `#e85002` as the accent, load-bearing | Any other saturated accent (sand, the link rows' `#ff3d97` hover, the gold chips, the row drawer's `#948bff` labels, and semantic states are the sanctioned exceptions) |
 | DM Mono (public) / IBM Plex Mono (dashboard) for all chrome, uppercase + tracked | Serif fonts; Chakra Petch / JetBrains Mono / Inter / Fraunces (all retired) |
 | Archivo for editorial content, extended on public display | Extended Archivo in dashboard card rows (overflow) |
 | `--tg-*` on public, `:root`/Tailwind on dashboard | Cross-surface token references |
