@@ -58,6 +58,12 @@ export function Wordmark({
           fontSize: size,
           lineHeight: 0.82,
           color,
+          // Trim the box to cap-height/baseline so the masthead's equal
+          // padding is OPTICALLY equal: Archivo's em box leaves 0.058em above
+          // the caps but 0.076em below the baseline (hhea 878/-210, cap 686),
+          // so untrimmed all-caps text sits visibly high. Falls back to the
+          // near-equal line-height box where text-box is unsupported.
+          ...({ textBox: "trim-both cap alphabetic" } as React.CSSProperties),
         }}
       >
         {text}
