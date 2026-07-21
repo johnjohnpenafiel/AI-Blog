@@ -115,9 +115,11 @@
    ember fade (0.6s) on leave. Shadow blur is in em so it scales with the
    fit-to-width font size. */
 .tg-wm-letter {
+  /* Leaving a letter: the glow lingers for a beat (0.35s hold), then a long
+     1s ember fade. Entering (:hover below) stays instant — no delay. */
   transition:
-    color 0.6s ease,
-    text-shadow 0.6s ease;
+    color 1s ease 0.35s,
+    text-shadow 1s ease 0.35s;
   /* One-shot load sweep — per-letter delay set inline by the component.
      Once finished the animation releases the properties and hover takes over. */
   animation: tg-wm-ignite 0.9s ease-out backwards;
@@ -148,6 +150,7 @@
     0 0 0.12em rgba(255, 106, 16, 0.9),
     0 0 0.35em rgba(232, 80, 2, 0.5);
   transition-duration: 0.06s;
+  transition-delay: 0s;
 }
 @media (prefers-reduced-motion: reduce) {
   .tg-wm-letter {
