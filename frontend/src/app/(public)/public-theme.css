@@ -110,6 +110,52 @@
   border-bottom: 3px solid var(--tg-frame);
 }
 
+/* Wordmark letter glow — each glyph lights up under the cursor. Asymmetric
+   timing makes it feel alive: near-instant ignition (60ms) on hover, slow
+   ember fade (0.6s) on leave. Shadow blur is in em so it scales with the
+   fit-to-width font size. */
+.tg-wm-letter {
+  transition:
+    color 0.6s ease,
+    text-shadow 0.6s ease;
+  /* One-shot load sweep — per-letter delay set inline by the component.
+     Once finished the animation releases the properties and hover takes over. */
+  animation: tg-wm-ignite 0.9s ease-out backwards;
+}
+@keyframes tg-wm-ignite {
+  0% {
+    color: var(--tg-orange);
+    text-shadow:
+      0 0 0.12em rgba(255, 106, 16, 0),
+      0 0 0.35em rgba(232, 80, 2, 0);
+  }
+  25% {
+    color: #ff6a10;
+    text-shadow:
+      0 0 0.12em rgba(255, 106, 16, 0.9),
+      0 0 0.35em rgba(232, 80, 2, 0.5);
+  }
+  100% {
+    color: var(--tg-orange);
+    text-shadow:
+      0 0 0.12em rgba(255, 106, 16, 0),
+      0 0 0.35em rgba(232, 80, 2, 0);
+  }
+}
+.tg-wm-letter:hover {
+  color: #ff6a10;
+  text-shadow:
+    0 0 0.12em rgba(255, 106, 16, 0.9),
+    0 0 0.35em rgba(232, 80, 2, 0.5);
+  transition-duration: 0.06s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tg-wm-letter {
+    transition: none;
+    animation: none;
+  }
+}
+
 /* ── Mobile masthead bar + full-screen menu (≤768px) ──────────────────────────
    The NYT pattern in the stage's language: burger left, wordmark centered
    (fixed size — the fit-to-width stage piece is desktop-only), and the menu

@@ -45,7 +45,7 @@ export function Wordmark({
   }, [text]);
 
   return (
-    <div ref={wrapRef} style={{ width: "100%", lineHeight: 0.82 }}>
+    <div ref={wrapRef} style={{ width: "100%", lineHeight: 0.82, userSelect: "none" }}>
       <span
         ref={txtRef}
         style={{
@@ -66,7 +66,23 @@ export function Wordmark({
           ...({ textBox: "trim-both cap alphabetic" } as React.CSSProperties),
         }}
       >
-        {text}
+        {/* Per-letter spans so each glyph can light up on hover (.tg-wm-letter). */}
+        {Array.from(text).map((ch, i) =>
+          ch === " " ? (
+            <span key={i}>{" "}</span>
+          ) : (
+            <span
+              key={i}
+              className="tg-wm-letter"
+              // Load-time sweep: each letter's ignition is staggered by its
+              // position so the glow passes left → right (delay in the char
+              // index, so spaces keep the travel speed even).
+              style={{ animationDelay: `${400 + i * 55}ms` }}
+            >
+              {ch}
+            </span>
+          ),
+        )}
       </span>
     </div>
   );
