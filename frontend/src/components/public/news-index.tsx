@@ -29,7 +29,7 @@ const FORMATS = [
   { id: "Explainer", label: "Start Here" },
 ];
 
-function FolderIcon({ color = "var(--tg-orange)" }: { color?: string }) {
+function FolderIcon({ color = "#ff6a10" }: { color?: string }) {
   return (
     <svg
       width="18"

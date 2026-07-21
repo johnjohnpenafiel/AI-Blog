@@ -432,14 +432,14 @@
 }
 .tg-fgroup-chev {
   font-size: 10px;
-  color: var(--tg-orange);
+  color: #ff6a10; /* color test: hot orange (was --tg-orange) */
   width: 11px;
 }
 .tg-fgroup-title {
   font-family: var(--tg-font-mono);
   font-size: 14px;
   letter-spacing: 0.03em;
-  color: var(--tg-orange);
+  color: #ff6a10; /* color test: hot orange (was --tg-orange) */
 }
 .tg-fgroup-list {
   display: flex;
@@ -557,7 +557,7 @@
 .tg-row-bullet {
   width: 9px;
   height: 9px;
-  background: var(--tg-orange-deep);
+  background: #00e5ff; /* color test: neon cyan (was --tg-orange-deep) */
   flex-shrink: 0;
 }
 .tg-row-name {
@@ -571,11 +571,11 @@
   flex: 0 1 auto;
   min-width: 0;
   font-family: var(--tg-font-display);
-  font-weight: 300;
+  font-weight: 400;
   font-stretch: 100%;
-  font-size: clamp(19px, 2.1vw, 28px);
+  font-size: clamp(21px, 2.3vw, 29px);
   letter-spacing: -0.01em;
-  color: var(--tg-ink-soft);
+  color: #e4e1dd; /* color test: midway between --tg-ink-soft and --tg-ink */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -644,7 +644,7 @@
   font-size: 14px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #948bff; /* blue-violet — sanctioned literal, drawer labels only */
+  color: #00e5ff; /* color test: neon cyan (was blue-violet #948bff) */
   padding-top: 3px;
 }
 .tg-drawer-sum {
@@ -823,7 +823,7 @@
     padding: 14px 0;
   }
   .tg-row-title {
-    font-size: 26px;
+    font-size: 28px;
     line-height: 1.16;
   }
 }
