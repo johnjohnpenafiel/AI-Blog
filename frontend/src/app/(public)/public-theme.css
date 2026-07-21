@@ -774,7 +774,7 @@
      top padding (inline on the wrapper, hence !important) reads as dead air
      on a phone. */
   .tg-idx-pad {
-    padding-top: 28px !important;
+    padding-top: 38px !important;
   }
   .tg-rows-head {
     display: none;
@@ -783,7 +783,7 @@
     padding-left: 0;
   }
   .tg-news-title {
-    margin-bottom: 34px;
+    margin-bottom: 22px;
   }
   .tg-filters {
     border-right: none;
