@@ -57,9 +57,7 @@ function CoverFig({ imageUrl, title }: { imageUrl: string | null; title: string 
           <img src={imageUrl} alt={title} />
         )}
       </div>
-      <div className="tg-figcap">
-        {imageUrl ? "Cover" : "Lead image placeholder"}
-      </div>
+      {!imageUrl && <div className="tg-figcap">Lead image placeholder</div>}
     </div>
   );
 }
@@ -68,6 +66,7 @@ function ArticleBody({ post }: { post: PublicPostDetail }) {
   const [lede, rest] = splitLede(post.content);
   return (
     <>
+      <CoverFig imageUrl={post.image_url} title={post.title} />
       {lede && (
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
@@ -81,7 +80,6 @@ function ArticleBody({ post }: { post: PublicPostDetail }) {
           {lede}
         </ReactMarkdown>
       )}
-      <CoverFig imageUrl={post.image_url} title={post.title} />
       {rest && <ReactMarkdown remarkPlugins={[remarkGfm]}>{rest}</ReactMarkdown>}
     </>
   );
@@ -123,6 +121,12 @@ function MetaSidebar({ post, showTitle }: { post: PublicPostDetail; showTitle: b
           {post.read_time_minutes} min read
         </span>
       </div>
+      {post.format && (
+        <div className="tg-meta-row">
+          <span className="tg-meta-key">Format:</span>
+          <span className="tg-meta-chip">{post.format}</span>
+        </div>
+      )}
       {post.tags.length > 0 && (
         <div className="tg-meta-row">
           <span className="tg-meta-key">Categories:</span>
@@ -248,6 +252,11 @@ export function PostView({ post }: { post: PublicPostDetail }) {
         <h1 className="tg-hero-title" ref={heroRef}>
           {post.title}
         </h1>
+      </div>
+      {/* Mobile composition: title → cover → metadata → article. Hidden on
+          desktop, where the cover sits inside the article after the lede. */}
+      <div className="tg-cover-band">
+        <CoverFig imageUrl={post.image_url} title={post.title} />
       </div>
       <div className="tg-post">
         <MetaSidebar post={post} showTitle={titleGone} />

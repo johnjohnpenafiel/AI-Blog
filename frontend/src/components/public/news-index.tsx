@@ -158,7 +158,9 @@ function NewsRow({ post }: { post: PublicPostListItem }) {
               {post.format && (
                 <>
                   <span className="tg-drawer-label">Format:</span>
-                  <span className="tg-drawer-value">{post.format}</span>
+                  <span className="tg-drawer-chips">
+                    <span className="tg-drawer-chip">{post.format}</span>
+                  </span>
                 </>
               )}
               {post.tags.length > 0 && (
@@ -224,7 +226,7 @@ export function NewsIndex({ posts }: { posts: PublicPostListItem[] }) {
 
   return (
     <div className="tg-idx-scale" style={{ background: "var(--tg-bg)" }}>
-      <div className="tg-idx-pad" style={{ padding: "52px 24px 64px" }}>
+      <div className="tg-idx-pad" style={{ padding: "52px 16px 64px" }}>
         <h1 className="tg-news-title">
           News
           <sup className="tg-news-count">
