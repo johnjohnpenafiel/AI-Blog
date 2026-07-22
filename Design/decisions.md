@@ -6,6 +6,18 @@
 
 New entries at the top.
 
+### 2026-07-22 — "/ Statistics" marquee band on the homepage (stripe.dev reference)
+
+**Context**: stripe.dev closes its landing content with a `/ STATISTICS` marquee — an infinite mono crawl of `LABEL: [value]` pairs in dashed chips. The Garage AI's version tells the machine's own numbers (dispatches, sources cited, covers generated, human edits: 0 — radical transparency about the automated pipeline). Lives between the homepage featured/latest spotlight and the News index (`stats-ticker.tsx`).
+
+**Decisions**:
+
+- **Same band grammar as the landing**: `zoom: 0.8` page scale, `/ Statistics` head in the spotlight labels' spec (mono 15.6px / 0.14em / faint) with its rule inset 16px off the walls; the moving strip itself runs full-bleed.
+- **Value chips are dashed SAND, not gold.** The Stripe reference's dashed value chips map onto our dashed-chip voice, but the gold literal stays scoped to the post/relcard chips — sand is the sanctioned secondary accent, so `.tg-stat-chip` (sand text, `rgb(217 195 171 / .5)` dashed border) becomes a new sanctioned dashed surface without extending the gold scope. (A gold pass was tried on the operator's request and reverted same-day — sand won on screen.)
+- **Dashed separators between pairs** (18px dashed `--tg-faint` verticals) — dashed = machinery, same as the filter-bar/meta dividers.
+- **Motion**: pure-CSS crawl — the track holds two identical runs (second `aria-hidden`) and translates −50% over 40s linear, so the loop is seamless; pauses on hover; `prefers-reduced-motion` swaps the crawl for a hand-scrollable static strip.
+- **Data honesty**: stats derive server-side from the already-fetched post list (dispatches, covers, read-minutes, the constant human-edits 0). Sources-cited / publishers-read are deliberately absent until the pipeline persists run metadata (Trello: "Track articles-screened count in the pipeline") — no invented numbers on the wire.
+
 ### 2026-07-19 — News-index rows become expandable drawers (Stripe-reference)
 
 **Context**: Homepage index rows were one-line links straight to the post. Per the Stripe-blog reference, a row now opens an inline detail drawer first; reading is an explicit second step.

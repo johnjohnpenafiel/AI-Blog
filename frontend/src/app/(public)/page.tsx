@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { HomeLanding } from "@/components/public/home-landing";
 import { NewsIndex } from "@/components/public/news-index";
+import { StatsTicker } from "@/components/public/stats-ticker";
 import { getFeaturedPost, listPublicPosts } from "@/lib/public-api";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,7 @@ export default async function HomePage() {
   return (
     <>
       <HomeLanding featured={featured} latest={latest} total={total} />
+      <StatsTicker posts={posts} total={total} />
       <NewsIndex posts={posts} />
     </>
   );

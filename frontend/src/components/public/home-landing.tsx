@@ -76,17 +76,10 @@ export function HomeLanding({
         <span className="tg-folio-right">
           <span className="tg-folio-date">{editionDate()}</span>
           <span className="tg-folio-drop">
-            <span className="tg-folio-dot tg-pulse" aria-hidden="true" />
             Next drop {nextDrop()} 08:00
           </span>
         </span>
       </div>
-
-      {/* Mobile-only greeting (≤768px): the desktop masthead's welcome hero
-          doesn't exist there, so a plain welcome line follows the folio. */}
-      <p className="tg-home-mwelcome">
-        Welcome to <span className="tg-home-mwelcome-brand">The Garage AI</span>.
-      </p>
 
       {/* Standfirst — the publication's voice on the article-blockquote
           orange rule, signed. About is an inline text link, not a button. */}
