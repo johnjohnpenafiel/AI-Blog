@@ -120,7 +120,7 @@ describe("NewsIndex", () => {
       }),
     ).toBeInTheDocument();
     expect(
-      openDrawer.getByText("Brief", { selector: ".tg-drawer-value" }),
+      openDrawer.getByText("Brief", { selector: ".tg-drawer-chip" }),
     ).toBeInTheDocument();
     expect(openDrawer.getByText("Voice AI")).toBeInTheDocument();
     expect(openDrawer.getByRole("link", { name: "Read" })).toHaveAttribute(
@@ -140,9 +140,9 @@ describe("NewsIndex", () => {
       screen.getByText("Summary d").closest(".tg-row-drawer") as HTMLElement,
     );
     expect(drawer.queryByText("Section:")).not.toBeInTheDocument();
-    // Delta is a Roundup — format still shows
+    // Delta is a Roundup — format still shows (as a gold chip)
     expect(
-      drawer.getByText("Roundup", { selector: ".tg-drawer-value" }),
+      drawer.getByText("Roundup", { selector: ".tg-drawer-chip" }),
     ).toBeInTheDocument();
   });
 
