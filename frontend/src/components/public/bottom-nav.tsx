@@ -3,7 +3,7 @@ import Link from "next/link";
 /**
  * Fixed bottom nav floating over the stage — mono nav links on a blurred
  * near-black panel, right-aligned (per the v5 canvas, which dropped the old
- * boxed-LogoMark panel). "News" is the homepage: the index IS the news.
+ * boxed-LogoMark panel). "Blog" is the homepage: the index IS the archive.
  * Subscribe returns when the newsletter flow ships (Phase 4).
  */
 export function BottomNav() {
@@ -35,7 +35,7 @@ export function BottomNav() {
     >
       <div style={{ ...panel, gap: 28, padding: "12px 22px" }}>
         <Link href="/" className="tg-nav-link">
-          News
+          Blog
         </Link>
         <Link href="/about" className="tg-nav-link">
           About

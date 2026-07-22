@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { BottomNav } from "@/components/public/bottom-nav";
+import { MastheadWelcome } from "@/components/public/masthead-welcome";
 import { MobileMasthead } from "@/components/public/mobile-masthead";
 import { PublicFooter } from "@/components/public/public-footer";
 import { Wordmark } from "@/components/public/wordmark";
@@ -32,6 +33,10 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
             className="tg-masthead-brand tg-masthead-desktop"
             style={{ padding: "26px 24px" }}
           >
+            {/* Homepage only: the "// Welcome to" eyebrow that rides up with
+                the wordmark on the first scroll and vanishes behind the top
+                frame line. Null elsewhere. */}
+            <MastheadWelcome />
             <Wordmark />
           </div>
           <MobileMasthead />
