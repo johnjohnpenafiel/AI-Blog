@@ -2116,6 +2116,340 @@
   }
 }
 
+/* ── About page — the machine's spec sheet ────────────────────────────────────
+   The About page in the v5/Post-v2 stage voice: Post-v2 hero (confession
+   headline), then `/ Section` seclabel bands — the beat (department grid +
+   struck off-beat list), the machine (numbered assembly-line steps), the
+   cadence (three columns wearing the homepage neon triad — scope extended,
+   see Design/decisions.md), the POV manifesto (orange blockquote rule), the
+   contract (§-numbered clauses), the garage, and a single CTA out. */
+.tg-about {
+  /* Same 0.8 page scale as the index / post / landing. */
+  zoom: 0.8;
+  line-height: normal;
+  padding-bottom: 30px;
+}
+
+/* Hero — the Post-v2 hero voice, one notch smaller (statement, not headline
+   of record), with the operative phrase in orange. */
+.tg-about-hero {
+  padding: clamp(36px, 3.8vw, 56px) 24px 10px;
+}
+.tg-about-kicker {
+  font-family: var(--tg-font-mono);
+  font-size: 13.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--tg-sand);
+  margin-bottom: 22px;
+}
+.tg-about-title {
+  font-family: var(--tg-font-display);
+  font-weight: 600;
+  font-stretch: 100%;
+  font-size: clamp(44px, 5.8vw, 96px);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  color: var(--tg-ink-soft);
+  margin: 0;
+  max-width: 13em;
+}
+.tg-about-title-accent {
+  color: var(--tg-orange);
+}
+.tg-about-stand {
+  font-family: var(--tg-font-display);
+  font-weight: 400;
+  font-stretch: 105%;
+  font-size: clamp(19px, 1.6vw, 24px);
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+  color: var(--tg-mute);
+  max-width: 40em;
+  margin: 30px 0 0;
+}
+
+/* Section bands — `/ Label` seclabel (rule under the label, shared idiom),
+   then an Archivo heading + editorial copy. */
+.tg-about-band {
+  padding: 46px 24px 26px;
+}
+.tg-about-h2 {
+  font-family: var(--tg-font-display);
+  font-weight: 600;
+  font-stretch: 100%;
+  font-size: clamp(27px, 2.6vw, 44px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--tg-ink);
+  margin: 0 0 20px;
+  max-width: 20em;
+}
+.tg-about-copy {
+  font-family: var(--tg-font-display);
+  font-weight: 400;
+  font-stretch: 105%;
+  font-size: 19px;
+  line-height: 1.6;
+  color: var(--tg-ink-soft);
+  max-width: 40em;
+  margin: 0;
+}
+
+/* The beat — six-department grid (orange-deep square bullets, the index
+   rows' bullet voice) + a struck "not on the beat" line. */
+.tg-about-depts {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 40px;
+  margin: 34px 0 0;
+  padding: 0;
+  max-width: 1040px;
+}
+.tg-about-dept {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font-family: var(--tg-font-mono);
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tg-ink-soft);
+  padding: 14px 0;
+  border-bottom: 1px solid var(--tg-frame-hair);
+}
+.tg-about-dept::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  background: var(--tg-orange-deep);
+  transform: translateY(-1px);
+}
+.tg-about-not {
+  font-family: var(--tg-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tg-faint);
+  margin: 26px 0 0;
+}
+.tg-about-not s {
+  text-decoration-thickness: 1px;
+}
+
+/* The machine — assembly-line rows: orange counter · mono step name ·
+   editorial description, split by hairlines (the link-row list voice). */
+.tg-about-steps {
+  list-style: none;
+  margin: 34px 0 0;
+  padding: 0;
+  max-width: 1040px;
+  border-top: 1px solid var(--tg-frame-hair);
+}
+.tg-about-step {
+  display: grid;
+  grid-template-columns: 72px 200px minmax(0, 1fr);
+  gap: 20px;
+  align-items: baseline;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--tg-frame-hair);
+}
+.tg-about-step-num {
+  font-family: var(--tg-font-mono);
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  color: var(--tg-orange);
+}
+.tg-about-step-name {
+  font-family: var(--tg-font-mono);
+  font-size: 15px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--tg-ink);
+}
+.tg-about-step-desc {
+  font-family: var(--tg-font-display);
+  font-weight: 400;
+  font-stretch: 105%;
+  font-size: 17.5px;
+  line-height: 1.55;
+  color: var(--tg-mute);
+}
+.tg-about-step-out {
+  font-family: var(--tg-font-mono);
+  font-size: 13.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tg-sand);
+  margin: 26px 0 0;
+}
+
+/* The cadence — three columns split by dashed verticals (dashed =
+   machinery); format names wear the homepage neon triad. */
+.tg-about-cadence {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 36px;
+  max-width: 1180px;
+}
+.tg-about-day {
+  padding: 6px 36px 6px 0;
+}
+.tg-about-day + .tg-about-day {
+  border-left: 1px dashed var(--tg-mute);
+  padding-left: 36px;
+}
+.tg-about-day-when {
+  font-family: var(--tg-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--tg-faint);
+  margin-bottom: 14px;
+}
+/* Overrides the neon classes' relative sizing (source order wins). */
+.tg-about-day-name {
+  font-family: var(--tg-font-display);
+  font-weight: 600;
+  font-stretch: 100%;
+  font-size: 27px;
+  letter-spacing: -0.01em;
+}
+.tg-about-day-desc {
+  font-family: var(--tg-font-display);
+  font-weight: 400;
+  font-stretch: 105%;
+  font-size: 16.5px;
+  line-height: 1.55;
+  color: var(--tg-mute);
+  margin: 14px 0 0;
+}
+
+/* The point of view — the manifesto blockquote voice (orange rule, signed
+   in mono sand — same anatomy as the homepage standfirst). */
+.tg-about-pov {
+  border-left: 3px solid var(--tg-orange);
+  padding-left: 30px;
+  max-width: 820px;
+}
+.tg-about-sig {
+  font-family: var(--tg-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--tg-sand);
+  margin-top: 22px;
+}
+
+/* The contract — §-numbered clause rows (sand counters, hairline splits). */
+.tg-about-clauses {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 900px;
+}
+.tg-about-clause {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 20px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--tg-frame-hair);
+}
+.tg-about-clause:first-child {
+  /* The seclabel's rule above already draws the line. */
+  padding-top: 6px;
+}
+.tg-about-clause-num {
+  font-family: var(--tg-font-mono);
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  color: var(--tg-sand);
+}
+.tg-about-clause-title {
+  display: block;
+  font-family: var(--tg-font-display);
+  font-weight: 600;
+  font-stretch: 100%;
+  font-size: 19px;
+  color: var(--tg-ink);
+  margin-bottom: 6px;
+}
+.tg-about-clause-text {
+  display: block;
+  font-family: var(--tg-font-display);
+  font-weight: 400;
+  font-stretch: 105%;
+  font-size: 16.5px;
+  line-height: 1.55;
+  color: var(--tg-mute);
+}
+
+/* CTA — one door out. The shared mono ghost button, sized up a notch. */
+.tg-about-cta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 28px;
+  padding: 40px 24px 64px;
+}
+.tg-about-cta-line {
+  font-family: var(--tg-font-mono);
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tg-faint);
+}
+.tg-about-cta-btn {
+  font-size: 14px;
+  padding: 14px 24px;
+  text-decoration: none;
+}
+
+/* Mobile recompose (≤820px): grids stack, dashed column dividers become
+   row rules, the hero clamp floor rises so the title anchors the page. */
+@media (max-width: 820px) {
+  .tg-about-title {
+    font-size: clamp(42px, 11vw, 60px);
+  }
+  .tg-about-stand {
+    font-size: 17px;
+  }
+  .tg-about-band {
+    padding: 38px 24px 22px;
+  }
+  .tg-about-depts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tg-about-step {
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 8px 16px;
+  }
+  /* Description drops under the step name, indented past the counter. */
+  .tg-about-step-desc {
+    grid-column: 2;
+  }
+  .tg-about-cadence {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tg-about-day {
+    padding: 22px 0;
+  }
+  .tg-about-day + .tg-about-day {
+    border-left: 0;
+    border-top: 1px dashed var(--tg-mute);
+    padding-left: 0;
+  }
+  .tg-about-pov {
+    padding-left: 20px;
+  }
+  .tg-about-clause {
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+
 /* ── Rail removed sitewide ──────────────────────────────────────────────────
    The indexed marker gutter is gone: every band runs full-width with a single
    editorial left inset (--tg-edge). Markers that carried meaning were folded

@@ -1,15 +1,19 @@
-# About · Section 1 — Intro
+# About · Section 1 — Hero
 
-The page's opening statement band.
+The page's opening statement — the "confession" hero in the Post-v2 voice
+(the whole page runs at the shared 0.8 scale inside `.tg-about`).
 
-- **Source:** `frontend/src/app/(public)/about/page.tsx` (the `band()` helper renders every About band)
-- **Gutter marker:** `(✶)`
+- **Source:** `frontend/src/app/(public)/about/page.tsx` (`.tg-about-hero`)
 
 ## Elements
 
 ```
-About Intro band
-├── Kicker             ← "// About The Garage AI" (sand)
-├── Display Headline   ← two-tone: thesis statement with the key phrase in orange
-└── Standfirst         ← 2–3 sentence positioning paragraph (large, muted)
+About Hero (.tg-about-hero)
+├── Kicker             ← "// About The Garage AI" (mono sand, .tg-about-kicker)
+├── Display Headline   ← "This publication is a machine." — Archivo 600 @ 100%
+│                        width, clamp 44–96px, ink-soft with the operative
+│                        phrase in orange (.tg-about-title / -accent)
+└── Standfirst         ← positioning paragraph: what it is, who it's for, and
+                         the transparency angle (large muted Archivo,
+                         .tg-about-stand)
 ```

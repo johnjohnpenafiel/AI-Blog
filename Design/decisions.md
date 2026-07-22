@@ -6,6 +6,17 @@
 
 New entries at the top.
 
+### 2026-07-22 — About page v2: the machine's spec sheet (content + design redesign)
+
+**Context**: The About page was the last public surface still speaking the retired pre-v5 language (extended-Archivo band headings, alternating `--tg-band` stripes, the old `band()` helper) — it read as a different site next to the v5 homepage and Post v2. Content-wise it buried the brand's most differentiating fact: the whole publication is a disclosed machine.
+
+**Decisions**:
+
+- **Concept: the About page is the machine's spec sheet.** The confession is the marketing angle — where other About pages say "our team," ours leads with *"This publication is a machine."* (Post-v2 hero voice, operative phrase in orange) and then documents itself: `/ The beat` (six-department mono grid + a struck-through "not on the beat" line — defining the niche by exclusion), `/ The machine` (the pipeline as six numbered assembly-line rows: Sweep → Sort → Pick → Write → Judge → Paint, closing on "Human edits: 0" — the stats ticker's voice), `/ The cadence`, `/ The point of view` (the manifesto blockquote, signed — The Garage Desk), `/ The contract` (four §-numbered reader promises), `/ The garage` ("Mechanics, not authors." — the humans tune the machine, the machine writes; deliberately headcount-free), and a single CTA back to the dispatches.
+- **Fully in the v5/Post-v2 system**: 0.8 page scale, `.tg-seclabel` band heads, hairline row lists, dashed-mute column dividers (machinery), Archivo 600 @ 100% display type, mono chrome. All styling moved from inline JSX to a `── About page ──` section of `public-theme.css` (the newer components' pattern). The old `band()` helper, gutter markers, and alternating stripes are gone.
+- **Neon triad scope extended to the About cadence.** The homepage manifesto's per-format accents (`.tg-home-neon-cyan/magenta/green` — The Brief / The Deep Dive / The Roundup) are reused for the cadence columns' format names, so a format wears one color everywhere it's *named*. Still scoped to naming formats — not a general license for the neon literals.
+- **One CTA, deliberately.** The page ends on a single door — "Read the latest dispatch →" (the `.tg-btn` ghost recipe as a link). No subscribe band (no newsletter yet — Phase 4), no social row.
+
 ### 2026-07-22 — "/ Statistics" marquee band on the homepage (stripe.dev reference)
 
 **Context**: stripe.dev closes its landing content with a `/ STATISTICS` marquee — an infinite mono crawl of `LABEL: [value]` pairs in dashed chips. The Garage AI's version tells the machine's own numbers (dispatches, sources cited, covers generated, human edits: 0 — radical transparency about the automated pipeline). Lives between the homepage featured/latest spotlight and the News index (`stats-ticker.tsx`).
