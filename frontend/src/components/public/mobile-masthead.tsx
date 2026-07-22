@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 const LINKS = [
-  { href: "/", label: "News" },
+  { href: "/", label: "Blog" },
   { href: "/about", label: "About" },
 ];
 

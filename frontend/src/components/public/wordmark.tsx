@@ -11,12 +11,25 @@ import { useLayoutEffect, useRef, useState } from "react";
 export function Wordmark({
   text = "THE GARAGE AI",
   color = "var(--tg-orange)",
+  fitText,
+  scale = 1,
+  letterFx = true,
 }: {
   text?: string;
   color?: string;
+  /** Size against THIS string instead of `text` — lets a shorter companion
+      line (the homepage "WELCOME TO") render at the exact font size the
+      main wordmark gets, rather than fitting its own width. */
+  fitText?: string;
+  /** Multiplier on the fitted font size (the welcome line runs slightly
+      smaller than the title). */
+  scale?: number;
+  /** false = plain glyphs: no per-letter load sweep, no hover glow. */
+  letterFx?: boolean;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const txtRef = useRef<HTMLSpanElement>(null);
+  const probeRef = useRef<HTMLSpanElement>(null);
   const [size, setSize] = useState(140);
 
   useLayoutEffect(() => {
@@ -25,10 +38,17 @@ export function Wordmark({
       const txt = txtRef.current;
       if (!wrap || !txt) return;
       const avail = wrap.clientWidth;
-      const prev = txt.style.fontSize;
-      txt.style.fontSize = "100px";
-      const natural = txt.scrollWidth;
-      txt.style.fontSize = prev;
+      let natural: number;
+      if (probeRef.current) {
+        // The hidden probe renders fitText at a fixed 100px, so its width
+        // is the measurement directly.
+        natural = probeRef.current.scrollWidth;
+      } else {
+        const prev = txt.style.fontSize;
+        txt.style.fontSize = "100px";
+        natural = txt.scrollWidth;
+        txt.style.fontSize = prev;
+      }
       if (natural > 0) setSize((100 * avail) / natural);
     }
     fit();
@@ -42,10 +62,29 @@ export function Wordmark({
       window.removeEventListener("resize", fit);
       clearTimeout(t);
     };
-  }, [text]);
+  }, [text, fitText]);
 
   return (
     <div ref={wrapRef} style={{ width: "100%", lineHeight: 0.82, userSelect: "none" }}>
+      {fitText && fitText !== text && (
+        <span
+          ref={probeRef}
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            visibility: "hidden",
+            whiteSpace: "nowrap",
+            pointerEvents: "none",
+            fontFamily: "var(--tg-font-display)",
+            fontWeight: 700,
+            fontStretch: "125%",
+            letterSpacing: "-0.005em",
+            fontSize: 100,
+          }}
+        >
+          {fitText}
+        </span>
+      )}
       <span
         ref={txtRef}
         style={{
@@ -55,7 +94,7 @@ export function Wordmark({
           fontWeight: 700,
           fontStretch: "125%",
           letterSpacing: "-0.005em",
-          fontSize: size,
+          fontSize: size * scale,
           lineHeight: 0.82,
           color,
           // Trim the box to cap-height/baseline so the masthead's equal
@@ -67,22 +106,24 @@ export function Wordmark({
         }}
       >
         {/* Per-letter spans so each glyph can light up on hover (.tg-wm-letter). */}
-        {Array.from(text).map((ch, i) =>
-          ch === " " ? (
-            <span key={i}>{" "}</span>
-          ) : (
-            <span
-              key={i}
-              className="tg-wm-letter"
-              // Load-time sweep: each letter's ignition is staggered by its
-              // position so the glow passes left → right (delay in the char
-              // index, so spaces keep the travel speed even).
-              style={{ animationDelay: `${400 + i * 55}ms` }}
-            >
-              {ch}
-            </span>
-          ),
-        )}
+        {letterFx
+          ? Array.from(text).map((ch, i) =>
+              ch === " " ? (
+                <span key={i}>{" "}</span>
+              ) : (
+                <span
+                  key={i}
+                  className="tg-wm-letter"
+                  // Load-time sweep: each letter's ignition is staggered by its
+                  // position so the glow passes left → right (delay in the char
+                  // index, so spaces keep the travel speed even).
+                  style={{ animationDelay: `${400 + i * 55}ms` }}
+                >
+                  {ch}
+                </span>
+              ),
+            )
+          : text}
       </span>
     </div>
   );

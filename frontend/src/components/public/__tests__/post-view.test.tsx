@@ -41,8 +41,9 @@ describe("PostView", () => {
     // The markdown's leading `# H1` restates the title — the hero owns it, so
     // the article must not render a second h1.
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
-    // No image_url → the marked placeholder figure renders.
-    expect(screen.getByText("Lead image placeholder")).toBeInTheDocument();
+    // No image_url → the marked placeholder figure renders — twice: once in
+    // the mobile cover band, once inside the article (CSS shows one per band).
+    expect(screen.getAllByText("Lead image placeholder")).toHaveLength(2);
     expect(
       screen.getByRole("heading", { level: 2, name: "The phones stopped ringing" }),
     ).toBeInTheDocument();
