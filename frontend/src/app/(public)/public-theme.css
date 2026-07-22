@@ -1792,23 +1792,126 @@
   zoom: 0.8;
   border-bottom: 1px solid var(--tg-frame-hair);
 }
-.tg-home-intro {
-  padding: 44px 16px 28px;
+/* Mobile-only homepage greeting — a plain welcome line after the folio
+   (the desktop masthead's welcome hero is hidden ≤768px along with the
+   desktop masthead). */
+.tg-home-mwelcome {
+  display: none;
 }
-.tg-home-lede {
+@media (max-width: 768px) {
+  .tg-home-mwelcome {
+    display: block;
+    margin: 0;
+    padding: 30px 16px 0;
+    font-family: var(--tg-font-display);
+    font-weight: 400;
+    font-stretch: 105%;
+    font-size: 21px;
+    line-height: 1.4;
+    color: var(--tg-ink-soft);
+  }
+  .tg-home-mwelcome-brand {
+    font-weight: 600;
+    color: var(--tg-orange);
+  }
+}
+
+/* Folio — the broadsheet data line under the flag (the masthead's 3px rule
+   plays the nameplate cutoff; this hairline bar beneath it is pure edition
+   furniture): volume + live dispatch number · motto · date · next drop. */
+.tg-folio {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--tg-frame-hair);
+  font-family: var(--tg-font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tg-faint);
+}
+.tg-folio-right {
+  display: flex;
+  align-items: baseline;
+  gap: 28px;
+}
+.tg-folio-date {
+  color: var(--tg-mute);
+}
+.tg-folio-drop {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--tg-ink-soft);
+}
+/* Live dot — one of the sanctioned tiny circles; neon green = "system up",
+   same literal as the manifesto's Roundup accent. */
+.tg-folio-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3ef58c;
+  flex-shrink: 0;
+}
+
+/* Standfirst manifesto — the publication's voice on the article-blockquote
+   orange rule, large light editorial Archivo, signed in mono sand. */
+.tg-home-manifesto {
+  margin: 42px 16px 36px;
+  padding-left: 28px;
+  border-left: 3px solid var(--tg-orange);
+  max-width: 32em;
+}
+/* Kicker → headline → deck: the classic editorial stack. */
+.tg-manifesto-kicker {
+  font-family: var(--tg-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--tg-orange);
+  margin-bottom: 16px;
+}
+.tg-manifesto-title {
+  margin: 0 0 18px;
+  font-family: var(--tg-font-display);
+  font-weight: 600;
+  font-stretch: 100%;
+  font-size: clamp(30px, 3.6vw, 48px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--tg-ink);
+}
+.tg-manifesto-text {
   margin: 0;
   font-family: var(--tg-font-display);
-  font-weight: 500;
-  font-stretch: 106%;
-  font-size: clamp(24px, 3.2vw, 44px);
-  line-height: 1.24;
-  letter-spacing: -0.015em;
+  font-weight: 400;
+  font-stretch: 105%;
+  font-size: clamp(17px, 2vw, 24px);
+  line-height: 1.5;
+  letter-spacing: -0.005em;
   color: var(--tg-ink-soft);
-  max-width: 26em;
 }
-/* The lede's neon triad — one accent per verb of the thesis ("sell /
-   service / operate"). Canvas literals scoped to the homepage lede: cyan +
-   neon green new, magenta shared with the link rows' hover flood (#ff3d97). */
+.tg-manifesto-sig {
+  margin-top: 18px;
+  font-family: var(--tg-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--tg-sand);
+}
+.tg-manifesto-about {
+  margin: 24px 0 0;
+  font-family: var(--tg-font-display);
+  font-weight: 400;
+  font-stretch: 105%;
+  font-size: 15.5px;
+  color: var(--tg-mute);
+}
+/* The manifesto's neon triad — one accent per format name ("The Brief /
+   The Deep Dive / The Roundup"). Canvas literals scoped to the homepage:
+   cyan + neon green new, magenta shared with the link rows' hover flood. */
 .tg-home-neon-cyan {
   color: #56e1ff;
 }
@@ -1905,8 +2008,15 @@
   }
 }
 @media (max-width: 820px) {
-  .tg-home-intro {
-    padding: 44px 16px 56px;
+  .tg-folio {
+    flex-wrap: wrap;
+    row-gap: 6px;
+    font-size: 11px;
+    padding: 11px 16px;
+  }
+  .tg-home-manifesto {
+    margin: 32px 16px 30px;
+    padding-left: 20px;
   }
   .tg-home-label {
     font-size: 12px;

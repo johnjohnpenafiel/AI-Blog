@@ -21,7 +21,7 @@ export const metadata: Metadata = {
  */
 export default async function HomePage() {
   // SSR fetch — the page reflects the live DB state on every request.
-  const [{ items: posts }, featured] = await Promise.all([
+  const [{ items: posts, total }, featured] = await Promise.all([
     listPublicPosts({ limit: 50 }),
     getFeaturedPost(),
   ]);
@@ -33,7 +33,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <HomeLanding featured={featured} latest={latest} />
+      <HomeLanding featured={featured} latest={latest} total={total} />
       <NewsIndex posts={posts} />
     </>
   );
