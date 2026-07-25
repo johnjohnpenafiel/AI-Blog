@@ -2207,6 +2207,13 @@
   }
   .tg-manifesto-title {
     width: 100%;
+    /* Phones lose the ghost monument and the wide measure, so the title
+       carries the band alone — heavier and larger than the desktop's
+       light broadsheet cut. */
+    font-weight: 600;
+    font-size: clamp(38px, 9.5vw, 56px);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
   }
   .tg-manifesto-foot {
     padding-top: 26px;
