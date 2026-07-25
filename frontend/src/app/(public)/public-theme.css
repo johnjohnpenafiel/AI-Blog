@@ -1880,7 +1880,7 @@
     display: flex;
     justify-content: space-between;
     gap: 16px;
-    padding: 12px 16px 0;
+    padding: 12px 24px 0;
     color: var(--tg-mute);
     font-family: var(--tg-font-mono);
     font-size: 11px;
