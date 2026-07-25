@@ -2192,8 +2192,9 @@
   .tg-home-manifesto {
     min-height: 0;
     margin: 32px 16px 30px;
-    padding-left: 0;
-    border-left: none;
+    /* The orange standfirst rule stays on phones — tighter inset for the
+       narrow measure. */
+    padding-left: 18px;
   }
   .tg-manifesto-ghost {
     display: none;
