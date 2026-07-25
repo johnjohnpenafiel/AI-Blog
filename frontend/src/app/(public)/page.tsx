@@ -34,7 +34,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <HomeLanding featured={featured} latest={latest} total={total} />
+      <HomeLanding featured={featured} latest={latest} />
       <StatsTicker posts={posts} total={total} />
       <NewsIndex posts={posts} />
     </>

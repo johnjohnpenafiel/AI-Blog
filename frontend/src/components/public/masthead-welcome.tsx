@@ -6,8 +6,9 @@ import { useEffect, useRef } from "react";
 /**
  * "Welcome to" — the homepage-only masthead eyebrow (desktop stage).
  *
- * On load the masthead reads "// Welcome to ▮ / THE GARAGE AI" — the
- * greeting in the console voice (mono eyebrow + blinking cursor). The first
+ * On load the masthead reads "Welcome to ▮ / THE GARAGE AI" — the broadcast
+ * desk's announcement completing into the flag (with the blinking cursor
+ * keeping the machine subtext). The first
  * scroll is CONSUMED by the eyebrow: while the page is at the top, wheel
  * input drives the masthead pair upward as one unit — greeting and wordmark
  * keep their distance, the greeting disappears behind the top frame line,

@@ -111,14 +111,7 @@ export function Wordmark({
               ch === " " ? (
                 <span key={i}>{" "}</span>
               ) : (
-                <span
-                  key={i}
-                  className="tg-wm-letter"
-                  // Load-time sweep: each letter's ignition is staggered by its
-                  // position so the glow passes left → right (delay in the char
-                  // index, so spaces keep the travel speed even).
-                  style={{ animationDelay: `${400 + i * 55}ms` }}
-                >
+                <span key={i} className="tg-wm-letter">
                   {ch}
                 </span>
               ),
