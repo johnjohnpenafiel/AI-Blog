@@ -6,6 +6,20 @@
 
 New entries at the top.
 
+### 2026-07-25 — Homepage manifesto v2 (the "V2 monument" comp) + format chips wear the neon triad
+
+**Context**: The homepage manifesto (front-page standfirst) read as too empty after the folio/spotlight recomposition — a narrow column of text with a dead right half, and its title competed with the fit-to-width masthead. Several comps were tried with the operator (two-column standfirst, giant poster headline, floating title, staircase headline, ledger rows) before landing on the monument.
+
+**Decisions**:
+
+- **The manifesto is a poster composed around a ghost monument.** A giant outline-only "V2" (the folio's pipeline generation) — Archivo 600, up to 720px, `1.5px` `--tg-frame-hair` stroke at 50% opacity, no fill — bleeds off the band's bottom-right corner (band crops it via `overflow: hidden`). Scale that whispers: it fills the air with quiet mass so the set text stays small. Set text: kicker + title + 30em deck upper-left, signature line (sand mono sig left · about link right) grounding the bottom.
+- **The band's height is a dial, not content-driven**: `min-height: clamp(400px, 34vw, 740px)` tuned so the featured/latest spotlight cards peek ~¼ into the first desktop viewport. The band renders at `.tg-home`'s 0.8 zoom.
+- **The manifesto title speaks the LIGHT display register** (Archivo 350, stretch 102%, 70px cap) — the News rows' voice scaled up, deliberately not the bold web-heading register, so it can't compete with the masthead.
+- **Format names are console tokens**: the deck's "The Brief / The Deep Dive / The Roundup" switched from enlarged Archivo to DM Mono 500 @ 1.2em in their neon colors — mono + neon reads as a machine token embedded in editorial prose.
+- **Format-tag chips now wear the neon triad everywhere a format chip renders** (`.tg-fmt-brief` cyan / `.tg-fmt-deep-dive` magenta / `.tg-fmt-roundup` green, via `lib/public-format.formatChipClass()`): the homepage/related dispatch cards, the post sidebar's meta chip, and the index drawer's format chip. The gold chip recipe stays for everything else (tags, section, author); unknown formats fall back to gold. This widens the triad's sanctioned scope from "naming formats in prose" to "the format's tag anywhere" — a format wears one color everywhere.
+- **Folio strip quieted**: single `--tg-mute` color across all three groups (was a faint→soft brightness ramp), 12.5px desktop / 11px mobile.
+- Mobile (≤820px) keeps the plain single-column stack; the ghost is hidden.
+
 ### 2026-07-22 — About page v2: the machine's spec sheet (content + design redesign)
 
 **Context**: The About page was the last public surface still speaking the retired pre-v5 language (extended-Archivo band headings, alternating `--tg-band` stripes, the old `band()` helper) — it read as a different site next to the v5 homepage and Post v2. Content-wise it buried the brand's most differentiating fact: the whole publication is a disclosed machine.

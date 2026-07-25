@@ -69,7 +69,7 @@ export function HomeLanding({
           dispatch number, the motto, today's date, and the next drop off the
           Mon/Thu/Fri cadence. Edition data, not marketing copy. */}
       <div className="tg-folio">
-        <span>
+        <span className="tg-folio-edition">
           Vol. {volume()} · No. {String(total).padStart(2, "0")} ·{" "}
           {PIPELINE_VERSION}
         </span>
@@ -82,28 +82,41 @@ export function HomeLanding({
       </div>
 
       {/* Standfirst — the publication's voice on the article-blockquote
-          orange rule, signed. About is an inline text link, not a button. */}
+          orange rule, composed around a MONUMENT: a giant outline-only
+          ghost "OS" (the thesis in two letters) drawn in a faint hairline
+          stroke, bleeding off the band's bottom-right like a schematic
+          watermark. It fills the air with quiet mass so the real text can
+          stay small and sparse — title + deck upper-left, signature line
+          grounding the bottom. */}
       <div className="tg-home-manifesto">
-        <div className="tg-manifesto-kicker">{"// From the Garage desk"}</div>
+        <div className="tg-manifesto-ghost" aria-hidden="true">
+          OS
+        </div>
         <h2 className="tg-manifesto-title">
           AI is the new dealership operating system.
         </h2>
         <p className="tg-manifesto-text">
           Every dealership runs on software now — the question is whose, and
           whether it works. We track the AI that actually moves metal, fixes
-          cars, and keeps customers; the vendor noise gets called what it is.{" "}
-          <span className="tg-home-neon-cyan">The Brief</span> lands Monday.{" "}
+          cars, and keeps customers; the vendor noise gets called what it
+          is.
+          <br />
+          <span className="tg-home-neon-cyan">The Brief</span> lands Monday.
+          <br />
           <span className="tg-home-neon-magenta">The Deep Dive</span>,
-          Thursday. <span className="tg-home-neon-green">The Roundup</span>,
-          Friday.
+          Thursday.
+          <br />
+          <span className="tg-home-neon-green">The Roundup</span>, Friday.
         </p>
-        <div className="tg-manifesto-sig">— The Garage Desk</div>
-        <p className="tg-manifesto-about">
-          First time in the garage?{" "}
-          <Link href="/about" className="tg-body-link">
-            Read what we&apos;re about
-          </Link>
-        </p>
+        <div className="tg-manifesto-foot">
+          <span className="tg-manifesto-sig">— The Garage Desk</span>
+          <span className="tg-manifesto-about">
+            First time in the garage?{" "}
+            <Link href="/about" className="tg-body-link">
+              Read what we&apos;re about
+            </Link>
+          </span>
+        </div>
       </div>
       {/* Flat grid: the two labels are row 1 (their borders join into one
           straight full-width rule), the two cards row 2. The ≤1100px stack

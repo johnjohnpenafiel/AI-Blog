@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm";
 
 import { SourcesList } from "@/components/public/sources-list";
 import type { PublicPostDetail } from "@/lib/public-api";
-import { dotDate } from "@/lib/public-format";
+import { dotDate, formatChipClass } from "@/lib/public-format";
 
 /**
  * The dispatch page body — hero title, sticky metadata sidebar, and the
@@ -124,7 +124,9 @@ function MetaSidebar({ post, showTitle }: { post: PublicPostDetail; showTitle: b
       {post.format && (
         <div className="tg-meta-row">
           <span className="tg-meta-key">Format:</span>
-          <span className="tg-meta-chip">{post.format}</span>
+          <span className={`tg-meta-chip ${formatChipClass(post.format)}`}>
+            {post.format}
+          </span>
         </div>
       )}
       {post.tags.length > 0 && (

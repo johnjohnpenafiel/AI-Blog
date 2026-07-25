@@ -75,7 +75,7 @@ Layout variables: `--tg-edge` (band left inset, clamp), `--tg-frame-pad` (frame 
 
 **Blue-violet `#948bff`** — a third canvas literal, scoped to the News-index row drawer's mono labels (`.tg-drawer-label`; 2026-07-19). Must not propagate.
 
-(The per-format accent system — `formatAccent`, tinted chips/cards — retired with the v5/Post v2 redesign; format is now a filter, not a color.)
+**The neon format triad** — cyan `#56e1ff` (Brief) / magenta `#ff3d97` (Deep Dive) / neon green `#3ef58c` (Roundup): canvas literals giving each format one color everywhere it's *named or tagged* — the homepage manifesto's inline format names, the About cadence, and the format-tag chip modifiers (`.tg-fmt-*`, overriding the gold chip recipe on format chips only). Must not propagate beyond those surfaces. (The MVP-era `formatAccent` tinted-card system stays retired — cards and bands never tint by format.)
 
 ## Typography
 

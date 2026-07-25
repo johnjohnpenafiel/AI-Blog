@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import type { PublicPostListItem } from "@/lib/public-api";
-import { dotDate } from "@/lib/public-format";
+import { dotDate, formatChipClass } from "@/lib/public-format";
 
 /**
  * The v5 News index — the entire homepage (Stripe-blog layout, from the
@@ -159,7 +159,11 @@ function NewsRow({ post }: { post: PublicPostListItem }) {
                 <>
                   <span className="tg-drawer-label">Format:</span>
                   <span className="tg-drawer-chips">
-                    <span className="tg-drawer-chip">{post.format}</span>
+                    <span
+                      className={`tg-drawer-chip ${formatChipClass(post.format)}`}
+                    >
+                      {post.format}
+                    </span>
                   </span>
                 </>
               )}

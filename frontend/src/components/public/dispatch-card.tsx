@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import type { PublicPostListItem } from "@/lib/public-api";
-import { dotDate } from "@/lib/public-format";
+import { dotDate, formatChipClass } from "@/lib/public-format";
 
 /**
  * The console-window dispatch card (from the Post v2 canvas's related-articles
@@ -63,7 +63,11 @@ export function DispatchCard({
         </p>
         <div className="tg-relcard-chips">
           {post.section && <span className="tg-relcard-chip">{post.section}</span>}
-          {post.format && <span className="tg-relcard-chip">{post.format}</span>}
+          {post.format && (
+            <span className={`tg-relcard-chip ${formatChipClass(post.format)}`}>
+              {post.format}
+            </span>
+          )}
         </div>
       </div>
     </Link>
