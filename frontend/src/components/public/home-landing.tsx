@@ -8,28 +8,18 @@ import { DispatchCard } from "./dispatch-card";
  * Homepage landing — the bands above the Blog index, composed as a
  * broadsheet FRONT PAGE rather than a website hero:
  *
- * 1. Folio — the thin data line under the flag (nameplate): volume + live
- *    dispatch number, motto, today's date, next drop. Publications carry
- *    edition data where websites put hero copy.
- * 2. Standfirst manifesto — the publication's voice on the blockquote
+ * 1. Standfirst manifesto — the publication's voice on the blockquote
  *    orange rule, signed "— The Garage Desk", About as an inline link.
- * 3. Spotlight — "/ Featured post" beside "/ Latest post" as console-window
+ *    (The desktop date TAB lives in the pinned masthead — masthead-folio.tsx;
+ *    here only the ≤768px flat date strip renders.)
+ * 2. Spotlight — "/ Featured post" beside "/ Latest post" as console-window
  *    dispatch cards split by a centered dashed divider.
  *
  * Renders nothing pre-launch (no published posts) — the Blog index's empty
  * state owns the page then.
  */
 
-/** Content-engine generation shown in the folio (bump when the pipeline
-    meaningfully changes — v2 = the multi-format taxonomy engine). */
-const PIPELINE_VERSION = "v2.0";
-
-/** Folio volume = publication year: Vol. 01 = 2026, Vol. 02 = 2027, … */
-function volume(): string {
-  return String(new Date().getFullYear() - 2025).padStart(2, "0");
-}
-
-/** Long-form edition date for the folio, e.g. "Monday, July 21, 2026". */
+/** Long-form edition date for the mobile strip, e.g. "Monday, July 21, 2026". */
 function editionDate(): string {
   return new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -55,42 +45,30 @@ function nextDrop(): string {
 export function HomeLanding({
   featured,
   latest,
-  total,
 }: {
   featured: PublicFeaturedPost | null;
   latest: PublicPostListItem | null;
-  /** Published dispatch count — the folio's edition number. */
-  total: number;
 }) {
   if (!featured) return null;
   return (
     <div className="tg-home">
-      {/* Folio — the broadsheet data line under the flag: volume + live
-          dispatch number, the motto, today's date, and the next drop off the
-          Mon/Thu/Fri cadence. Edition data, not marketing copy. */}
-      <div className="tg-folio">
-        <span className="tg-folio-edition">
-          Vol. {volume()} · No. {String(total).padStart(2, "0")} ·{" "}
-          {PIPELINE_VERSION}
-        </span>
-        <span className="tg-folio-right">
-          <span className="tg-folio-date">{editionDate()}</span>
-          <span className="tg-folio-drop">
-            Next drop {nextDrop()} 08:00
-          </span>
-        </span>
+      {/* ≤768px only — the flat edition strip under the mobile masthead bar
+          (the desktop tab is masthead-folio.tsx, hidden with the desktop
+          masthead). */}
+      <div className="tg-folio-mobile">
+        <span suppressHydrationWarning>{editionDate()}</span>
+        <span suppressHydrationWarning>Next drop {nextDrop()} 08:00</span>
       </div>
 
       {/* Standfirst — the publication's voice on the article-blockquote
-          orange rule, composed around a MONUMENT: a giant outline-only
-          ghost "OS" (the thesis in two letters) drawn in a faint hairline
-          stroke, bleeding off the band's bottom-right like a schematic
-          watermark. It fills the air with quiet mass so the real text can
-          stay small and sparse — title + deck upper-left, signature line
-          grounding the bottom. */}
+          orange rule, set as a newspaper lede (title + deck upper-left,
+          signature line grounding the bottom) around a MONUMENT: "BLOG" as
+          a 2×2 monogram tile — BL over OG — in a faint outline stroke,
+          bleeding off the band's bottom-right like a schematic watermark. */}
       <div className="tg-home-manifesto">
         <div className="tg-manifesto-ghost" aria-hidden="true">
-          OS
+          <span>BL</span>
+          <span>OG</span>
         </div>
         <h2 className="tg-manifesto-title">
           AI is the new dealership operating system.
@@ -100,13 +78,17 @@ export function HomeLanding({
           whether it works. We track the AI that actually moves metal, fixes
           cars, and keeps customers; the vendor noise gets called what it
           is.
-          <br />
-          <span className="tg-home-neon-cyan">The Brief</span> lands Monday.
-          <br />
-          <span className="tg-home-neon-magenta">The Deep Dive</span>,
-          Thursday.
-          <br />
-          <span className="tg-home-neon-green">The Roundup</span>, Friday.
+          <span className="tg-cadence-line">
+            <span className="tg-home-neon-cyan">The Brief</span> lands
+            Monday.
+          </span>
+          <span className="tg-cadence-line">
+            <span className="tg-home-neon-magenta">The Deep Dive</span>,
+            Thursday.
+          </span>
+          <span className="tg-cadence-line">
+            <span className="tg-home-neon-green">The Roundup</span>, Friday.
+          </span>
         </p>
         <div className="tg-manifesto-foot">
           <span className="tg-manifesto-sig">— The Garage Desk</span>

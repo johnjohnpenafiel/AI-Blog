@@ -109,6 +109,13 @@
 .tg-masthead-brand {
   border-bottom: 3px solid var(--tg-frame);
 }
+/* Homepage (the welcome eyebrow marks it): the folio's date-tab contour
+   OWNS the cutoff line — one continuous line dipping into the pocket — so
+   the brand block's own rule goes transparent (not none: the 3px must
+   keep occupying layout so the masthead height doesn't shift per-page). */
+.tg-masthead-desktop:has(.tg-welcome) {
+  border-bottom-color: transparent;
+}
 
 /* ── Masthead welcome (homepage only) ─────────────────────────────────────
    The "// Welcome to ▮" eyebrow above the wordmark. The first scroll input
@@ -162,34 +169,12 @@
    fit-to-width font size. */
 .tg-wm-letter {
   /* Leaving a letter: the glow lingers for a beat (0.35s hold), then a long
-     1s ember fade. Entering (:hover below) stays instant — no delay. */
+     1s ember fade. Entering (:hover below) stays instant — no delay.
+     (The one-shot load-sweep ignite animation was removed — hover is the
+     only glow now.) */
   transition:
     color 1s ease 0.35s,
     text-shadow 1s ease 0.35s;
-  /* One-shot load sweep — per-letter delay set inline by the component.
-     Once finished the animation releases the properties and hover takes over. */
-  animation: tg-wm-ignite 0.9s ease-out backwards;
-}
-@keyframes tg-wm-ignite {
-  0% {
-    color: var(--tg-orange);
-    text-shadow:
-      0 0 0.12em rgba(255, 106, 16, 0),
-      0 0 0.35em rgba(232, 80, 2, 0);
-  }
-  /* Softer peak than the hover glow — the load sweep is ambiance, not focus. */
-  25% {
-    color: var(--tg-orange-bright);
-    text-shadow:
-      0 0 0.12em rgba(255, 106, 16, 0.45),
-      0 0 0.35em rgba(232, 80, 2, 0.22);
-  }
-  100% {
-    color: var(--tg-orange);
-    text-shadow:
-      0 0 0.12em rgba(255, 106, 16, 0),
-      0 0 0.35em rgba(232, 80, 2, 0);
-  }
 }
 .tg-wm-letter:hover {
   color: var(--tg-orange-bright);
@@ -1795,41 +1780,128 @@
      at the site's calibration, so its labels/cards match the rest on screen. */
   zoom: 0.8;
 }
-/* Folio — the broadsheet data line under the flag (the masthead's 3px rule
-   plays the nameplate cutoff; this hairline bar beneath it is pure edition
-   furniture): volume + live dispatch number · motto · date · next drop. */
+/* Folio — the homepage date TAB hung from the masthead's bottom rule
+   (masthead-folio.tsx). It renders IN the pinned header — outside
+   .tg-home's 0.8 zoom — so the 3px contour rasterizes at true pixel scale
+   and the cutoff line survives scrolling. The row owns the WHOLE line (the
+   brand block's own rule is transparent on the homepage): flex-filler flat
+   → fixed 50×36 shoulder SVG (true 45° chamfer, r≈5 eased vertices) → tab
+   underline. All three meet on shared centerlines by construction. */
 .tg-folio {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--tg-frame-hair);
+  justify-content: flex-end;
+  /* Sit in the brand block's transparent 3px border slot so the contour's
+     top line lands EXACTLY where every other page's rule renders. */
+  margin-top: -3px;
+  /* Zero-height overhang: the row takes no layout space, so the scroll
+     region starts AT the masthead rule and content passes visibly through
+     the strip — only the tab itself (bg on .tg-folio-right + the shoulder's
+     pocket fill) masks what slides beneath it. */
+  height: 0;
+  overflow: visible;
   font-family: var(--tg-font-mono);
-  font-size: 12.5px;
+  font-size: 10.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--tg-faint);
 }
+/* Fixed 36px tab height — the shoulder SVG is authored at exactly 50×36,
+   so geometry and box always agree (no stretching, no drifted joins). */
 .tg-folio-right {
   display: flex;
-  align-items: baseline;
-  gap: 28px;
+  align-items: center;
+  gap: 24px;
+  color: var(--tg-mute);
+  position: relative;
+  height: 36px;
+  /* Optical centering, both axes: 4px bottom pad counters DM Mono's tall
+     ascender sinking the line box ~2px low; the wider right pad matches the
+     ~30px visual gap the shoulder's diagonal leaves on the text's left at
+     cap height (16px box padding + the chamfer's intrusion), so the text
+     reads centered between chamfer and frame wall. */
+  padding: 0 30px 4px 16px;
+  /* The tab is the ONE opaque part of the overhang — it masks content
+     scrolling beneath it; everything left of the shoulder stays clear. */
+  background: var(--tg-bg);
+}
+/* The contour's left flat — flex filler carrying the 3px line at the row's
+   top, stopping 50px short of the tab (the shoulder SVG's span). */
+.tg-folio-line {
+  flex: 1;
+  align-self: flex-start;
+  height: 3px;
+  margin-right: 50px;
+  background: var(--tg-frame);
+}
+/* The tab's straight underline, continuing the shoulder's exit line to the
+   frame wall — 3px like the masthead rule, its center at y 34.5 where the
+   shoulder path exits. */
+.tg-folio-right::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--tg-frame);
+}
+/* The shoulder — fixed-size, drawn at 1:1 in the row's own coordinate
+   space (top line y 0–3, underline y 33–36). */
+.tg-folio-shoulder {
+  position: absolute;
+  right: 100%;
+  top: 0;
+  width: 50px;
+  height: 36px;
+  overflow: visible;
+  display: block;
+}
+.tg-shoulder-line {
+  fill: none;
+  stroke: var(--tg-frame);
+  stroke-width: 3px;
+}
+/* The pocket wedge — fills the area above/right of the shoulder contour
+   (the tab's interior side) with the page bg, continuing .tg-folio-right's
+   mask so content sliding under the notch is hidden right up to the line. */
+.tg-shoulder-fill {
+  fill: var(--tg-bg);
+  stroke: none;
+}
+/* Desktop tab hides with the desktop masthead; home-landing's flat strip
+   takes over below (see the ≤768px block). */
+.tg-folio-mobile {
+  display: none;
+}
+@media (max-width: 768px) {
+  .tg-folio {
+    display: none;
+  }
+  .tg-folio-mobile {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 24px 0;
+    color: var(--tg-mute);
+    font-family: var(--tg-font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
 }
 
 /* Standfirst manifesto — the publication's voice on the article-blockquote
-   orange rule, composed around a MONUMENT: a giant outline-only ghost "OS"
-   (the thesis in two letters) in a faint hairline stroke, bleeding off the
-   band's bottom-right corner like a schematic watermark. Scale that
-   whispers — it fills the air with quiet mass so the set text stays small
-   and sparse: title + deck upper-left, signature line grounding the
-   bottom. The min-height is the height dial (the band renders at
-   .tg-home's 0.8 zoom); overflow crops the ghost's bleed. ≤820px collapses
-   to the single editorial column, ghost hidden. */
+   orange rule, set as a newspaper lede (title + deck upper-left, signature
+   line grounding the bottom) around a MONUMENT: "BLOG" as a 2×2 monogram
+   tile — BL over OG — in a faint outline stroke, bleeding off the band's
+   bottom-right corner like a schematic watermark. The min-height is the
+   height dial (the band renders at .tg-home's 0.8 zoom); overflow crops
+   the tile's bleed. ≤820px collapses to the single editorial column,
+   ghost hidden. */
 .tg-home-manifesto {
   position: relative;
   overflow: hidden;
-  margin: 36px 16px 32px;
+  /* Top margin clears the folio tab's 36px overhang plus breathing room. */
+  margin: 52px 16px 32px;
   padding-left: 28px;
   border-left: 3px solid var(--tg-orange);
   display: flex;
@@ -1845,23 +1917,28 @@
   position: relative;
   z-index: 1;
 }
-/* The ghost monument — outline-only display type, cropped by the band. */
+/* The ghost monogram tile — outline-only, stacked BL / OG, cropped by the
+   band's bottom edge. */
 .tg-manifesto-ghost {
   position: absolute;
   z-index: 0;
-  right: -0.06em;
-  bottom: -0.16em;
+  right: -0.04em;
+  bottom: -0.2em;
   font-family: var(--tg-font-display);
   font-weight: 600;
   font-stretch: 100%;
-  font-size: clamp(230px, 31vw, 620px);
-  line-height: 0.8;
-  letter-spacing: -0.03em;
+  font-size: clamp(180px, 24vw, 480px);
+  line-height: 0.82;
+  letter-spacing: -0.04em;
+  text-align: right;
   color: transparent;
-  -webkit-text-stroke: 1.5px var(--tg-frame-hair);
-  opacity: 0.5;
+  -webkit-text-stroke: 1px var(--tg-frame-hair);
+  opacity: 0.32;
   pointer-events: none;
   user-select: none;
+}
+.tg-manifesto-ghost span {
+  display: block;
 }
 /* Browsers without text-stroke get a tonal fill instead of nothing. */
 @supports not (-webkit-text-stroke: 1px black) {
@@ -1871,14 +1948,12 @@
   }
 }
 /* Title + deck set as a NEWSPAPER LEDE — print grammar, not web grammar:
-   a double hairline rule caps the headline; the deck runs justified-and-
-   hyphenated in two newsprint columns split by a hairline column rule and
-   opens on an orange drop cap. Both share one measure so the rules and
-   columns read as one set block. */
+   the deck runs justified-and-hyphenated in two newsprint columns split by
+   a hairline column rule and opens on an orange drop cap. Both share one
+   measure so the columns read as one set block. */
 .tg-manifesto-title {
   margin: 0 0 30px;
   width: min(100%, clamp(560px, 46vw, 900px));
-  border-top: 1px solid var(--tg-ink);
   font-family: var(--tg-font-display);
   font-weight: 350;
   font-stretch: 102%;
@@ -1887,14 +1962,6 @@
   letter-spacing: -0.01em;
   text-wrap: balance;
   color: var(--tg-ink);
-}
-/* The second hairline of the double rule, 2px under the first. */
-.tg-manifesto-title::before {
-  content: "";
-  display: block;
-  height: 1px;
-  background: var(--tg-ink);
-  margin: 2px 0 22px;
 }
 /* The deck — two justified newsprint columns on the shared measure. */
 .tg-manifesto-text {
@@ -1908,10 +1975,15 @@
   font-family: var(--tg-font-display);
   font-weight: 400;
   font-stretch: 105%;
-  font-size: clamp(18px, 1.45vw, 26px);
+  font-size: clamp(19px, 1.6vw, 28px);
   line-height: 1.58;
   letter-spacing: -0.005em;
   color: var(--tg-ink-soft);
+}
+/* Cadence stanza — each format on its own line, set solid, never wrapped. */
+.tg-cadence-line {
+  display: block;
+  white-space: nowrap;
 }
 /* Drop cap opening the lede — orange, three lines deep. */
 .tg-manifesto-text::first-letter {
@@ -1956,24 +2028,27 @@
 .tg-home-neon-magenta,
 .tg-home-neon-green {
   /* The format names speak the CONSOLE voice inside the editorial sentence
-     — mono on a neon HIGHLIGHT flood (ink-black content on the accent,
-     the link rows' hover-flood recipe) reads as a machine token. */
+     — mono in the format's neon, boxed by the format-tag chips' border
+     recipe (1px dashed, neon @ 45% — same as .tg-fmt-* on the post pages)
+     so a format reads identically wherever it's named. */
   font-family: var(--tg-font-mono);
   font-weight: 500;
   letter-spacing: 0.02em;
-  color: var(--tg-ink-black);
   padding: 1px 7px;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
 .tg-home-neon-cyan {
-  background: #56e1ff;
+  color: #56e1ff;
+  border: 1px dashed rgb(86 225 255 / 0.45);
 }
 .tg-home-neon-magenta {
-  background: #ff3d97;
+  color: #ff3d97;
+  border: 1px dashed rgb(255 61 151 / 0.45);
 }
 .tg-home-neon-green {
-  background: #3ef58c;
+  color: #3ef58c;
+  border: 1px dashed rgb(62 245 140 / 0.45);
 }
 /* Format-tag chips carry their format's neon (the manifesto triad) wherever
    a format chip renders — .tg-meta-chip / .tg-relcard-chip / .tg-drawer-chip
@@ -2114,26 +2189,13 @@
 }
 
 @media (max-width: 820px) {
-  .tg-folio {
-    flex-wrap: wrap;
-    row-gap: 6px;
-    font-size: 11px;
-    padding: 12px 16px;
-  }
-  /* Phones drop the edition group — the strip carries only the live date
-     and next drop. */
-  .tg-folio-edition {
-    display: none;
-  }
-  .tg-folio-right {
-    flex: 1;
-    justify-content: space-between;
-  }
   .tg-home-manifesto {
     min-height: 0;
     margin: 32px 16px 30px;
-    padding-left: 0;
-    border-left: none;
+    /* The orange standfirst rule stays on phones — thinner, with a tighter
+       inset for the narrow measure. */
+    border-left-width: 2px;
+    padding-left: 18px;
   }
   .tg-manifesto-ghost {
     display: none;
@@ -2145,6 +2207,13 @@
   }
   .tg-manifesto-title {
     width: 100%;
+    /* Phones lose the ghost monument and the wide measure, so the title
+       carries the band alone — heavier and larger than the desktop's
+       light broadsheet cut. */
+    font-weight: 600;
+    font-size: clamp(38px, 9.5vw, 56px);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
   }
   .tg-manifesto-foot {
     padding-top: 26px;

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { BottomNav } from "@/components/public/bottom-nav";
+import { MastheadFolio } from "@/components/public/masthead-folio";
 import { MastheadWelcome } from "@/components/public/masthead-welcome";
 import { MobileMasthead } from "@/components/public/mobile-masthead";
 import { PublicFooter } from "@/components/public/public-footer";
@@ -28,7 +29,17 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 
         {/* Masthead: fit-to-width wordmark on desktop; on mobile a
             burger | centered wordmark bar + full-screen menu overlay */}
-        <header style={{ background: "var(--tg-bg)", flexShrink: 0 }}>
+        {/* zIndex 2 lifts the header above the scroll region (both default to
+            z-index 1 via .tg-frame > *) so the folio tab's zero-height
+            overhang paints OVER scrolling content. */}
+        <header
+          style={{
+            background: "var(--tg-bg)",
+            flexShrink: 0,
+            position: "relative",
+            zIndex: 2,
+          }}
+        >
           <div
             className="tg-masthead-brand tg-masthead-desktop"
             style={{ padding: "26px 24px" }}
@@ -39,6 +50,11 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
             <MastheadWelcome />
             <Wordmark />
           </div>
+          {/* Homepage only: the date TAB hung from the masthead rule —
+              pinned with the header (the line must survive scrolling) and
+              outside .tg-home's 0.8 zoom (the 3px contour must rasterize
+              at true scale). Null elsewhere. */}
+          <MastheadFolio />
           <MobileMasthead />
         </header>
 
