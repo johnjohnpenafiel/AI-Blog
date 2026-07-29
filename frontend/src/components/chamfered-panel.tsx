@@ -186,6 +186,10 @@ export function ChamferedPanel({
   const resolvedChamferStroke = chamferStroke ?? "var(--accent)";
   const chamferOpacity = tier === "structural" ? 0.7 : 1;
   const chamferWidth = chamferWidthProp ?? (tier === "structural" ? 2 : 1.5);
+  // Structural panels carry a heavier contour — perimeter matches the 2px
+  // chamfer stroke so the outline reads as one continuous line.
+  const resolvedPerimeterWidth =
+    perimeterWidth ?? (tier === "structural" ? 2 : 1);
 
   return (
     <div ref={ref} className={cn("relative", className)} style={style}>
@@ -223,7 +227,7 @@ export function ChamferedPanel({
               x2={edge.x2}
               y2={edge.y2}
               stroke={resolvedPerimeter}
-              strokeWidth={perimeterWidth ?? 1}
+              strokeWidth={resolvedPerimeterWidth}
               vectorEffect="non-scaling-stroke"
             />
           ))}
