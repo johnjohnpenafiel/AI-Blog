@@ -8,14 +8,14 @@
      pure-black inverted layering (darker = deeper) is retired — this is
      conventional stacking: dark chassis behind, grey structure (sidebar /
      shell) on it, lighter cards on top. */
-  --bg: #141517;
-  --structural: #202225;
-  --surface: #292b2f;
-  --surface-raised: #313438;
+  --bg: #1a1a1a;
+  --structural: #2e2e2e;
+  --surface: #373737;
+  --surface-raised: #404040;
 
   /* Borders */
-  --border: #3b3e43;
-  --border-dim: #2c2e32;
+  --border: #4f4f4f;
+  --border-dim: #3d3d3d;
 
   /* Text — mirrors the public surface's text ramp (--tg-ink / --tg-mute /
      --tg-faint) so both surfaces share the same legible grays. The old ramp
