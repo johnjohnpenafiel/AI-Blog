@@ -51,7 +51,7 @@ export function FeaturedSpotlight({
     <div className="w-full border border-border bg-surface">
       <div data-testid="featured-spotlight">
         <div className="px-4 pt-3 pb-3">
-          <span className="font-mono text-[9px] tracking-[0.25em] text-accent uppercase">
+          <span className="font-mono text-[9px] tracking-[0.25em] text-muted uppercase">
             ★ Featured on homepage
           </span>
 

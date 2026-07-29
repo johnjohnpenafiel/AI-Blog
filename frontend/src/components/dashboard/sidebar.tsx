@@ -147,7 +147,7 @@ export function Sidebar() {
                       className={cn(
                         "flex items-center justify-between border-l-2 py-2.5 pl-5 pr-3 font-mono text-[11px] tracking-[0.25em] uppercase transition-colors",
                         active
-                          ? "border-l-accent bg-accent-glow text-accent"
+                          ? "border-l-border bg-surface text-fg"
                           : "border-l-transparent text-dim hover:text-fg",
                       )}
                     >

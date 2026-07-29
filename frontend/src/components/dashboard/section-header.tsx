@@ -5,7 +5,7 @@ interface SectionHeaderProps {
 export function SectionHeader({ label }: SectionHeaderProps) {
   return (
     <div className="flex items-center gap-4">
-      <p className="shrink-0 font-mono text-[10px] tracking-[0.25em] text-accent uppercase">
+      <p className="shrink-0 font-mono text-[10px] tracking-[0.25em] text-muted uppercase">
         {label}
       </p>
       <span

@@ -94,7 +94,7 @@ export function QueueEmptyState() {
                 {nextRun.date}
               </div>
               {nextRun.time && (
-                <div className="font-mono text-[11px] tracking-[0.2em] text-accent">
+                <div className="font-mono text-[11px] tracking-[0.2em] text-muted">
                   {nextRun.time}
                 </div>
               )}
@@ -105,7 +105,7 @@ export function QueueEmptyState() {
             <span className="font-mono text-[9px] tracking-[0.25em] text-dim uppercase">
               Publishing mode
             </span>
-            <span className="font-mono text-[14px] tracking-[0.05em] text-accent uppercase">
+            <span className="font-mono text-[14px] tracking-[0.05em] text-fg uppercase">
               Approve only
             </span>
           </div>

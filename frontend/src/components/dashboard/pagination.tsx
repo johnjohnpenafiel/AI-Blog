@@ -83,7 +83,7 @@ export function Pagination({
             className={cn(
               CHIP,
               item === page
-                ? "border-accent bg-accent text-[var(--bg)]"
+                ? "border-border bg-surface-raised text-fg"
                 : CHIP_IDLE,
             )}
           >
