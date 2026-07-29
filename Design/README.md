@@ -24,7 +24,7 @@ The surfaces deliberately do **not** share one visual system. Each has its own l
 |---|---|---|
 | Feel | Editorial broadsheet × dark console | Operational command center / HUD |
 | Corners | Square everywhere (radius 0, defensively enforced) | Chamfered (45° cuts) — no radius either |
-| Background | Neutral **gray** ramp (`#17191c` base) | **Black** chassis (`#0a0a0a` body, `#000` panels) |
+| Background | Neutral **gray** ramp (`#17191c` base) | Near-black chassis (`#121316` body, `#101010` panels) with neutral-grey cards |
 | Chrome font | DM Mono | IBM Plex Mono |
 | Editorial font | Archivo (variable width, run extended) | Archivo (`--font-editorial`, post content only) |
 | Token namespace | `--tg-*`, scoped under `.tg-surface` | `:root` tokens + Tailwind `@theme` utilities |
@@ -32,7 +32,7 @@ The surfaces deliberately do **not** share one visual system. Each has its own l
 
 **Shared brand constants (byte-identical across surfaces):**
 - **Orange `#e85002`** — the primary accent (`--tg-orange` = `--accent`). The only saturated hue besides the public surface's sand and the dashboard's semantic state colors.
-- **Text ramp** — `#f9f9f9` / `#a7a7a7` / `#646464` (`--tg-ink`/`--tg-mute`/`--tg-faint` = `--text-primary`/`--text-secondary`/`--text-dim`).
+- **Text ramp** — `#f9f9f9` / `#a7a7a7` shared byte-identically (`--tg-ink`/`--tg-mute` = `--text-primary`/`--text-secondary`). The faint tier diverges by design: public `--tg-faint` stays `#646464`; the dashboard's `--text-dim` runs `#8a8a8a` because its grey card surfaces are lighter than the public chassis (2026-07-29).
 - **Single dark theme.** No light mode, no toggle, ever.
 - **Mono chrome / editorial content split.** On both surfaces, UI machinery speaks monospace and content speaks Archivo — type encodes what belongs to the tool vs. what belongs to the publication.
 
@@ -133,21 +133,21 @@ The desktop composition is not shrunk — it's **recomposed**. The **masthead** 
 
 ## Aesthetic direction
 
-Dark operational command center. The chassis is near-black; the major structural panels (sidebar, main shell) are **pure black, recessed** into it (inverted layering — darker = deeper). Every load-bearing shape carries a **chamfered corner** with an orange cut line. Chrome is monospaced console text; the posts being managed keep their editorial face. Utilitarian, data-dense, HUD-flavored.
+Dark operational command center on a plain neutral-grey ramp (the 2026-07-29 regray — deliberately its own family, near the public grays in spirit but never their exact values). The chassis is near-black with a faint cool cast; the major structural panels (sidebar, main shell) are a hair darker still — recessed, plain dark grey — and the cards lift clearly above both in neutral grey. Every load-bearing shape carries a **chamfered corner** with an orange cut line. Chrome is monospaced console text; the posts being managed keep their editorial face. Utilitarian, data-dense, HUD-flavored.
 
 ## Color tokens (`:root` → Tailwind utilities)
 
 | Token | Value | Utility | Usage |
 |---|---|---|---|
-| `--bg` | `#0a0a0a` | `bg-bg` | Body background. |
-| `--structural` | `#000000` | `bg-structural` | Sidebar + main shell + modal panels (recessed). |
-| `--surface` | `#111111` | `bg-surface` | Cards, panels. |
-| `--surface-raised` | `#181818` | `bg-surface-raised` | Hover states, card footer bands. |
-| `--border` | `#222222` | `border-border` | Component perimeters. |
-| `--border-dim` | `#1a1a1a` | `border-border-dim` | Hairline dividers. |
+| `--bg` | `#121316` | `bg-bg` | Body background — near-black, faint cool cast (a different material than the neutral panels). |
+| `--structural` | `#101010` | `bg-structural` | Sidebar + main shell + modal panels (recessed, plain dark grey). |
+| `--surface` | `#272727` | `bg-surface` | Cards, panels. |
+| `--surface-raised` | `#303030` | `bg-surface-raised` | Hover states, card footer bands. |
+| `--border` | `#3c3c3c` | `border-border` | Component perimeters. |
+| `--border-dim` | `#2c2c2c` | `border-border-dim` | Hairline dividers. |
 | `--text-primary` | `#f9f9f9` | `text-fg` | Headings, values. *(= public ink)* |
 | `--text-secondary` | `#a7a7a7` | `text-muted` | Meta, secondary. *(= public mute)* |
-| `--text-dim` | `#646464` | `text-dim` | Labels, fine print. *(= public faint)* |
+| `--text-dim` | `#8a8a8a` | `text-dim` | Labels, fine print. *(diverges from public faint `#646464` — lifted for contrast on the grey surfaces, 2026-07-29)* |
 | `--accent` | `#e85002` | `text-accent` etc. | The only accent. *(= public orange)* |
 | `--accent-dim` | `#c24302` | `bg-accent-dim` | Orange hover. |
 | `--accent-glow` | `rgb(232 80 2 / .12)` | `bg-accent-glow` | Active-nav tint, featured glow. |
@@ -167,10 +167,10 @@ Chakra Petch, JetBrains Mono, Fraunces, and Inter are **gone** — remove on sig
 
 ## Depth hierarchy (inverted layering)
 
-1. **Body** `#0a0a0a` — the chassis.
-2. **Structural** `#000` — sidebar, main shell, review panel: recessed cuts into the chassis.
-3. **Cards** `#111` — lifted above the shell.
-4. **Raised** `#181818` — hover states and card footer bands.
+1. **Structural** `#101010` — sidebar, main shell, review panel: recessed cuts, the deepest layer.
+2. **Body** `#121316` — the chassis, a hair above the structural panels.
+3. **Cards** `#272727` — lifted clearly above the shell.
+4. **Raised** `#303030` — hover states and card footer bands.
 
 ## Chamfer geometry — the structural signature
 
@@ -184,13 +184,13 @@ Every **structural panel and post-bearing card** uses a 45° corner cut, impleme
 
 ## Border tiers
 
-- **Tier 1 — Structural**: uniform orange @ 60% (`--accent-structural`) around the whole clipped shape (perimeter and cuts read as one continuous line). Sidebar, main shell, review panel.
-- **Tier 2 — Component**: dark `#222` perimeter, orange **only on the chamfer cut lines**. Cards, buttons.
+- **Tier 1 — Structural**: uniform orange @ 60% (`--accent-structural`) around the whole clipped shape, drawn at **2px** so perimeter and cuts read as one continuous heavier line (2026-07-29). Sidebar, main shell, review panel.
+- **Tier 2 — Component**: dark `--border` (`#3c3c3c`) perimeter at 1px, orange **only on the chamfer cut lines**. Cards, buttons.
 - Plain-rectangle utility panels: `--border` perimeter, no orange.
 
 ## Recurring patterns
 
-- **Section Header** (`section-header.tsx`) — `// NN` orange counter + label + full-width `--border-dim` rule. Sections are named, not boxed. Counters stay sequential in display order.
+- **Section Header** (`section-header.tsx`) — bare orange mono label + full-width `--border-dim` rule. Sections are named, not boxed. (The `// NN` counters and the slash prefix were retired 2026-07-29.)
 - **Data cards / stat readouts** — three-slot hierarchy: primary value (dominant), sub-line (complementary dimension), footer (persistent context). If a slot has no meaningful data, omit it; never placeholder. Pending Review activates full-orange when > 0.
 - **Card footer band** — `--surface-raised` strip + hairline divider holding date · eval badge · actions.
 - **Buttons** — the one shared `Button` (`components/button.tsx`): primary (orange fill, dark text) / outline / ghost / destructive / link.

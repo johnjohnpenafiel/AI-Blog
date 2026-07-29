@@ -6,6 +6,21 @@
 
 New entries at the top.
 
+### 2026-07-29 — Dashboard regray: the cockpit moves off pure black onto a neutral-grey ramp
+
+**Context**: The pure-black cockpit (`#0a0a0a` body / `#000` panels / `#111` cards) read harsh and "not user friendly" to the operator. The ask: bring it toward the public site's palette (grays + orange) while feeling like its own serious tool. Iterated live through four ramps (public-exact cool grays → lighter neutral → mid grey → final) against the running dashboard.
+
+**Decisions**:
+
+- **The dashboard gets its OWN neutral-grey family** — deliberately *not* the public surface's exact blue-tinted values (`#17191c` etc.), so the cockpit reads as a sibling tool, not the site. Final ramp: structural `#101010` (sidebar/shell — recessed, plain dark grey) · body `#121316` (near-black with a faint cool cast, a different *material* than the neutral panels) · cards `#272727` · raised `#303030` · borders `#3c3c3c`/`#2c2c2c`.
+- **Inverted layering survives only at the bottom of the stack**: structural panels sit a hair below the chassis (recessed), but cards now lift *clearly* above both — the dominant read is conventional dark-UI stacking, softened from the old all-black flatness.
+- **`--text-dim` diverges from the public faint**: `#8a8a8a` vs `--tg-faint`'s `#646464`. The old value was calibrated for near-black surfaces; on the grey cards it fell to ~2.4:1 contrast (unreadable labels). This is the first deliberate break in the "text ramp is byte-identical across surfaces" constant — primary and secondary remain shared.
+- **Structural chamfer panels draw a 2px perimeter** (was 1px), matching the chamfer-cut stroke so the tier-1 orange contour reads as one continuous heavier line against the lighter ground.
+- **Section headers quieted**: the `// NN` counter and slash prefix are gone — a bare orange mono label + hairline rule. The numbering ceremony fought the "serious and plain" direction.
+- **Overview footer**: "Built by John John" removed; the version credit right-aligned.
+
+**Tradeoffs**: the black-cockpit drama is gone by intent; the orange accent, chamfer geometry, mono chrome, and locked viewport carry the command-center identity on the friendlier ground. Modal scrims stay black (they dim, not decorate).
+
 ### 2026-07-25 — Homepage manifesto v2 (the "V2 monument" comp) + format chips wear the neon triad
 
 **Context**: The homepage manifesto (front-page standfirst) read as too empty after the folio/spotlight recomposition — a narrow column of text with a dead right half, and its title competed with the fit-to-width masthead. Several comps were tried with the operator (two-column standfirst, giant poster headline, floating title, staircase headline, ledger rows) before landing on the monument.
