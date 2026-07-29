@@ -241,7 +241,6 @@ export function OverviewClient() {
 
       <footer className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-border-dim pt-5 font-mono text-[10px] tracking-[0.25em] text-dim uppercase">
         <span>The Garage AI v2</span>
-        <span>Built by John John</span>
       </footer>
     </div>
   );
