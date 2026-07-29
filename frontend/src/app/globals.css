@@ -27,7 +27,10 @@
      same gray family the public surface proved them on. */
   --text-primary: #f9f9f9; /* public --tg-ink */
   --text-secondary: #a7a7a7; /* public --tg-mute */
-  --text-dim: #646464; /* public --tg-faint */
+  /* Diverges from the public --tg-faint (#646464): the grey-ramp panels are
+     lighter than the public chassis, so faint labels need ~#8a to clear
+     readable contrast on --surface / --surface-raised. */
+  --text-dim: #8a8a8a;
 
   /* Accent — burnt orange, the only accent. Matches the public --tg-orange so
      the brand reads identically across both surfaces. */
