@@ -10,9 +10,9 @@
      shell) on it, lighter cards on top. */
   /* Chassis — near-black with a faint cool cast: reads as a different
      material than the neutral-grey panels sitting on it. */
-  --bg: #0b0c0e;
+  --bg: #121316;
   /* Structure — really dark plain grey, just off the chassis. */
-  --structural: #1d1d1d;
+  --structural: #171717;
   --surface: #272727;
   --surface-raised: #303030;
 
