@@ -2,21 +2,25 @@
 
 /* Dashboard ("Cockpit") design tokens — source of truth: Design/README.md v3.0 */
 :root {
-  /* Depth — inverted layering */
-  --bg: #0a0a0a;
-  --structural: #000000;
-  --surface: #111111;
-  --surface-raised: #181818;
+  /* Depth — inverted layering, on the public surface's cool-gray family
+     (the --tg-bg #17191c blue-tinted ramp, copied by value per the scoping
+     rule — never var()-referenced). The old pure-black chassis read harsh;
+     this lifts the whole cockpit into the site's gray spectrum while
+     keeping darker = deeper. */
+  --bg: #17191c;
+  --structural: #0f1114;
+  --surface: #1e2126;
+  --surface-raised: #252930;
 
   /* Borders */
-  --border: #222222;
-  --border-dim: #1a1a1a;
+  --border: #33383f;
+  --border-dim: #23262b;
 
   /* Text — mirrors the public surface's text ramp (--tg-ink / --tg-mute /
      --tg-faint) so both surfaces share the same legible grays. The old ramp
      (#f0f0f0 / #555 / #333) bottomed out too dark — low-emphasis labels blended
-     into the chassis. These read clearly on the dark dashboard (more contrast
-     than on the public gray, since the chassis is darker). */
+     into the chassis. These read clearly here — the chassis now sits on the
+     same gray family the public surface proved them on. */
   --text-primary: #f9f9f9; /* public --tg-ink */
   --text-secondary: #a7a7a7; /* public --tg-mute */
   --text-dim: #646464; /* public --tg-faint */
