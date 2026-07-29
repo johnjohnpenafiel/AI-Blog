@@ -58,7 +58,7 @@ export function ScheduledClient() {
 
   return (
     <div className="flex flex-col gap-4">
-      <SectionHeader index="01" label="Scheduled" />
+      <SectionHeader label="Scheduled" />
 
       {loadState === "loading" && (
         <p className="font-mono text-xs tracking-[0.2em] text-muted uppercase">

@@ -140,7 +140,7 @@ export function PublishedClient() {
           {/* Featured: the post currently driving the homepage ★ band.
               Pinned — stays put while the list below scrolls in place. */}
           <section className="flex shrink-0 flex-col gap-4">
-            <SectionHeader index="01" label="Featured" />
+            <SectionHeader label="Featured" />
             <FeaturedSpotlight
               post={featured}
               onUnfeature={(p) => {
@@ -162,7 +162,7 @@ export function PublishedClient() {
 
           {/* All Published: header + pagination stay pinned; the list scrolls. */}
           <section className="flex min-h-0 flex-1 flex-col gap-4">
-            <SectionHeader index="02" label="All Published" />
+            <SectionHeader label="All Published" />
             <div className="min-h-0 flex-1 overflow-y-auto">
               <ul className="flex flex-col gap-2.5">
                 {items.map((post) => (

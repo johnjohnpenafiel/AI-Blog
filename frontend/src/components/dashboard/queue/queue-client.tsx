@@ -63,7 +63,7 @@ export function QueueClient() {
 
   return (
     <div className="flex h-full flex-col gap-4">
-      <SectionHeader index="01" label="Pending Review" />
+      <SectionHeader label="Pending Review" />
 
       {loadState === "loading" && (
         <p className="font-mono text-xs tracking-[0.2em] text-muted uppercase">

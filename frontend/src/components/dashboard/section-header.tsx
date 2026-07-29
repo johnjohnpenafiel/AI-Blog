@@ -1,13 +1,12 @@
 interface SectionHeaderProps {
-  index: string;
   label: string;
 }
 
-export function SectionHeader({ index, label }: SectionHeaderProps) {
+export function SectionHeader({ label }: SectionHeaderProps) {
   return (
     <div className="flex items-center gap-4">
       <p className="shrink-0 font-mono text-[10px] tracking-[0.25em] text-accent uppercase">
-        {"//"} {index}&nbsp;&nbsp;{label}
+        {"/"} {label}
       </p>
       <span
         aria-hidden

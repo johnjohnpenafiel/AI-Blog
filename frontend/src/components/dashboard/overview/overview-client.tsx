@@ -183,7 +183,7 @@ export function OverviewClient() {
           They stack below lg. */}
       <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-12">
         <section className="flex flex-col gap-5 lg:w-[28rem] lg:shrink-0">
-          <SectionHeader index="01" label="Status" />
+          <SectionHeader label="Status" />
           <StatusList
             items={[
             {
@@ -223,7 +223,7 @@ export function OverviewClient() {
         </section>
 
         <section className="flex flex-col gap-5 lg:flex-1">
-          <SectionHeader index="02" label="Quick Actions" />
+          <SectionHeader label="Quick Actions" />
           <div className="flex flex-wrap items-start gap-3">
             <TriggerPipelineButton
               onStarted={handlePipelineStarted}
@@ -235,7 +235,7 @@ export function OverviewClient() {
       </div>
 
       <section className="flex flex-col gap-5">
-        <SectionHeader index="03" label="Featured" />
+        <SectionHeader label="Featured" />
         <FeaturedSpotlight post={featured} />
       </section>
 
