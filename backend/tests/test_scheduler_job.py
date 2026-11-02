@@ -167,3 +167,38 @@ def test_publish_scheduled_job_swallows_errors(
     assert any(
         "scheduled-publisher tick failed" in rec.message for rec in caplog.records
     )
+
+
+def test_publish_scheduled_job_also_emails_new_posts(db: SASession) -> None:
+    """The 30-min tick runs the subscriber email sweep in the same wake-up."""
+    factory = _session_factory_bound_to(db)
+    with patch.object(scheduler_module, "publish_due_posts", return_value=0), patch.object(
+        scheduler_module, "email_new_posts", return_value=0
+    ) as mock_email, patch.object(scheduler_module, "SessionLocal", side_effect=factory):
+        scheduler_module._publish_scheduled_job()
+
+    assert mock_email.call_count == 1
+
+
+def test_email_sweep_runs_even_if_publisher_fails(db: SASession) -> None:
+    factory = _session_factory_bound_to(db)
+    with patch.object(
+        scheduler_module, "publish_due_posts", side_effect=RuntimeError("boom")
+    ), patch.object(
+        scheduler_module, "email_new_posts", return_value=0
+    ) as mock_email, patch.object(scheduler_module, "SessionLocal", side_effect=factory):
+        scheduler_module._publish_scheduled_job()
+
+    assert mock_email.call_count == 1
+
+
+def test_run_pipeline_job_emails_new_posts_after_run(db: SASession) -> None:
+    factory = _session_factory_bound_to(db)
+    with patch.object(scheduler_module, "_format_for", return_value="Brief"), patch.object(
+        scheduler_module, "run_pipeline", return_value=None
+    ), patch.object(
+        scheduler_module, "email_new_posts", return_value=0
+    ) as mock_email, patch.object(scheduler_module, "SessionLocal", side_effect=factory):
+        scheduler_module._run_pipeline_job()
+
+    assert mock_email.call_count == 1

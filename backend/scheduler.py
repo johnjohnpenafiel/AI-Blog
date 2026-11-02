@@ -22,6 +22,7 @@ from database import SessionLocal
 from models import Setting
 from services.pipeline import run_pipeline, run_roundup
 from services.publisher import publish_due_posts
+from services.subscriber_emailer import email_new_posts
 
 logger = logging.getLogger(__name__)
 
@@ -92,9 +93,28 @@ def _run_pipeline_job() -> None:
     except Exception:
         logger.exception("scheduled pipeline fire failed")
 
+    # An auto-mode run publishes immediately — email it now rather than on the
+    # next 30-min tick, while the DB is already awake.
+    _email_new_posts()
+
+
+def _email_new_posts() -> None:
+    """Send any unsent published posts to subscribers. Never propagates."""
+    try:
+        db = SessionLocal()
+        try:
+            count = email_new_posts(db)
+            if count > 0:
+                logger.info("subscriber-emailer emailed %d post(s)", count)
+        finally:
+            db.close()
+    except Exception:
+        logger.exception("subscriber-emailer failed")
+
 
 def _publish_scheduled_job() -> None:
-    """Interval-job entry point. Flips due posts to published; silent on no-op."""
+    """Interval-job entry point. Flips due posts to published, then emails any
+    unsent published posts (covers manual publishes too). Silent on no-op."""
     try:
         db = SessionLocal()
         try:
@@ -105,6 +125,10 @@ def _publish_scheduled_job() -> None:
             db.close()
     except Exception:
         logger.exception("scheduled-publisher tick failed")
+
+    # Same tick, same DB wake-up — no separate interval job, so Neon can
+    # still autosuspend between ticks.
+    _email_new_posts()
 
 
 def start_scheduler() -> None:

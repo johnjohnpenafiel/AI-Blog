@@ -16,8 +16,9 @@ Readers can subscribe with their email and receive every new Garage AI post
 - Public endpoints: POST /public/subscribe, POST /public/subscribe/confirm,
   POST /public/unsubscribe (token-based, no login)
 - Double opt-in: confirmation email; only `active` subscribers get posts
-- Scheduler job (every 5 min): published posts with emailed_at NULL are sent
-  to all active subscribers, then stamped. Covers all 4 publish paths
+- Email sweep (end of the 8 AM pipeline job + every 30-min scheduled-publisher
+  tick — no extra Neon wake-ups): published posts with emailed_at NULL are
+  claimed, then sent to all active subscribers. Covers all 4 publish paths
 - Every post email carries a one-click unsubscribe link (+ List-Unsubscribe header)
 - Resend client behind a small sender seam; with no RESEND_API_KEY it logs
   instead of sending (local dev / tests)
@@ -49,13 +50,13 @@ Readers can subscribe with their email and receive every new Garage AI post
 - [x] Subscriber model + posts.emailed_at + Alembic migration (with backfill)
 - [x] Email sender seam (Resend + log fallback) and email templates (confirmation done; post email comes with the scheduler job)
 - [x] Public subscribe / confirm / unsubscribe endpoints + tests
-- [ ] Scheduler job to send new posts + tests (exactly-once, all publish paths)
+- [x] Scheduler job to send new posts + tests (exactly-once, all publish paths)
 - [x] Frontend /subscribe, /subscribe/confirm, /unsubscribe pages
 - [x] Subscribe link in bottom nav + mobile menu; update Design/site-map
 - [x] Dashboard Overview subscriber stat card
-- [ ] Add RESEND_API_KEY / EMAIL_FROM to .env.example
+- [x] Add RESEND_API_KEY / EMAIL_FROM to .env.example
 
 ## Verification
-- [ ] Backend pytest suite passes in Docker
-- [ ] Frontend typecheck, lint, tests pass
-- [ ] Manual end-to-end locally: subscribe → confirm → publish → logged email → unsubscribe
+- [x] Backend pytest suite passes in Docker
+- [x] Frontend typecheck, lint, tests pass
+- [x] Manual end-to-end locally: subscribe → confirm → publish → logged email → unsubscribe

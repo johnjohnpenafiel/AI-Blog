@@ -42,17 +42,7 @@ def public_site_url() -> str:
     return url.rstrip("/")
 
 
-def send_email(message: OutgoingEmail) -> None:
-    api_key = os.getenv("RESEND_API_KEY")
-    if not api_key:
-        logger.info(
-            "email (log-only, RESEND_API_KEY unset): to=%s subject=%r\n%s",
-            message.to,
-            message.subject,
-            message.text,
-        )
-        return
-
+def _payload(message: OutgoingEmail) -> dict[str, object]:
     payload: dict[str, object] = {
         "from": os.getenv("EMAIL_FROM", DEFAULT_FROM),
         "to": [message.to],
@@ -62,13 +52,16 @@ def send_email(message: OutgoingEmail) -> None:
     }
     if message.headers:
         payload["headers"] = message.headers
+    return payload
 
+
+def _post(url: str, api_key: str, body: object) -> None:
     try:
         response = httpx.post(
-            RESEND_URL,
-            json=payload,
+            url,
+            json=body,
             headers={"Authorization": f"Bearer {api_key}"},
-            timeout=15.0,
+            timeout=30.0,
         )
     except httpx.HTTPError as exc:
         raise EmailSendError(f"resend request failed: {exc}") from exc
@@ -76,3 +69,39 @@ def send_email(message: OutgoingEmail) -> None:
         raise EmailSendError(
             f"resend returned {response.status_code}: {response.text[:200]}"
         )
+
+
+def _log_only(message: OutgoingEmail) -> None:
+    logger.info(
+        "email (log-only, RESEND_API_KEY unset): to=%s subject=%r\n%s",
+        message.to,
+        message.subject,
+        message.text,
+    )
+
+
+def send_email(message: OutgoingEmail) -> None:
+    api_key = os.getenv("RESEND_API_KEY")
+    if not api_key:
+        _log_only(message)
+        return
+    _post(RESEND_URL, api_key, _payload(message))
+
+
+# Resend's batch endpoint takes up to 100 emails per call; one call per chunk
+# keeps a post send well inside the account's requests-per-second limit.
+BATCH_MAX = 100
+
+
+def send_batch(messages: list[OutgoingEmail]) -> None:
+    """Send up to `BATCH_MAX` distinct emails in one provider call."""
+    if len(messages) > BATCH_MAX:
+        raise ValueError(f"batch too large: {len(messages)} > {BATCH_MAX}")
+    if not messages:
+        return
+    api_key = os.getenv("RESEND_API_KEY")
+    if not api_key:
+        for message in messages:
+            _log_only(message)
+        return
+    _post(f"{RESEND_URL}/batch", api_key, [_payload(m) for m in messages])
