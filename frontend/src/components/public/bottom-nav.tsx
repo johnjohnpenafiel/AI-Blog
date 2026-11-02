@@ -4,7 +4,7 @@ import Link from "next/link";
  * Fixed bottom nav floating over the stage — mono nav links on a blurred
  * near-black panel, right-aligned (per the v5 canvas, which dropped the old
  * boxed-LogoMark panel). "Blog" is the homepage: the index IS the archive.
- * Subscribe returns when the newsletter flow ships (Phase 4).
+ * Subscribe links the email-subscription signup (feature-plans/email-subscriptions.md).
  */
 export function BottomNav() {
   const panel: React.CSSProperties = {
@@ -39,6 +39,9 @@ export function BottomNav() {
         </Link>
         <Link href="/about" className="tg-nav-link">
           About
+        </Link>
+        <Link href="/subscribe" className="tg-nav-link">
+          Subscribe
         </Link>
       </div>
     </div>

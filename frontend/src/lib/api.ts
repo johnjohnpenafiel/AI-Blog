@@ -210,6 +210,18 @@ export async function getSettings(): Promise<Settings> {
   return res.json();
 }
 
+export interface SubscriberStats {
+  active: number;
+}
+
+export async function getSubscriberStats(): Promise<SubscriberStats> {
+  const res = await fetch("/api/subscribers/stats", { cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`Subscriber stats fetch failed: ${res.status}`);
+  }
+  return res.json();
+}
+
 export async function updateSettings(body: {
   publishing_mode: PublishingMode;
 }): Promise<Settings> {

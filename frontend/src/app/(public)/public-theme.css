@@ -2666,6 +2666,140 @@
   }
 }
 
+/* ── Subscribe / confirm / unsubscribe — the About hero + one form ──────────
+   Reuses .tg-about's hero, bands, and 0.8 page scale; only the form, the
+   inbox readout, and the cadence strip are new. Square input on the frame
+   rule; the shared .tg-btn sized up to match the input height. */
+.tg-sub-form {
+  max-width: 640px;
+}
+.tg-sub-label {
+  display: block;
+  font-family: var(--tg-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--tg-sand);
+  margin-bottom: 12px;
+}
+.tg-sub-row {
+  display: flex;
+  gap: 0;
+}
+.tg-sub-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--tg-font-display);
+  font-stretch: 105%;
+  font-size: 19px;
+  color: var(--tg-ink);
+  background: var(--tg-band);
+  border: 1px solid var(--tg-frame);
+  border-right: 0;
+  border-radius: 0;
+  padding: 15px 18px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.tg-sub-input::placeholder {
+  color: var(--tg-faint);
+}
+.tg-sub-input:focus {
+  border-color: var(--tg-orange);
+}
+.tg-sub-input[aria-invalid] {
+  border-color: var(--tg-orange);
+}
+.tg-sub-btn {
+  font-size: 14px;
+  padding: 15px 26px;
+  color: var(--tg-ink-black);
+  background: var(--tg-orange);
+  border-color: var(--tg-orange);
+}
+.tg-sub-btn:hover {
+  background: var(--tg-orange-bright);
+  border-color: var(--tg-orange-bright);
+}
+.tg-sub-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.tg-sub-msg {
+  min-height: 1.4em;
+  margin: 12px 0 0;
+  font-family: var(--tg-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--tg-orange);
+}
+.tg-sub-done {
+  max-width: 640px;
+  border-left: 2px solid var(--tg-orange);
+  padding: 4px 0 4px 22px;
+}
+.tg-sub-done-label {
+  font-family: var(--tg-font-mono);
+  font-size: 13.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--tg-orange);
+  margin-bottom: 12px;
+}
+.tg-sub-done-copy {
+  font-family: var(--tg-font-display);
+  font-stretch: 105%;
+  font-size: 19px;
+  line-height: 1.55;
+  color: var(--tg-ink-soft);
+  margin: 0;
+}
+.tg-sub-email {
+  color: var(--tg-ink);
+}
+.tg-sub-back {
+  display: inline-flex;
+  margin-top: 28px;
+}
+.tg-sub-cadence {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 28px;
+  margin: 36px 0 0;
+  padding: 0;
+  font-family: var(--tg-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.tg-sub-cadence li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tg-sub-cadence-when {
+  color: var(--tg-faint);
+}
+.tg-sub-fine {
+  font-family: var(--tg-font-display);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--tg-mute);
+  max-width: 36em;
+  margin: 26px 0 0;
+}
+@media (max-width: 720px) {
+  .tg-sub-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .tg-sub-input {
+    border-right: 1px solid var(--tg-frame);
+    font-size: 17px;
+  }
+}
+
 /* ── Rail removed sitewide ──────────────────────────────────────────────────
    The indexed marker gutter is gone: every band runs full-width with a single
    editorial left inset (--tg-edge). Markers that carried meaning were folded

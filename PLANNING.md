@@ -218,7 +218,13 @@ Notes:
 | GET | `/public/posts/{slug}` | Get single published post by slug |
 | POST | `/public/subscribe` | Body `{email}`. Creates (or re-arms) a `pending` subscriber and sends the confirmation email. Always returns the same response whether the address is new, pending, or active — never leaks list membership. |
 | POST | `/public/subscribe/confirm` | Body `{token}`. Activates the subscriber matching the confirm token; 404 on an unknown/used token. |
-| POST | `/public/unsubscribe` | Body `{token}`. Marks the subscriber matching the unsubscribe token `unsubscribed` (idempotent). Also accepts the RFC 8058 one-click POST from mail clients. |
+| POST | `/public/unsubscribe` | Body `{token}`. Marks the subscriber matching the unsubscribe token `unsubscribed` (idempotent). 404 on an unknown token. |
+| POST | `/public/unsubscribe/one-click` | `?token=…` in the query, body ignored. The RFC 8058 `List-Unsubscribe-Post` target — mail clients POST a form body here, so it can't share the JSON route. |
+
+### Subscribers (admin-only — `require_api_key` + proxy session check)
+| Method | Path | Description |
+|---|---|---|
+| GET | `/subscribers/stats` | `{active}` — count of active subscribers for the dashboard Overview. |
 
 ### Posts (admin-only — `require_api_key` + proxy session check, see note above)
 | Method | Path | Description |
@@ -288,7 +294,7 @@ The Friday run does **not** fetch news. `run_roundup` reads the week's own `publ
 
 > Phase 4 "subscriber relationship", shipped as `feature-plans/email-subscriptions.md`. Rationale in the 2026-11-02 decision-log entry.
 
-- **Signup** — the public `/subscribe` page (linked from the bottom nav + mobile menu) posts to `/public/subscribe`. **Double opt-in:** the row starts `pending` and a confirmation email links to `/subscribe/confirm?token=…`; only `active` subscribers receive posts.
+- **Signup** — the public `/subscribe` page (linked from the bottom nav + mobile menu) calls `/public/subscribe` through a Next.js Server Action (`lib/subscribe-actions.ts`, server-side `BACKEND_URL` — no `/api/*` proxy, no auth). The confirm and unsubscribe pages act on an explicit button click, never on page load, so mail scanners pre-fetching links can't confirm or unsubscribe anyone. **Double opt-in:** the row starts `pending` and a confirmation email links to `/subscribe/confirm?token=…`; only `active` subscribers receive posts.
 - **Sending** — the `subscriber-emailer` scheduler job (every 5 min) finds `published` posts with `emailed_at IS NULL`, emails each to every `active` subscriber through Resend, then stamps `emailed_at`. Sweeping by column (not hooking each publish call site) covers all four publish paths — auto pipeline, accept-and-publish, manual publish, scheduled publisher — with one mechanism.
 - **Unsubscribe** — every post email carries an `/unsubscribe?token=…` link plus `List-Unsubscribe` / `List-Unsubscribe-Post` headers (one-click, required by Gmail/Yahoo bulk-sender rules).
 - **Sender seam** — the email service sits behind a small interface; with no `RESEND_API_KEY` set it logs instead of sending, so local dev and tests never hit Resend.

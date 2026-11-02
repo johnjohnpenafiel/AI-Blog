@@ -47,12 +47,12 @@ Readers can subscribe with their email and receive every new Garage AI post
 ## Tasks
 - [x] Update PLANNING.md + dated PLANNING-decisions.md entry
 - [x] Subscriber model + posts.emailed_at + Alembic migration (with backfill)
-- [ ] Email sender seam (Resend + log fallback) and email templates
-- [ ] Public subscribe / confirm / unsubscribe endpoints + tests
+- [x] Email sender seam (Resend + log fallback) and email templates (confirmation done; post email comes with the scheduler job)
+- [x] Public subscribe / confirm / unsubscribe endpoints + tests
 - [ ] Scheduler job to send new posts + tests (exactly-once, all publish paths)
-- [ ] Frontend /subscribe, /subscribe/confirm, /unsubscribe pages
-- [ ] Subscribe link in bottom nav + mobile menu; update Design/site-map
-- [ ] Dashboard Overview subscriber stat card
+- [x] Frontend /subscribe, /subscribe/confirm, /unsubscribe pages
+- [x] Subscribe link in bottom nav + mobile menu; update Design/site-map
+- [x] Dashboard Overview subscriber stat card
 - [ ] Add RESEND_API_KEY / EMAIL_FROM to .env.example
 
 ## Verification

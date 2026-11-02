@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import auth, pipeline, posts, public, settings
+from routers import auth, pipeline, posts, public, settings, subscribers
 from scheduler import shutdown_scheduler, start_scheduler
 
 logging.basicConfig(
@@ -42,6 +42,8 @@ app.include_router(pipeline.router)
 app.include_router(posts.router)
 app.include_router(public.router)
 app.include_router(settings.router)
+app.include_router(subscribers.public_router)
+app.include_router(subscribers.admin_router)
 
 
 @app.get("/health")
