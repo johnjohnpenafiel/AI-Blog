@@ -48,7 +48,7 @@ The audience is dealership operators, automotive tech executives, and industry o
 ### Components
 
 - **Frontend** (`frontend/`): Next.js 16 (App Router) + React 19 + Tailwind CSS v4. Source layout is `src/app/`. Two route groups: `(public)` for The Garage AI blog (homepage, post pages, about) and `dashboard/` for the admin UI (overview, queue, scheduled, published, settings). NextAuth handles credential-based login for the admin only. No component library — UI is hand-built against the design tokens, with one shared `Button` (`components/button.tsx`).
-- **Backend** (`backend/`): Python + FastAPI. Routers: `auth.py`, `posts.py` (admin), `public.py` (public read-only), `pipeline.py`, `settings.py`. Services: `news_fetcher.py` (Perplexity, open-canvas sourcing), `content_classifier.py` (Haiku promo-vs-news + importance classifier), `blog_writer.py` (Claude, format-aware generation + Roundup), `pipeline.py` (`run_pipeline` + `run_roundup` orchestrators), `publisher.py` (status routing + `publish_due_posts` bulk-publisher), `evals.py` (in-loop generation-quality judge), `image_art_director.py` (Opus metaphor → image prompt) + `image_generator.py` (Recraft V4.1 cover image, fail-soft). Canonical category vocabulary lives in `taxonomy.py`. `scheduler.py` runs APScheduler in-process for the **Mon / Thu / Fri** cron — each day mapped to a format (Mon → Brief, Thu → Deep Dive, Fri → Roundup) — AND a 1-minute interval job (`scheduled-publisher`) that flips accepted posts whose `scheduled_at` has passed to `published`.
+- **Backend** (`backend/`): Python + FastAPI. Routers: `auth.py`, `posts.py` (admin), `public.py` (public read-only), `pipeline.py`, `settings.py`. Services: `news_fetcher.py` (Perplexity, open-canvas sourcing), `content_classifier.py` (Haiku promo-vs-news + importance classifier), `blog_writer.py` (Claude, format-aware generation + Roundup), `pipeline.py` (`run_pipeline` + `run_roundup` orchestrators), `publisher.py` (status routing + `publish_due_posts` bulk-publisher), `evals.py` (in-loop generation-quality judge), `image_art_director.py` (Opus metaphor → image prompt) + `image_generator.py` (Recraft V4.1 cover image, fail-soft). Canonical category vocabulary lives in `taxonomy.py`. `scheduler.py` runs APScheduler in-process for the **Mon / Thu / Fri** cron — each day mapped to a format (Mon → Brief, Thu → Deep Dive, Fri → Roundup) — AND a 30-minute interval job (`scheduled-publisher`) that flips accepted posts whose `scheduled_at` has passed to `published` (30 min, not 1, so Neon can autosuspend between ticks). Both jobs finish with the **subscriber email sweep** (`services/subscriber_emailer.py`), which emails newly published posts to active subscribers via Resend — in the same DB wake-up, never as a separate interval job (see Email subscriptions below).
 - **Database**: PostgreSQL. Schema managed by SQLAlchemy models + Alembic migrations.
 - **External services**:
   - Anthropic Claude API (`claude-sonnet-5`) — blog generation. Also `claude-opus-4-8` for the per-post image art director.
@@ -119,6 +119,7 @@ Production deployment splits across three vendors, each picked for what it does 
 | Post generation | Anthropic Claude Sonnet 5 | Pay-per-use | ~$0.50–1.50/mo |
 | News fetching | Perplexity Sonar | Pay-per-use | ~$0.50–1.50/mo |
 | Cover images | fal.ai Recraft V4.1 + Claude Opus 4.8 (art director) | Pay-per-use | ~$0.50–1.00/mo (3 posts/wk) |
+| Subscriber email | Resend | Free (3,000 emails/mo, 100/day) | $0 until the list outgrows the free tier |
 
 Notes:
 - Render Starter is required (not Free) because APScheduler runs in-process and must stay resident to fire the cron — Render's free tier spins down after 15 min of idle.
@@ -160,12 +161,25 @@ Notes:
 | format | VARCHAR | nullable; v2 taxonomy (Brief / Deep Dive / Roundup …) |
 | story_type | VARCHAR | nullable; v2 taxonomy |
 | image_url | VARCHAR | nullable; AI-generated cover URL (fal.ai/Recraft) set by the pipeline's image step; NULL = not generated / fail-soft skip → UI placeholder |
+| emailed_at | TIMESTAMP | nullable; when the post was emailed to active subscribers. NULL on a published post = not yet sent (the subscriber email sweep picks it up). Stamped *before* sending (at-most-once). Migration backfilled pre-feature published posts so launch never emails the back catalog |
 | eval_pov | SMALLINT | nullable; generation-eval POV score (0–2) |
 | eval_format | SMALLINT | nullable; generation-eval format score (0–2) |
 | eval_grounding | SMALLINT | nullable; generation-eval grounding score (0–2) |
 | eval_passed | BOOLEAN | nullable; eval pass/fail |
 | eval_notes | TEXT | nullable; eval one-line rationale |
 | eval_at | TIMESTAMP | nullable; when scored — NULL = not scored |
+
+### `subscribers`
+| Column | Type | Notes |
+|---|---|---|
+| id | UUID | PK |
+| email | VARCHAR | unique, stored lowercased + trimmed |
+| status | ENUM | `pending`, `active`, `unsubscribed` (double opt-in: only `active` gets post emails) |
+| confirm_token | VARCHAR | unique, nullable; single-use confirm-link token, cleared on confirm |
+| unsubscribe_token | VARCHAR | unique; long-lived token in every post email's unsubscribe link |
+| created_at | TIMESTAMP | |
+| confirmed_at | TIMESTAMP | nullable |
+| unsubscribed_at | TIMESTAMP | nullable; row is kept on unsubscribe so a re-signup reuses it |
 
 ### `sources`
 | Column | Type | Notes |
@@ -202,6 +216,15 @@ Notes:
 | GET | `/public/posts` | List published posts |
 | GET | `/public/posts/featured` | The homepage featured-band post: the editor's-choice pin if one exists (regardless of recency), else the most-recent published post. `is_featured` flag distinguishes a real pin from the fallback. `null` when nothing is published. Declared before `/{slug}` so the literal path wins. |
 | GET | `/public/posts/{slug}` | Get single published post by slug |
+| POST | `/public/subscribe` | Body `{email}`. Creates (or re-arms) a `pending` subscriber and sends the confirmation email. Always returns the same response whether the address is new, pending, or active — never leaks list membership. |
+| POST | `/public/subscribe/confirm` | Body `{token}`. Activates the subscriber matching the confirm token; 404 on an unknown/used token. |
+| POST | `/public/unsubscribe` | Body `{token}`. Marks the subscriber matching the unsubscribe token `unsubscribed` (idempotent). 404 on an unknown token. |
+| POST | `/public/unsubscribe/one-click` | `?token=…` in the query, body ignored. The RFC 8058 `List-Unsubscribe-Post` target — mail clients POST a form body here, so it can't share the JSON route. |
+
+### Subscribers (admin-only — `require_api_key` + proxy session check)
+| Method | Path | Description |
+|---|---|---|
+| GET | `/subscribers/stats` | `{active}` — count of active subscribers for the dashboard Overview. |
 
 ### Posts (admin-only — `require_api_key` + proxy session check, see note above)
 | Method | Path | Description |
@@ -267,6 +290,18 @@ After the post is persisted, an **art director** (`claude-opus-4-8`, tool-callin
 
 The Friday run does **not** fetch news. `run_roundup` reads the week's own `published` posts from the DB and synthesizes a Roundup (~500–600w: week-range → through-line → "The Big Story" → "Also This Week" → "Worth Watching"), linking the week's Brief + Deep Dive. It's the safety net for important stories that didn't win an earlier slot. Skips cleanly if nothing was published that week.
 
+## Email subscriptions
+
+> Phase 4 "subscriber relationship", shipped as `feature-plans/email-subscriptions.md`. Rationale in the 2026-11-02 decision-log entry.
+
+- **Signup** — the public `/subscribe` page (linked from the bottom nav + mobile menu) calls `/public/subscribe` through a Next.js Server Action (`lib/subscribe-actions.ts`, server-side `BACKEND_URL` — no `/api/*` proxy, no auth). The confirm and unsubscribe pages act on an explicit button click, never on page load, so mail scanners pre-fetching links can't confirm or unsubscribe anyone. **Double opt-in:** the row starts `pending` and a confirmation email links to `/subscribe/confirm?token=…`; only `active` subscribers receive posts.
+- **Sending** — `email_new_posts` (`services/subscriber_emailer.py`) finds `published` posts with `emailed_at IS NULL` and emails each to every `active` subscriber through Resend's batch endpoint (100 per call, short pause between calls for the rate limit). It runs at the end of the 8 AM pipeline job (auto-mode posts go out right away) and of every 30-min `scheduled-publisher` tick (scheduled + manual publishes go out within 30 min) — **no interval job of its own**, so it never adds a Neon wake-up. Sweeping by column (not hooking each publish call site) covers all four publish paths — auto pipeline, accept-and-publish, manual publish, scheduled publisher — with one mechanism.
+- **At-most-once** — a post is *claimed* (conditional `UPDATE … SET emailed_at WHERE emailed_at IS NULL`, committed) before anything is sent, so it can't go out twice. If the first batch fails (provider down, nothing delivered) the claim is released and the next tick retries; a failure after some batches went out is logged, not retried. Posts published more than 3 days ago are stamped and skipped (no surprise back-catalog blasts after an outage). With zero active subscribers a post is just stamped.
+- **Unsubscribe** — every post email carries an `/unsubscribe?token=…` link plus `List-Unsubscribe` / `List-Unsubscribe-Post` headers (one-click, required by Gmail/Yahoo bulk-sender rules). The header points at the site's `/unsubscribe/one-click` route handler, which forwards to the backend — so every link in the email stays on the public domain.
+- **Sender seam** — the email service sits behind a small interface; with no `RESEND_API_KEY` set it logs instead of sending, so local dev and tests never hit Resend.
+- **Config** — `RESEND_API_KEY` and `EMAIL_FROM` (a verified Resend sending address) in `.env` / Render; `PUBLIC_SITE_URL` builds the confirm / unsubscribe / post links (falls back to `FRONTEND_URL`).
+- **Dashboard** — the Overview shows an active-subscriber count. No subscriber list/management UI, per-format preferences, or open/click tracking (v1 out of scope).
+
 ## Conventions
 
 ### Naming
@@ -305,7 +340,7 @@ The Friday run does **not** fetch news. `run_roundup` reads the week's own `publ
 - **Stay in the niche.** "AI as the dealership operating system" — no expansion into adjacent automotive beats.
 - **Source transparency.** Every post must list its sources (title, publisher, link, date) — part of the editorial contract with the audience.
 - **Measurement is first-class.** The product *is* the content, so the system is built to measure what it fetches and writes — not as a later analytics phase. Every post carries its full classification (`section` / `format` / `story_type`) and its generation-eval scores as part of the record, so outcomes can be tracked by eye now and analyzed properly later ("which kinds of posts perform?"). Adding a measurable dimension to a post is expected work, not scope creep.
-- **Secrets stay in `.env`.** `ANTHROPIC_API_KEY`, `PERPLEXITY_API_KEY`, `NEXTAUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL`, `BACKEND_API_SECRET` never committed.
+- **Secrets stay in `.env`.** `ANTHROPIC_API_KEY`, `PERPLEXITY_API_KEY`, `NEXTAUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DATABASE_URL`, `BACKEND_API_SECRET`, `RESEND_API_KEY` never committed.
 
 ## Decision log
 
@@ -369,7 +404,7 @@ Once Phase 1 lands, `news-sourcing-v2` and `multi-format-generation` can run as 
 
 - **SEO as a discipline** — keyword targeting, internal linking through Concept hubs, sitemaps / OG hardening.
 - **GEO / answer-engine visibility** — getting the site cited by AI search.
-- **Subscriber relationship** — newsletter / digest / return-reader loop. *(Was MVP out-of-scope; a deliberate v2 decision to bring it in — confirm before building.)*
+- **Subscriber relationship** — newsletter / digest / return-reader loop. *(Was MVP out-of-scope; a deliberate v2 decision to bring it in — confirmed 2026-11-02 and in progress as `email-subscriptions`: every new post emailed via Resend, double opt-in. See the Email subscriptions section above.)*
 
 ### Phase 5 — Analytics & Polish (Pillar 5)
 

@@ -9,6 +9,7 @@ import {
   getFeaturedPost,
   getPipelineStatus,
   getSettings,
+  getSubscriberStats,
   listPosts,
   type PipelineStatus,
   type PostListItem,
@@ -43,6 +44,7 @@ export function OverviewClient() {
   const [publishedCount, setPublishedCount] = useState<number | null>(null);
   const [featured, setFeatured] = useState<PostListItem | null>(null);
   const [mode, setMode] = useState<PublishingMode | null>(null);
+  const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
 
   const prevStateRef = useRef<PipelineStatus["state"] | null>(null);
 
@@ -123,6 +125,23 @@ export function OverviewClient() {
     };
   }, []);
 
+  // Active subscribers — same non-fatal pattern as Mode: on failure the row
+  // shows "—" instead of blanking the overview.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const stats = await getSubscriberStats();
+        if (!cancelled) setSubscriberCount(stats.active);
+      } catch {
+        // Non-fatal — Subscribers row falls back to "—".
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handlePipelineStarted = useCallback(() => {
     setPipeline((p) =>
       p
@@ -196,6 +215,11 @@ export function OverviewClient() {
               value: pending,
               activated: pending > 0,
               testId: "stat-pending-review",
+            },
+            {
+              label: "Subscribers",
+              value: subscriberCount ?? "—",
+              testId: "stat-subscribers",
             },
             {
               label: "Mode",

@@ -101,6 +101,15 @@ class Post(Base):
     # step failed stay NULL — the UI renders a placeholder in that case.
     image_url: Mapped[str | None] = mapped_column(String, nullable=True)
 
+    # When this post was emailed to active subscribers (the subscriber-email
+    # scheduler job). NULL on a published post = not yet sent; the job picks it
+    # up, sends, and stamps it, so every publish path is covered exactly once.
+    # The migration backfilled pre-feature published posts so launch doesn't
+    # email the back catalog.
+    emailed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
     # v2 generation-eval scores (the in-loop Haiku judge). All nullable —
     # NULL means "not scored": pre-eval posts, runs where the fail-soft eval was
     # skipped, and regenerated posts (regen has no source excerpts, so its stale
